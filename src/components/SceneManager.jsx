@@ -141,8 +141,13 @@ export default function SceneManager() {
       {items}
 
       <header className="chrome chrome-top">
-        <span className="wordmark stroke-hair">
-          Q<b>P</b>T
+        <span className="wordmark stroke-hair" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img
+            src="/favicon.png"
+            alt="Logo"
+            style={{ height: "55px", width: "auto", display: "block" }}
+          />
+          <span style={{ fontSize: "30px", lineHeight: 1, fontWeight: "inherit" }}>QPT</span>
         </span>
         <div className="chrome-controls">
           <LanguageSwitcher />

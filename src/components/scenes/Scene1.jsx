@@ -41,10 +41,7 @@ export default function Scene1() {
       </div>
 
       <div className="centered">
-        <span className="eyebrow stroke-hair">
-          <span className="eyebrow-dot" style={{ background: "var(--quantum)" }} />
-          QPT — beyond electricity
-        </span>
+
         <p className="hero-line stroke-lg">
           {words.map((w, i) => (
             <span
