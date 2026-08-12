@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "scrollHint": "Desplázate para continuar",
+    "themeToLight": "Cambiar a modo claro",
+    "themeToDark": "Cambiar a modo oscuro",
+    "languageLabel": "Idioma",
+    "progressLabel": "Escena {{current}} de {{total}}"
+  },
+  "scene1": {
+    "line": "El futuro de la inteligencia artificial no pertenece solo a la electricidad."
+  },
+  "scene2": {
+    "eyebrow": "Par de partículas — estado entrelazado",
+    "description": "Dos qubits vinculados a través del espacio, sus estados correlacionados más allá de lo que permiten los bits clásicos."
+  },
+  "scene3": {
+    "eyebrow": "Propagación de onda — modulada en fase",
+    "description": "Información transportada por la propia luz, moviéndose a la velocidad que permite el universo."
+  },
+  "scene4": {
+    "eyebrow": "Mapa de flujo térmico",
+    "description": "Computación que trata el calor y el ruido como un recurso, no como un defecto a eliminar."
+  },
+  "scene5": {
+    "statement": "QPT — el primer modelo de lenguaje que combina lo mejor de tres tipos de computación para lograr mayor eficiencia y menor costo."
+  },
+  "scene6": {
+    "eyebrow": "Salida del modelo"
+  },
+  "scene7": {
+    "eyebrow": "Bloqueo de señal",
+    "final": "QPT existe para responder honestamente una sola pregunta de investigación: ¿qué partes de un modelo de lenguaje realmente se benefician de la computación no clásica, y en qué medida?"
+  },
+  "scene8": {
+    "prefix": "En el futuro, ",
+    "ternary": "la computación ternaria",
+    "middle": " y ",
+    "bio": "la computación biológica",
+    "suffix": " también jugarán un papel importante en este proceso."
+  },
+  "footer": {
+    "thanks": "Gracias por confiar en nosotros",
+    "stayInformed": "Mantente informado",
+    "supportUs": "Apóyanos"
+  }
+}

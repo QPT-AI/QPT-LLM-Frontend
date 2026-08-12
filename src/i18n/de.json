@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "scrollHint": "Scrollen, um fortzufahren",
+    "themeToLight": "Zu hellem Modus wechseln",
+    "themeToDark": "Zu dunklem Modus wechseln",
+    "languageLabel": "Sprache",
+    "progressLabel": "Szene {{current}} von {{total}}"
+  },
+  "scene1": {
+    "line": "Die Zukunft der künstlichen Intelligenz gehört nicht der Elektrizität allein."
+  },
+  "scene2": {
+    "eyebrow": "Teilchenpaar — verschränkter Zustand",
+    "description": "Zwei Qubits, über den Raum hinweg verbunden — ihre Zustände korrelieren stärker, als es klassische Bits erlauben."
+  },
+  "scene3": {
+    "eyebrow": "Wellenausbreitung — phasenmoduliert",
+    "description": "Information, getragen vom Licht selbst, unterwegs mit der Geschwindigkeit, die das Universum erlaubt."
+  },
+  "scene4": {
+    "eyebrow": "Thermische Flusskarte",
+    "description": "Berechnung, die Wärme und Rauschen als Ressource begreift, nicht als Fehler, den es zu beseitigen gilt."
+  },
+  "scene5": {
+    "statement": "QPT — das erste Sprachmodell, das die Stärken dreier Rechenarten vereint, um höhere Effizienz und geringere Kosten zu erreichen."
+  },
+  "scene6": {
+    "eyebrow": "Modellausgabe"
+  },
+  "scene7": {
+    "eyebrow": "Signal fixiert",
+    "final": "QPT existiert, um eine einzige Forschungsfrage ehrlich zu beantworten: Welche Teile eines Sprachmodells profitieren tatsächlich von nicht-klassischer Berechnung, und in welchem Ausmaß?"
+  },
+  "scene8": {
+    "prefix": "In Zukunft werden auch ",
+    "ternary": "ternäres Rechnen",
+    "middle": " und ",
+    "bio": "biologisches Rechnen",
+    "suffix": " eine wichtige Rolle in diesem Prozess spielen."
+  },
+  "footer": {
+    "thanks": "Danke für Ihr Vertrauen",
+    "stayInformed": "Bleiben Sie informiert",
+    "supportUs": "Unterstützen Sie uns"
+  }
+}
