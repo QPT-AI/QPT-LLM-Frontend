@@ -10,26 +10,27 @@
     "line": "The future of artificial intelligence does not belong to electricity alone."
   },
   "scene2": {
-    "eyebrow": "Particle pair — entangled state",
-    "description": "Two qubits linked across space, their states correlated beyond what classical bits allow."
+    "eyebrow": "Quantum Computation",
+    "description": "Quantum states explore complex possibilities simultaneously, unlocking new paths for machine learning beyond classical computation."
   },
   "scene3": {
-    "eyebrow": "Wave propagation — phase modulated",
-    "description": "Information carried on light itself, moving at the speed the universe allows."
+    "eyebrow": "Photonic Computation",
+    "description": "Where light computes, machine learning accelerates."
   },
   "scene4": {
-    "eyebrow": "Thermal flux map",
-    "description": "Computation that treats heat and noise as a resource, not a flaw to eliminate."
+    "eyebrow": "Thermodinamic Computation",
+    "description": "Thermodynamic Natural optimization that harnesses thermal fluctuations to explore better solutions."
   },
   "scene5": {
     "statement": "QPT — the first language model to combine the best of three types of computing to achieve greater efficiency and lower cost."
   },
   "scene6": {
-    "eyebrow": "Model output"
+    "eyebrow": "Model output",
+    "generatedText": "Today you think this is bullshit; in 15 years you will realize that this idea will reach the world. This is the moment to prepare before the hardware boom explodes — by making artificial intelligence more efficient across combined forms of computing."
   },
   "scene7": {
     "eyebrow": "Signal lock",
-    "final": "QPT exists to answer a single research question honestly: Which parts of a language model actually benefit from non-classical computing, and by how much?"
+    "final": "QPT exists to answer a research question: Which parts of a language model actually benefit from non-classical computing, and by how much?"
   },
   "scene8": {
     "prefix": "In the future, ",

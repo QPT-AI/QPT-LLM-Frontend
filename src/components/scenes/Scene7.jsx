@@ -60,10 +60,7 @@ export default function Scene7({ active }) {
   return (
     <div className="scene-inner">
       <div className="centered">
-        <span className="eyebrow stroke-hair">
-          <span className="eyebrow-dot" style={{ background: "var(--photonic)" }} />
-          {t("scene7.eyebrow")}
-        </span>
+
         <p className="glitch-text stroke-sm" aria-live="off">
           {display}
         </p>

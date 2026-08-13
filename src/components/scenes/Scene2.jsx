@@ -112,6 +112,7 @@ export default function Scene2({ active }) {
             </span>
             <span className="letter-suffix stroke-sm">uantum</span>
           </div>
+          <br/>
           <p className="body-line" style={{ maxWidth: "38ch" }}>
             {t("scene2.description")}
           </p>

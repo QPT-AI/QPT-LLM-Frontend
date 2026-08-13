@@ -10,22 +10,23 @@
     "line": "Die Zukunft der künstlichen Intelligenz gehört nicht der Elektrizität allein."
   },
   "scene2": {
-    "eyebrow": "Teilchenpaar — verschränkter Zustand",
-    "description": "Zwei Qubits, über den Raum hinweg verbunden — ihre Zustände korrelieren stärker, als es klassische Bits erlauben."
+    "eyebrow": "Quantencomputing",
+    "description": "Quantenzustände erkunden komplexe Möglichkeiten gleichzeitig und eröffnen neue Wege für maschinelles Lernen jenseits der klassischen Datenverarbeitung."
   },
   "scene3": {
-    "eyebrow": "Wellenausbreitung — phasenmoduliert",
-    "description": "Information, getragen vom Licht selbst, unterwegs mit der Geschwindigkeit, die das Universum erlaubt."
+    "eyebrow": "Photonische Datenverarbeitung",
+    "description": "Wo Licht rechnet, beschleunigt sich maschinelles Lernen."
   },
   "scene4": {
-    "eyebrow": "Thermische Flusskarte",
-    "description": "Berechnung, die Wärme und Rauschen als Ressource begreift, nicht als Fehler, den es zu beseitigen gilt."
+    "eyebrow": "Thermodynamisches Computing",
+    "description": "Thermodynamische natürliche Optimierung nutzt thermische Fluktuationen, um bessere Lösungen zu erkunden."
   },
   "scene5": {
     "statement": "QPT — das erste Sprachmodell, das die Stärken dreier Rechenarten vereint, um höhere Effizienz und geringere Kosten zu erreichen."
   },
   "scene6": {
-    "eyebrow": "Modellausgabe"
+    "eyebrow": "Modellausgabe",
+    "generatedText": "Heute denkst du, das ist Unsinn; in 15 Jahren wirst du erkennen, dass diese Idee die Welt erreichen wird. Dies ist der Moment, sich vorzubereiten, bevor der Hardware-Boom explodiert — indem künstliche Intelligenz über kombinierte Rechenformen effizienter gemacht wird."
   },
   "scene7": {
     "eyebrow": "Signal fixiert",

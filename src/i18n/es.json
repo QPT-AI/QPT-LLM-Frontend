@@ -10,26 +10,27 @@
     "line": "El futuro de la inteligencia artificial no pertenece solo a la electricidad."
   },
   "scene2": {
-    "eyebrow": "Par de partículas — estado entrelazado",
-    "description": "Dos qubits vinculados a través del espacio, sus estados correlacionados más allá de lo que permiten los bits clásicos."
+    "eyebrow": "Computación Cuántica",
+    "description": "Los estados cuánticos exploran posibilidades complejas simultáneamente, abriendo nuevos caminos para el aprendizaje automático más allá de la computación clásica."
   },
   "scene3": {
-    "eyebrow": "Propagación de onda — modulada en fase",
-    "description": "Información transportada por la propia luz, moviéndose a la velocidad que permite el universo."
+    "eyebrow": "Computación Fotónica",
+    "description": "Donde la luz calcula, el aprendizaje automático se acelera."
   },
   "scene4": {
-    "eyebrow": "Mapa de flujo térmico",
-    "description": "Computación que trata el calor y el ruido como un recurso, no como un defecto a eliminar."
+    "eyebrow": "Computación Termodinámica",
+    "description": "Optimización natural termodinámica que aprovecha las fluctuaciones térmicas para explorar mejores soluciones."
   },
   "scene5": {
     "statement": "QPT — el primer modelo de lenguaje que combina lo mejor de tres tipos de computación para lograr mayor eficiencia y menor costo."
   },
   "scene6": {
-    "eyebrow": "Salida del modelo"
+    "eyebrow": "Salida del modelo",
+    "generatedText": "Hoy crees que esto es una tontería; en 15 años te darás cuenta de que esta idea llegará al mundo. Este es el momento de prepararse antes de que el boom del hardware explote — haciendo la inteligencia artificial más eficiente a través de formas combinadas de computación."
   },
   "scene7": {
     "eyebrow": "Bloqueo de señal",
-    "final": "QPT existe para responder honestamente una sola pregunta de investigación: ¿qué partes de un modelo de lenguaje realmente se benefician de la computación no clásica, y en qué medida?"
+    "final": "QPT existe para responder una pregunta de investigación: ¿qué partes de un modelo de lenguaje realmente se benefician de la computación no clásica, y en qué medida?"
   },
   "scene8": {
     "prefix": "En el futuro, ",

@@ -6,11 +6,7 @@ export default function Scene8() {
   return (
     <div className="scene-inner">
       <div className="future-wrap">
-        <span className="eyebrow stroke-hair">
-          <span className="eyebrow-dot" style={{ background: "var(--bio)" }} />
-          Future computing
-        </span>
-
+        
         <p className="future-statement stroke-lg" style={{ marginTop: 18 }}>
           {t("scene8.prefix")}
           <span className="future-term" style={{ color: "var(--ternary)" }}>

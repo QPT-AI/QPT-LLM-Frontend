@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const GENERATED_TEXT =
-  "Today you think this is bullshit; in 15 years you will realize that this idea will reach the world. " +
-  "This is the moment to prepare before the hardware boom explodes — by making artificial intelligence more efficient across combined forms of computing.";
-
 export default function Scene6({ active }) {
   const { t } = useTranslation();
+
+  // Resolve the translated string on every render so length is always correct
+  const generatedText = t("scene6.generatedText");
+
   const [revealed, setRevealed] = useState(0);
 
   useEffect(() => {
@@ -17,39 +17,42 @@ export default function Scene6({ active }) {
     setRevealed(0);
     const id = setInterval(() => {
       setRevealed((r) => {
-        if (r >= GENERATED_TEXT.length) {
+        if (r >= generatedText.length) {
           clearInterval(id);
           return r;
         }
         return r + 1;
       });
-    }, 22);
+    }, 44);
     return () => clearInterval(id);
-  }, [active]);
+  }, [active, generatedText]); // ← generatedText in deps so language switches restart the animation
 
-  const done = revealed >= GENERATED_TEXT.length;
+  const done = revealed >= generatedText.length;
 
   return (
     <div className="scene-inner">
       <div className="centered">
-        <span className="eyebrow stroke-hair">
-          <span className="eyebrow-dot" style={{ background: "var(--quantum)" }} />
-          {t("scene6.eyebrow")}
-        </span>
-
-        <div className="terminal-window">
-          <div className="terminal-bar">
-            <span className="terminal-dot" style={{ background: "#ff5f56" }} />
-            <span className="terminal-dot" style={{ background: "#ffbd2e" }} />
-            <span className="terminal-dot" style={{ background: "#27c93f" }} />
-            <span className="terminal-label">qpt · generation</span>
-          </div>
-          <pre className="terminal-body">
-            <span className="terminal-prompt">{"> "}</span>
-            {GENERATED_TEXT.slice(0, revealed)}
-            <span className="terminal-cursor">{done ? "▌" : "|"}</span>
-          </pre>
-        </div>
+        <p
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "clamp(1.12rem, 2.4vw, 1.4rem)",
+            lineHeight: 1.5,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            color: "#e7e9e6",
+            margin: 0,
+          }}
+        >
+          {generatedText.slice(0, revealed)}
+          <span
+            style={{
+              color: "var(--photonic)",
+              animation: "cursorBlink 1s steps(1) infinite",
+            }}
+          >
+            {done ? "▌" : "|"}
+          </span>
+        </p>
       </div>
     </div>
   );
