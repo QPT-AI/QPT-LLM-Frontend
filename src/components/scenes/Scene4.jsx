@@ -259,6 +259,57 @@ function CriticalPointMarkers() {
   );
 }
 
+// --- Floating formula label ----------------------------------------------
+
+function makeFormulaTexture(formula, color) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 128;
+  const ctx = canvas.getContext("2d");
+
+  // Dark semi-transparent backing for readability
+  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+  ctx.beginPath();
+  ctx.roundRect(8, 8, 496, 112, 16);
+  ctx.fill();
+
+  ctx.font = "italic 600 42px 'Times New Roman', Georgia, serif";
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(formula, 256, 64);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.needsUpdate = true;
+  return tex;
+}
+
+function FormulaLabel() {
+  const formula = "g̃ = F⁻¹ ∇l(θ)";
+  const texture = useMemo(() => makeFormulaTexture(formula, "#ffffff"), []);
+
+  const groupRef = useRef();
+  useFrame((state) => {
+    // Gentle bobbing
+    if (groupRef.current) {
+      groupRef.current.position.y = 2.1 + Math.sin(state.clock.elapsedTime * 0.8) * 0.06;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 2.1, 0]}>
+      <sprite scale={[1.6, 0.4, 1]}>
+        <spriteMaterial
+          map={texture}
+          transparent
+          depthWrite={false}
+          opacity={0.95}
+        />
+      </sprite>
+    </group>
+  );
+}
+
 // --- Ensemble of walkers doing thermodynamic gradient descent -----------
 // Each step follows the local gradient (steepest descent) plus a
 // breathing thermal-noise term, so walkers periodically escape shallow
@@ -395,6 +446,7 @@ function DescentScene() {
       <Terrain />
       <CriticalPointMarkers />
       <GradientWalkers />
+      <FormulaLabel />
     </group>
   );
 }

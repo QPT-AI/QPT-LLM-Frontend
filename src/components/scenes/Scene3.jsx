@@ -103,29 +103,81 @@ function TravelingPulse({ frequency, speed }) {
   );
 }
 
+function SquareWaveFormula({ isDark }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "12px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        padding: "8px 18px",
+        borderRadius: "8px",
+        background: isDark ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.75)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        border: `1px solid ${PHOTONIC}33`,
+        fontFamily: "'Courier New', Courier, monospace",
+        fontSize: "13px",
+        color: isDark ? "#e2e2e2" : "#1a1a1a",
+        letterSpacing: "0.4px",
+        whiteSpace: "nowrap",
+        pointerEvents: "none",
+        userSelect: "none",
+        zIndex: 10,
+      }}
+    >
+      <span style={{ color: PHOTONIC, fontWeight: 700 }}>y(x)</span>
+      <span style={{ margin: "0 4px" }}>=</span>
+      <span style={{ fontStyle: "italic" }}>A</span>
+      <span style={{ margin: "0 3px" }}>·</span>
+      <span style={{ color: PHOTONIC }}>sgn</span>
+      <span>[</span>
+      <span style={{ fontStyle: "italic" }}>sin</span>
+      <span>(</span>
+      <span style={{ display: "inline-block", textAlign: "center", lineHeight: 1.1 }}>
+        <span style={{ display: "block", borderBottom: `1px solid ${isDark ? "#888" : "#444"}`, paddingBottom: "1px" }}>
+          2π<i>f</i>(<i>x</i> − <i>X</i>
+          <sub style={{ fontSize: "9px" }}>START</sub>)
+        </span>
+        <span style={{ display: "block", paddingTop: "1px" }}>
+          <i>X</i>
+          <sub style={{ fontSize: "9px" }}>END</sub> − <i>X</i>
+          <sub style={{ fontSize: "9px" }}>START</sub>
+        </span>
+      </span>
+      <span>)</span>
+      <span>]</span>
+    </div>
+  );
+}
+
 function Visual({ frequency = 5, speed = 0.55 }) {
   const { isDark } = useTheme();
   const pathPoints = useMemo(() => buildSquareWavePoints(frequency), [frequency]);
 
   return (
-    <Canvas
-      camera={{ position: [0, 0.2, 4], fov: 40 }}
-      dpr={[1, 1.6]}
-      gl={{ antialias: true, alpha: true }}
-    >
-      <ambientLight intensity={isDark ? 0.3 : 0.7} />
-      <pointLight position={[2, 2, 2]} intensity={0.6} color={PHOTONIC} />
-      <Line
-        points={pathPoints}
-        color={PHOTONIC}
-        transparent
-        opacity={isDark ? 0.28 : 0.32}
-        lineWidth={0.6}
-      />
-      <Suspense fallback={null}>
-        <TravelingPulse frequency={frequency} speed={speed} />
-      </Suspense>
-    </Canvas>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <Canvas
+        camera={{ position: [0, 0.2, 4], fov: 40 }}
+        dpr={[1, 1.6]}
+        gl={{ antialias: true, alpha: true }}
+      >
+        <ambientLight intensity={isDark ? 0.3 : 0.7} />
+        <pointLight position={[2, 2, 2]} intensity={0.6} color={PHOTONIC} />
+        <Line
+          points={pathPoints}
+          color={PHOTONIC}
+          transparent
+          opacity={isDark ? 0.28 : 0.32}
+          lineWidth={0.6}
+        />
+        <Suspense fallback={null}>
+          <TravelingPulse frequency={frequency} speed={speed} />
+        </Suspense>
+      </Canvas>
+      <SquareWaveFormula isDark={isDark} />
+    </div>
   );
 }
 
