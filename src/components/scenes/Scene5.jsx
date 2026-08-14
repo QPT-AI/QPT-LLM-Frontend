@@ -1,670 +1,417 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-const COMPONENTS = [
-  {
-    label: "Tokenizer",
-    paradigm: "classical",
-    rationale:
-      "Fast, deterministic text segmentation. Classical CPUs handle BPE / WordPiece lookups with maximum throughput and zero overhead.",
-  },
-  {
-    label: "Token Embeddings",
-    paradigm: "quantum",
-    rationale:
-      "Quantum superposition encodes exponentially richer semantic geometry — each token lives in a high-dimensional Hilbert space simultaneously.",
-  },
-  {
-    label: "Positional Encoding",
-    paradigm: "photonic",
-    rationale:
-      "Phase-encoded light represents sinusoidal position signals naturally. Photonic waveguides propagate encoding at near-zero energy cost.",
-  },
-  {
-    label: "Attention Mechanism",
-    paradigm: "photonic",
-    rationale:
-      "Matrix products in attention map perfectly to optical dot-product arrays, enabling massively parallel QKV projections at the speed of light.",
-  },
-  {
-    label: "Feed-Forward (MLP)",
-    paradigm: "photonic",
-    rationale:
-      "Dense linear layers are the ideal photonic workload — optical multiply-accumulate units execute billions of MACs per watt.",
-  },
-  {
-    label: "Normalization",
-    paradigm: "thermo",
-    rationale:
-      "Layer norm mirrors thermodynamic equilibration. Stochastic normalization hardware exploits Boltzmann statistics for energy-efficient variance estimation.",
-  },
-  {
-    label: "Residual Connections",
-    paradigm: "classical",
-    rationale:
-      "Skip connections are memory-bus wiring — classical SRAM crossbars handle additive bypass paths with minimal latency penalty.",
-  },
-  {
-    label: "Transformer Blocks",
-    paradigm: "classical",
-    rationale:
-      "Orchestration logic — scheduling, tiling, layer sequencing — demands classical deterministic control flow and precise state management.",
-  },
-  {
-    label: "Output Projection",
-    paradigm: "quantum",
-    rationale:
-      "Quantum interference patterns collapse the attention manifold into a compressed vocabulary projection, exploiting amplitude encoding for O(log N) ops.",
-  },
-  {
-    label: "Softmax / Prob. Dist",
-    paradigm: "thermo",
-    rationale:
-      "The Boltzmann distribution is thermodynamics applied directly. Analog thermal hardware computes softmax via physical energy minimisation in microseconds.",
-  },
-  {
-    label: "Sampling / Decoding",
-    paradigm: "thermo",
-    rationale:
-      "Temperature-controlled stochastic sampling maps exactly to annealing hardware — adjusting thermal noise directly tunes creativity vs. determinism.",
-  },
-];
+// ── Brand palette (matches rest of app) ──────────────────────────────────────
+const QUANTUM   = "#5bad1e";
+const PHOTONIC  = "#f0ab00";
+const THERMO    = "#e8690a";
+const CLASSICAL = "#8a8a8a";
 
 const PARADIGM_META = {
-  classical: {
-    color: "var(--ternary)",
-    bg: "rgba(138,138,138,0.08)",
-    border: "rgba(138,138,138,0.28)",
-    glow: "none",
-    short: "Classical",
-    label: "Classical · CMOS",
-    pillClass: "scene5-pill-classical",
-  },
-  quantum: {
-    color: "var(--quantum)",
-    bg: "rgba(91,173,30,0.1)",
-    border: "rgba(91,173,30,0.45)",
-    glow: "0 0 14px rgba(91,173,30,0.22)",
-    short: "Quantum",
-    label: "Quantum · QPU",
-    pillClass: "scene5-pill-quantum",
-  },
-  photonic: {
-    color: "var(--photonic)",
-    bg: "rgba(240,171,0,0.1)",
-    border: "rgba(240,171,0,0.45)",
-    glow: "0 0 14px rgba(240,171,0,0.18)",
-    short: "Photonic",
-    label: "Photonic · OPU",
-    pillClass: "scene5-pill-photonic",
-  },
-  thermo: {
-    color: "var(--thermo)",
-    bg: "rgba(232,105,10,0.1)",
-    border: "rgba(232,105,10,0.45)",
-    glow: "0 0 14px rgba(232,105,10,0.18)",
-    short: "Thermo",
-    label: "Thermodynamic",
-    pillClass: "scene5-pill-thermo",
-  },
+  quantum:   { color: QUANTUM,   label: "Quantum",        glyph: "Q" },
+  photonic:  { color: PHOTONIC,  label: "Photonic",       glyph: "P" },
+  thermo:    { color: THERMO,    label: "Thermodynamic",  glyph: "T" },
+  classical: { color: CLASSICAL, label: "Classical",      glyph: "C" },
 };
 
-const ANIM_STEP_MS = 320;
-const ANIM_START_DELAY_MS = 500;
+// LLM pipeline with paradigm assignment
+const LAYERS = [
+  { id: 0,  label: "Tokenizer",                paradigm: "classical" },
+  { id: 1,  label: "Token Embeddings",         paradigm: "quantum"   },
+  { id: 2,  label: "Positional Encoding",      paradigm: "photonic"  },
+  { id: 3,  label: "Attention Mechanism",      paradigm: "photonic"  },
+  { id: 4,  label: "Feed-Forward Network",     paradigm: "photonic"  },
+  { id: 5,  label: "Normalization",            paradigm: "thermo"    },
+  { id: 6,  label: "Residual Connections",     paradigm: "classical" },
+  { id: 7,  label: "Transformer Blocks",       paradigm: "classical" },
+  { id: 8,  label: "Output Projection",        paradigm: "quantum"   },
+  { id: 9,  label: "Softmax / Distribution",   paradigm: "thermo"    },
+  { id: 10, label: "Sampling / Decoding",      paradigm: "thermo"    },
+];
 
-// ─── CSS injected once ─────────────────────────────────────────────────────────
-const SCENE5_CSS = `
-.scene5-root { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+// Animation timing
+const SCAN_DURATION_MS = 2800;
+const HOLD_MS          = 1800;
+const BETWEEN_CYCLE_MS = 900;
+const LAYER_STAGGER_MS = SCAN_DURATION_MS / LAYERS.length;
 
-.scene5-card {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 860px;
-  padding: clamp(20px, 4vw, 48px);
-  border: 1px solid var(--hairline);
-  background: var(--surface);
-  backdrop-filter: blur(8px);
-  border-radius: 4px;
-  opacity: 0;
-  transform: translateY(10px);
-  animation: scene5CardIn 900ms var(--ease-out) 160ms forwards;
-}
-@keyframes scene5CardIn { to { opacity: 1; transform: none; } }
+// Particle config per paradigm
+const PARTICLE_CONFIGS = {
+  quantum:   { count: 6, shape: "circle", size: 3, speed: 1.4 },
+  photonic:  { count: 8, shape: "line",   size: 4, speed: 2.2 },
+  thermo:    { count: 7, shape: "circle", size: 2, speed: 0.9 },
+  classical: { count: 4, shape: "circle", size: 2, speed: 0.5 },
+};
 
-/* Header */
-.scene5-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--hairline);
-}
-.scene5-title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(1.15rem, 3vw, 2rem);
-  letter-spacing: -0.01em;
-  line-height: 1.1;
-  margin: 4px 0 0;
-}
-.scene5-legend {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-.scene5-legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-.scene5-legend-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
+// ── Scan animation hook ───────────────────────────────────────────────────────
 
-/* Layout */
-.scene5-layout {
-  display: grid;
-  grid-template-columns: 1fr 188px;
-  gap: 18px;
-  align-items: start;
-}
-@media (max-width: 680px) {
-  .scene5-layout { grid-template-columns: 1fr; }
-  .scene5-sidebar { display: none; }
+function useScanAnimation(active) {
+  const [revealed, setRevealed] = useState(-1);
+  const [phase, setPhase]       = useState("idle");
+  const timers = useRef([]);
+
+  useEffect(() => {
+    if (!active) { setRevealed(-1); setPhase("idle"); return; }
+
+    function clearTimers() { timers.current.forEach(clearTimeout); timers.current = []; }
+
+    function runCycle() {
+      setPhase("scanning");
+      setRevealed(-1);
+      LAYERS.forEach((_, i) => {
+        const t = setTimeout(() => setRevealed(i), LAYER_STAGGER_MS * i + 320);
+        timers.current.push(t);
+      });
+      const holdT = setTimeout(() => {
+        setPhase("holding");
+        const restartT = setTimeout(() => { clearTimers(); runCycle(); }, HOLD_MS);
+        timers.current.push(restartT);
+      }, SCAN_DURATION_MS + BETWEEN_CYCLE_MS);
+      timers.current.push(holdT);
+    }
+
+    const initT = setTimeout(runCycle, 400);
+    timers.current.push(initT);
+    return clearTimers;
+  }, [active]);
+
+  return { revealed, phase };
 }
 
-/* Diagram */
-.scene5-diagram { display: flex; flex-direction: column; gap: 6px; }
+// ── Particle canvas ───────────────────────────────────────────────────────────
 
-.scene5-node-row {
-  display: grid;
-  grid-template-columns: 22px 1fr auto;
-  align-items: center;
-  gap: 8px;
-}
-.scene5-node-idx {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  color: var(--ink-faint);
-  text-align: right;
-  line-height: 1;
-  flex-shrink: 0;
-}
-.scene5-node-bar {
-  height: 38px;
-  border-radius: 5px;
-  border: 1.5px solid transparent;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  cursor: default;
-  overflow: hidden;
-  position: relative;
-  transition:
-    background 680ms var(--ease-out),
-    border-color 680ms var(--ease-out),
-    box-shadow 680ms var(--ease-out),
-    transform 200ms var(--ease-out);
-  appearance: none;
-  -webkit-appearance: none;
-  text-align: left;
-  font: inherit;
-  outline: none;
-  width: 100%;
-}
-.scene5-node-bar:focus-visible {
-  outline: 2px solid var(--quantum);
-  outline-offset: 2px;
-}
-.scene5-node-bar.transitioning {
-  animation: scene5NodePop 600ms var(--ease-out) forwards;
-}
-@keyframes scene5NodePop {
-  0%   { transform: scaleX(0.97); opacity: 0.65; }
-  42%  { transform: scaleX(1.01); opacity: 1; }
-  100% { transform: scaleX(1);    opacity: 1; }
-}
-.scene5-node-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 50%;
-  background: rgba(255,255,255,0.14);
-  opacity: 0;
-  left: -100%;
-  border-radius: inherit;
-}
-.scene5-node-bar.transitioning::before {
-  animation: scene5Scan 600ms var(--ease-out) forwards;
-}
-@keyframes scene5Scan {
-  0%   { opacity: 0; left: -60%; }
-  40%  { opacity: 1; }
-  100% { opacity: 0; left: 180%; }
-}
+function ParticleField({ paradigm, width, height, seed }) {
+  const canvasRef = useRef(null);
+  const cfg       = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
+  const color     = PARADIGM_META[paradigm].color;
 
-.scene5-node-label {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.76rem;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  position: relative;
-  z-index: 1;
-  transition: color 500ms;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.scene5-node-marker {
-  font-size: 6px;
-  opacity: 0.7;
-  line-height: 1;
-}
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = width  * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
 
-/* Pills */
-.scene5-pill {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 600ms var(--ease-out);
-}
-.scene5-pill-classical { background: rgba(138,138,138,0.12); color: var(--ternary);   border: 1px solid rgba(138,138,138,0.28); }
-.scene5-pill-quantum   { background: rgba(91,173,30,0.12);   color: var(--quantum);    border: 1px solid rgba(91,173,30,0.32); }
-.scene5-pill-photonic  { background: rgba(240,171,0,0.12);   color: #b07c00;           border: 1px solid rgba(240,171,0,0.32); }
-.scene5-pill-thermo    { background: rgba(232,105,10,0.12);  color: var(--thermo);     border: 1px solid rgba(232,105,10,0.32); }
+    const rng = (n) => Math.abs(Math.sin(seed * 9301 + n * 49297 + n) % 1);
+    const particles = Array.from({ length: cfg.count }, (_, i) => ({
+      x:     rng(i * 3)     * width,
+      y:     rng(i * 3 + 1) * height,
+      vx:    (rng(i * 3 + 2) - 0.5) * cfg.speed,
+      vy:    (rng(i * 7 + 1) - 0.5) * cfg.speed,
+      phase: rng(i * 11)    * Math.PI * 2,
+    }));
 
-/* Sidebar */
-.scene5-sidebar { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 0; }
+    let raf;
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      const t = Date.now() / 1000;
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width)  p.vx *= -1;
+        if (p.y < 0 || p.y > height) p.vy *= -1;
+        const alpha = 0.25 + 0.35 * Math.sin(t * 2.1 + p.phase);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle   = color;
+        if (cfg.shape === "line") {
+          ctx.strokeStyle = color;
+          ctx.lineWidth   = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 4, p.y);
+          ctx.lineTo(p.x + 4, p.y);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, cfg.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(draw);
+    }
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [paradigm, width, height, seed, cfg, color]);
 
-.scene5-info-card {
-  border: 1px solid var(--hairline);
-  border-radius: 6px;
-  background: var(--bg-raise);
-  padding: 14px;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 380ms var(--ease-out), transform 380ms var(--ease-out);
-  min-height: 120px;
-}
-.scene5-info-card.visible { opacity: 1; transform: none; }
-.scene5-info-paradigm {
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 600;
-  display: block;
-  margin-bottom: 6px;
-}
-.scene5-info-component {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 0.88rem;
-  letter-spacing: -0.01em;
-  color: var(--ink);
-  margin: 0 0 8px;
-  line-height: 1.2;
-}
-.scene5-info-desc {
-  font-family: var(--font-mono);
-  font-size: 0.64rem;
-  line-height: 1.55;
-  color: var(--ink-dim);
-  margin: 0;
-}
-
-/* Progress dots */
-.scene5-progress {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-.scene5-p-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--hairline);
-  transition: all 280ms;
-  display: inline-block;
-  flex-shrink: 0;
-}
-.scene5-p-dot.active { transform: scale(1.5); }
-
-/* Controls */
-.scene5-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 14px;
-  border-top: 1px solid var(--hairline);
-  margin-top: 14px;
-}
-.scene5-status {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-left: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scene5-node-bar,
-  .scene5-info-card,
-  .scene5-pill { transition-duration: 0.001ms !important; }
-  .scene5-node-bar.transitioning,
-  .scene5-node-bar.transitioning::before,
-  .scene5-card { animation-duration: 0.001ms !important; }
-}
-`;
-
-function injectStyles() {
-  if (document.getElementById("scene5-styles")) return;
-  const el = document.createElement("style");
-  el.id = "scene5-styles";
-  el.textContent = SCENE5_CSS;
-  document.head.appendChild(el);
-}
-
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-function NodeBar({ comp, idx, paradigm, isTransitioning, onHover }) {
-  const meta = PARADIGM_META[paradigm];
   return (
-    <div className="scene5-node-row">
-      <span className="scene5-node-idx">{String(idx + 1).padStart(2, "0")}</span>
-      <button
-        className={[
-          "scene5-node-bar",
-          isTransitioning ? "transitioning" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{
-          background: meta.bg,
-          borderColor: meta.border,
-          boxShadow: paradigm !== "classical" ? meta.glow : "none",
-        }}
-        onMouseEnter={() => onHover(idx)}
-        onFocus={() => onHover(idx)}
-        aria-label={`${comp.label} — ${meta.short}`}
-      >
-        <span
-          className="scene5-node-label"
-          style={{ color: paradigm !== "classical" ? meta.color : undefined }}
-        >
-          {comp.label}
-          {paradigm !== "classical" && (
-            <span className="scene5-node-marker" aria-hidden="true">◆</span>
-          )}
-        </span>
-      </button>
-      <span className={`scene5-pill ${meta.pillClass}`}>{meta.short}</span>
-    </div>
+    <canvas
+      ref={canvasRef}
+      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
+    />
   );
 }
 
-function InfoCard({ active, comp, paradigm }) {
-  const meta = PARADIGM_META[paradigm ?? "classical"];
+// ── Scanner sweep line ────────────────────────────────────────────────────────
+
+function ScanLine({ phase }) {
+  const lineRef = useRef(null);
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
+    const el = lineRef.current;
+    if (!el) return;
+    el.style.transition = "none";
+    el.style.top = "0%";
+    void el.offsetHeight;
+    el.style.transition = `top ${SCAN_DURATION_MS}ms cubic-bezier(0.4,0,0.6,1)`;
+    el.style.top = "100%";
+  }, [phase]);
+
+  if (phase === "idle") return null;
   return (
-    <div className={`scene5-info-card${active ? " visible" : ""}`}>
-      <span className="scene5-info-paradigm" style={{ color: meta.color }}>
-        {meta.label}
-      </span>
-      <p className="scene5-info-component">{comp?.label ?? "—"}</p>
-      <p className="scene5-info-desc">
-        {comp?.rationale ?? "Hover a step to explore the computing paradigm."}
-      </p>
-    </div>
+    <div
+      ref={lineRef}
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: "0%",
+        height: 2,
+        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 80%, transparent 100%)",
+        zIndex: 20,
+        pointerEvents: "none",
+        boxShadow: "0 0 16px 6px rgba(255,255,255,0.15)",
+      }}
+    />
   );
 }
 
-function ProgressDots({ count, active, paradigm }) {
-  const meta = PARADIGM_META[paradigm ?? "classical"];
+// ── Legend strip ──────────────────────────────────────────────────────────────
+
+function Legend() {
   return (
-    <div className="scene5-progress">
-      {Array.from({ length: count }).map((_, i) => (
-        <span
-          key={i}
-          className={`scene5-p-dot${i === active ? " active" : ""}`}
-          style={i === active ? { background: meta.color } : undefined}
-        />
+    <div style={{ display: "flex", gap: "clamp(10px,2vw,22px)", flexWrap: "wrap" }}>
+      {Object.entries(PARADIGM_META).map(([key, meta]) => (
+        <div key={key} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{
+            width: 8, height: 8, borderRadius: "50%",
+            background: meta.color,
+            boxShadow: `0 0 6px ${meta.color}99`,
+          }} />
+          <span style={{
+            fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+            fontSize: "clamp(0.6rem, 0.82vw, 0.7rem)",
+            letterSpacing: "0.12em",
+            color: meta.color,
+            textTransform: "uppercase",
+          }}>
+            {meta.label}
+          </span>
+        </div>
       ))}
     </div>
   );
 }
 
-// ─── Main Scene ────────────────────────────────────────────────────────────────
+// ── Single pipeline row ───────────────────────────────────────────────────────
 
-export default function Scene5() {
-  const { t } = useTranslation();
-
-  useEffect(() => { injectStyles(); }, []);
-
-  const [states, setStates] = useState(() => COMPONENTS.map(() => "classical"));
-  const [transitioning, setTransitioning] = useState(() => COMPONENTS.map(() => false));
-  const [focused, setFocused] = useState(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [statusLabel, setStatusLabel] = useState("All classical");
-
-  const timerRef = useRef(null);
-  const stepRef = useRef(0);
-  const hasAutoRun = useRef(false);
-
-  const clearAnim = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-  }, []);
-
-  const setNodeParadigm = useCallback((i, paradigm) => {
-    setStates((prev) => {
-      const next = [...prev];
-      next[i] = paradigm;
-      return next;
-    });
-    setTransitioning((prev) => {
-      const next = [...prev];
-      next[i] = true;
-      return next;
-    });
-    setTimeout(() => {
-      setTransitioning((prev) => {
-        const next = [...prev];
-        next[i] = false;
-        return next;
-      });
-    }, 720);
-  }, []);
-
-  // runStep uses a ref to avoid stale closure
-  const runStepRef = useRef(null);
-  runStepRef.current = () => {
-    const i = stepRef.current;
-    if (i >= COMPONENTS.length) {
-      setIsAnimating(false);
-      setStatusLabel("Hybrid config active");
-      setFocused(COMPONENTS.length - 1);
-      return;
-    }
-    setNodeParadigm(i, COMPONENTS[i].paradigm);
-    setFocused(i);
-    setStatusLabel(`Step ${i + 1} / ${COMPONENTS.length}`);
-    stepRef.current = i + 1;
-    timerRef.current = setTimeout(() => runStepRef.current(), ANIM_STEP_MS);
-  };
-
-  const resetAll = useCallback((animate = true) => {
-    clearAnim();
-    setIsAnimating(false);
-    stepRef.current = 0;
-    setStatusLabel("All classical");
-    setFocused(null);
-    if (animate) {
-      COMPONENTS.forEach((_, i) => setNodeParadigm(i, "classical"));
-    } else {
-      setStates(COMPONENTS.map(() => "classical"));
-      setTransitioning(COMPONENTS.map(() => false));
-    }
-  }, [clearAnim, setNodeParadigm]);
-
-  const showAll = useCallback(() => {
-    clearAnim();
-    setIsAnimating(false);
-    stepRef.current = 0;
-    setStatusLabel("Hybrid config active");
-    setStates(COMPONENTS.map((c) => c.paradigm));
-    setTransitioning(COMPONENTS.map(() => false));
-    setFocused(COMPONENTS.length - 1);
-  }, [clearAnim]);
-
-  const startAnimation = useCallback(() => {
-    if (isAnimating) return;
-    setStates(COMPONENTS.map(() => "classical"));
-    setTransitioning(COMPONENTS.map(() => false));
-    setFocused(null);
-    setIsAnimating(true);
-    stepRef.current = 0;
-    setStatusLabel("Optimising…");
-    timerRef.current = setTimeout(() => runStepRef.current(), ANIM_START_DELAY_MS);
-  }, [isAnimating]);
-
-  // Auto-start once
-  useEffect(() => {
-    if (hasAutoRun.current) return;
-    hasAutoRun.current = true;
-    timerRef.current = setTimeout(() => startAnimation(), ANIM_START_DELAY_MS);
-    return clearAnim;
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const focusedComp = focused !== null ? COMPONENTS[focused] : null;
-  const focusedParadigm = focused !== null ? states[focused] : "classical";
+function LayerRow({ layer, isRevealed, rowH, particleW }) {
+  const { color, label: paradigmLabel, glyph } = PARADIGM_META[layer.paradigm];
 
   return (
-    <div className="scene-inner scene5-root">
+    <div style={{ position: "relative", display: "flex", alignItems: "center", height: rowH }}>
 
-      {/* Ambient relics */}
-      <div className="ambient-relics" aria-hidden="true">
-        <span
-          className="relic-blob"
-          style={{ width: 280, height: 280, top: "6%", left: "2%", background: "#5bad1e" }}
-        />
-        <span
-          className="relic-blob"
-          style={{ width: 220, height: 220, bottom: "4%", right: "3%", background: "#e8690a" }}
-        />
-        <span
-          className="relic-blob"
-          style={{ width: 180, height: 180, top: "40%", right: "18%", background: "#f0ab00", animationDelay: "-7s" }}
-        />
-        <svg
-          className="relic-wave"
-          width="70%"
-          height="160"
-          style={{ top: "50%", left: "15%", marginTop: -80 }}
-          viewBox="0 0 700 160"
-          aria-hidden="true"
-        >
-          <path
-            d="M0,80 C80,16 160,144 240,80 C320,16 400,144 480,80 C560,16 640,144 700,80"
-            fill="none"
-            stroke="#f0ab00"
-            strokeWidth="1.5"
-          />
-        </svg>
+      {/* Glyph badge */}
+      <div style={{
+        flexShrink: 0,
+        width: rowH * 1.15,
+        height: rowH,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
+        fontWeight: 700,
+        fontSize: `clamp(0.65rem, 1.1vw, 0.95rem)`,
+        color: isRevealed ? color : "rgba(255,255,255,0.18)",
+        transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
+        textShadow: isRevealed ? `0 0 14px ${color}88` : "none",
+      }}>
+        {isRevealed ? glyph : "·"}
       </div>
 
-      {/* Main card */}
-      <div className="scene5-card intro-card">
+      {/* Main block */}
+      <div style={{
+        flex: 1,
+        height: "100%",
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: "clamp(9px,1.4vw,16px)",
+        border: `1px solid ${isRevealed ? color + "44" : "rgba(255,255,255,0.08)"}`,
+        borderLeft: `2.5px solid ${isRevealed ? color : "rgba(255,255,255,0.14)"}`,
+        background: isRevealed
+          ? `linear-gradient(90deg, ${color}16 0%, ${color}07 55%, transparent 100%)`
+          : "rgba(255,255,255,0.02)",
+        transition: [
+          "border-color 380ms cubic-bezier(0.16,1,0.3,1)",
+          "border-left-color 380ms cubic-bezier(0.16,1,0.3,1)",
+          "background 380ms cubic-bezier(0.16,1,0.3,1)",
+          "box-shadow 380ms cubic-bezier(0.16,1,0.3,1)",
+        ].join(", "),
+        boxShadow: isRevealed ? `inset 0 0 0 1px ${color}1a, 0 0 18px ${color}10` : "none",
+        overflow: "hidden",
+        borderRadius: "0 3px 3px 0",
+      }}>
+        {isRevealed && (
+          <ParticleField
+            paradigm={layer.paradigm}
+            width={particleW || 200}
+            height={rowH}
+            seed={layer.id + 1}
+          />
+        )}
 
-        {/* Header */}
-        <div className="scene5-header">
-          <div>
-            <span className="eyebrow stroke-hair">
-              <span className="eyebrow-dot" style={{ background: "var(--quantum)" }} />
-              {t("scene5.eyebrow", "QPT · Hybrid Architecture")}
-            </span>
-            <h2 className="scene5-title">
-              {t("scene5.title", "Hybrid LLM")}
-            </h2>
-          </div>
-          <div className="scene5-legend">
-            {Object.entries(PARADIGM_META).map(([key, m]) => (
-              <div key={key} className="scene5-legend-item">
-                <span className="scene5-legend-dot" style={{ background: m.color }} />
-                <span>{m.short}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <span style={{
+          position: "relative",
+          zIndex: 2,
+          fontFamily: "var(--font-body, 'Inter', sans-serif)",
+          fontWeight: isRevealed ? 500 : 400,
+          fontSize: "clamp(0.68rem, 1.05vw, 0.85rem)",
+          color: isRevealed ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+          letterSpacing: "0.01em",
+          transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
+          whiteSpace: "nowrap",
+        }}>
+          {layer.label}
+        </span>
 
-        {/* Diagram + Sidebar */}
-        <div className="scene5-layout">
-          <div className="scene5-diagram">
-            {COMPONENTS.map((comp, i) => (
-              <NodeBar
-                key={i}
-                idx={i}
-                comp={comp}
-                paradigm={states[i]}
-                isTransitioning={transitioning[i]}
-                onHover={setFocused}
-              />
-            ))}
-          </div>
+        <span style={{
+          position: "absolute",
+          right: "clamp(8px,1.3vw,14px)",
+          zIndex: 2,
+          fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+          fontSize: "clamp(0.52rem, 0.78vw, 0.64rem)",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: isRevealed ? color : "transparent",
+          opacity: isRevealed ? 0.8 : 0,
+          transition: "color 380ms cubic-bezier(0.16,1,0.3,1), opacity 380ms cubic-bezier(0.16,1,0.3,1)",
+        }}>
+          {paradigmLabel}
+        </span>
+      </div>
 
-          <div className="scene5-sidebar">
-            <InfoCard
-              active={focused !== null}
-              comp={focusedComp}
-              paradigm={focusedParadigm}
-            />
-            <ProgressDots
-              count={COMPONENTS.length}
-              active={focused}
-              paradigm={focusedParadigm}
-            />
-          </div>
-        </div>
+      {/* Row index */}
+      <div style={{
+        flexShrink: 0,
+        width: rowH * 1.05,
+        height: rowH,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+        fontSize: "clamp(0.52rem, 0.76vw, 0.62rem)",
+        color: isRevealed ? color + "88" : "rgba(255,255,255,0.14)",
+        transition: "color 380ms",
+      }}>
+        {String(layer.id + 1).padStart(2, "0")}
+      </div>
+    </div>
+  );
+}
 
-        {/* Controls */}
-        <div className="scene5-controls">
-          <button
-            className="footer-btn primary"
-            onClick={startAnimation}
-            disabled={isAnimating}
+// ── Main export ───────────────────────────────────────────────────────────────
+
+export default function Scene5({ active }) {
+  const { t } = useTranslation();
+  const { revealed, phase } = useScanAnimation(active);
+
+  // Measure container for particle canvases
+  const containerRef = useRef(null);
+  const [particleW, setParticleW] = useState(300);
+  const [rowH, setRowH]           = useState(34);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setParticleW(Math.floor(width * 0.72));
+      const computed = Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3));
+      setRowH(computed);
+    });
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div className="scene-inner">
+      {/* Ambient blobs */}
+      <div className="ambient-relics" aria-hidden="true">
+        <span className="relic-blob" style={{ width: 260, height: 260, top: "4%",  left: "2%",  background: QUANTUM  }} />
+        <span className="relic-blob" style={{ width: 200, height: 200, bottom: "6%", right: "4%", background: THERMO }} />
+        <span className="relic-blob" style={{ width: 160, height: 160, top: "42%", left: "44%", background: PHOTONIC }} />
+      </div>
+
+      <div className="split">
+        {/* ── Text side ──────────────────────────────────────────────────── */}
+        <div className="scene-text">
+          <span className="eyebrow stroke-hair">
+            <span className="eyebrow-dot" style={{ background: "var(--quantum)" }} />
+            QPT
+          </span>
+
+          <p
+            className="stroke-lg"
+            style={{
+              fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
+              fontWeight: 700,
+              fontSize: "clamp(1.1rem, 2.4vw, 2rem)",
+              lineHeight: 1.3,
+              margin: "clamp(10px,1.8vw,18px) 0",
+              maxWidth: "26ch",
+            }}
           >
-            {isAnimating ? "Animating…" : "▶ Animate"}
-          </button>
-          <button className="footer-btn ghost" onClick={() => resetAll(true)}>
-            Reset
-          </button>
-          <button className="footer-btn ghost" onClick={showAll}>
-            Show all
-          </button>
-          <span className="scene5-status">{statusLabel}</span>
+            {t(
+              "scene5.statement",
+              "A new era of hybrid computing — every layer runs on its optimal substrate."
+            )}
+          </p>
+
+          <p className="body-line" style={{ maxWidth: "33ch", fontSize: "clamp(0.76rem,1.1vw,0.9rem)" }}>
+            {t(
+              "scene5.sub",
+              "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic."
+            )}
+          </p>
+
+          <div style={{ marginTop: "clamp(14px,2.2vw,24px)" }}>
+            <Legend />
+          </div>
+        </div>
+
+        {/* ── Diagram side ───────────────────────────────────────────────── */}
+        <div className="visual-pane">
+          <div
+            className="instrument-frame"
+            style={{ padding: "clamp(8px,1.6vw,18px) clamp(4px,0.9vw,12px)" }}
+          >
+            <div
+              ref={containerRef}
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                gap: 3,
+                justifyContent: "center",
+              }}
+            >
+              <ScanLine phase={phase} />
+
+              {LAYERS.map((layer) => (
+                <LayerRow
+                  key={layer.id}
+                  layer={layer}
+                  isRevealed={layer.id <= revealed}
+                  rowH={rowH}
+                  particleW={particleW}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
