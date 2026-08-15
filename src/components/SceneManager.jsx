@@ -7,13 +7,14 @@ import ProgressRail from "./ui/ProgressRail";
 const Scene1 = lazy(() => import("./scenes/Scene1"));
 const Scene2 = lazy(() => import("./scenes/Scene2"));
 const Scene3 = lazy(() => import("./scenes/Scene3"));
-const Scene4 = lazy(() => import("./scenes/Scene4"));
+const Scene4a = lazy(() => import("./scenes/Scene4a"));
+const Scene4b = lazy(() => import("./scenes/Scene4b"));
 const Scene5 = lazy(() => import("./scenes/Scene5"));
 const Scene6 = lazy(() => import("./scenes/Scene6"));
 const Scene7 = lazy(() => import("./scenes/Scene7"));
 const Scene8 = lazy(() => import("./scenes/Scene8"));
 
-const SCENES = [Scene1, Scene2, Scene3, Scene4, Scene5, Scene6, Scene7, Scene8];
+const SCENES = [Scene1, Scene2, Scene3, null, Scene5, Scene6, Scene7, Scene8];
 const TOTAL = SCENES.length;
 const TRANSITION_MS = 900;
 const WHEEL_COOLDOWN_MS = 780;
@@ -26,6 +27,7 @@ export default function SceneManager() {
   const lockRef = useRef(false);
   const wheelAccumRef = useRef(0);
   const touchStartY = useRef(null);
+  const scene4Visits = useRef(0);
 
   const goTo = useCallback((next) => {
     const clamped = Math.max(0, Math.min(TOTAL - 1, next));
@@ -35,6 +37,12 @@ export default function SceneManager() {
       window.setTimeout(() => {
         lockRef.current = false;
       }, WHEEL_COOLDOWN_MS);
+
+      // Every time we ENTER scene 4 (index 3), count the visit
+      if (clamped === 3 && cur !== 3) {
+        scene4Visits.current += 1;
+      }
+
       return clamped;
     });
   }, []);
@@ -114,6 +122,15 @@ export default function SceneManager() {
         const offset = i - index;
         const isActive = offset === 0;
         const isNearby = Math.abs(offset) <= 1;
+
+        // Pick Scene4a on odd visits, Scene4b on even visits
+        const Component =
+          i === 3
+            ? scene4Visits.current % 2 === 1
+              ? Scene4a
+              : Scene4b
+            : SceneComponent;
+
         return (
           <div
             key={i}
@@ -128,7 +145,7 @@ export default function SceneManager() {
             aria-hidden={!isActive}
           >
             <Suspense fallback={null}>
-              {isNearby ? <SceneComponent active={isActive} /> : null}
+              {isNearby && Component ? <Component active={isActive} /> : null}
             </Suspense>
           </div>
         );
