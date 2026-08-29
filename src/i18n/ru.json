@@ -42,6 +42,10 @@
   "footer": {
     "thanks": "Спасибо, что доверяете нам",
     "stayInformed": "Будьте в курсе",
-    "supportUs": "Поддержите нас"
+    "supportUs": "Поддержите нас",
+    "emailLabel": "Электронная почта",
+    "emailPlaceholder": "you@email.com",
+    "emailError": "Что-то пошло не так — попробуйте снова",
+    "submit": "Отправить"
   }
 }

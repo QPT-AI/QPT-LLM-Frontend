@@ -1,12 +1,11 @@
 import { useTranslation } from "react-i18next";
+import EmailCapture from "../ui/EmailCapture";
 
 export default function Scene8() {
   const { t } = useTranslation();
-
   return (
     <div className="scene-inner">
       <div className="future-wrap">
-        
         <p className="future-statement stroke-lg" style={{ marginTop: 18 }}>
           {t("scene8.prefix")}
           <span className="future-term" style={{ color: "var(--ternary)" }}>
@@ -18,13 +17,10 @@ export default function Scene8() {
           </span>
           {t("scene8.suffix")}
         </p>
-
         <footer className="footer-strip">
           <span className="footer-thanks stroke-hair">{t("footer.thanks")}</span>
           <div className="footer-actions">
-            <button type="button" className="footer-btn ghost">
-              {t("footer.stayInformed")}
-            </button>
+            <EmailCapture />
             <button type="button" className="footer-btn primary">
               {t("footer.supportUs")}
             </button>

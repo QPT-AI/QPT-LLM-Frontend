@@ -925,3 +925,94 @@ a {
     transform: none;
   }
 }
+
+.email-capture {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.email-capture-form {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding-left: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  overflow: hidden;
+  width: clamp(220px, 26vw, 280px);
+  animation: captureOpen 260ms var(--ease-out);
+}
+
+@keyframes captureOpen {
+  from { width: 132px; opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+.email-capture-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  outline: none;
+}
+
+.email-capture-input::placeholder {
+  color: var(--ink-faint);
+}
+
+.email-capture-submit {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  margin-left: 4px;
+  border: none;
+  border-left: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.email-capture-submit:hover:not(:disabled) { color: var(--quantum); }
+.email-capture-submit:active:not(:disabled) { transform: scale(0.92); }
+.email-capture-submit:disabled { cursor: default; opacity: 0.6; }
+
+.email-capture-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.6px solid var(--hairline);
+  border-top-color: var(--ink);
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.email-capture-error {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--thermo);
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

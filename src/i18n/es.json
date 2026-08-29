@@ -42,6 +42,10 @@
   "footer": {
     "thanks": "Gracias por confiar en nosotros",
     "stayInformed": "Mantente informado",
-    "supportUs": "Apóyanos"
+    "supportUs": "Apóyanos",
+    "emailLabel": "Correo electrónico",
+    "emailPlaceholder": "tucorreo@email.com",
+    "emailError": "Algo salió mal — inténtalo de nuevo",
+    "submit": "Enviar"
   }
 }

@@ -42,6 +42,10 @@
   "footer": {
     "thanks": "Danke für Ihr Vertrauen",
     "stayInformed": "Bleiben Sie informiert",
-    "supportUs": "Unterstützen Sie uns"
+    "supportUs": "Unterstützen Sie uns",
+    "emailLabel": "E-Mail-Adresse",
+    "emailPlaceholder": "deine@email.com",
+    "emailError": "Etwas ist schiefgelaufen — bitte erneut versuchen",
+    "submit": "Absenden"
   }
 }
