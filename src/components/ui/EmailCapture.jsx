@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-
-const API_ENDPOINT = "http://localhost:9600/api/v1/notifications/register";
+import { registerEmail } from "../../services/notifications";
 
 export default function EmailCapture() {
   const { t } = useTranslation();
@@ -44,12 +43,7 @@ export default function EmailCapture() {
     if (status === "loading") return;
     setStatus("loading");
     try {
-      const res = await fetch(API_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+      await registerEmail(email);
       setStatus("success");
       setTimeout(collapse, 2400);
     } catch {

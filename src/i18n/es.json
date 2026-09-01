@@ -4,7 +4,24 @@
     "themeToLight": "Cambiar a modo claro",
     "themeToDark": "Cambiar a modo oscuro",
     "languageLabel": "Idioma",
-    "progressLabel": "Escena {{current}} de {{total}}"
+    "progressLabel": "Escena {{current}} de {{total}}",
+    "sectionLabel": "Secciones",
+    "home": "Inicio",
+    "chat": "Chat",
+    "monitor": "Monitor"
+  },
+  "chat": {
+    "empty": "Inicia una conversación con QPT.",
+    "placeholder": "Escribe tu mensaje…",
+    "placeholderReply": "QPT aún no está conectado. La integración con el backend llegará pronto.",
+    "send": "Enviar"
+  },
+  "monitor": {
+    "title": "Monitor",
+    "cpu": "CPU",
+    "memory": "Memoria",
+    "gpu": "GPU",
+    "status": "Estado"
   },
   "scene1": {
     "line": "El futuro de la inteligencia artificial no pertenece solo a la electricidad."

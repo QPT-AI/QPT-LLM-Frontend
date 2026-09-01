@@ -4,7 +4,24 @@
     "themeToLight": "Zu hellem Modus wechseln",
     "themeToDark": "Zu dunklem Modus wechseln",
     "languageLabel": "Sprache",
-    "progressLabel": "Szene {{current}} von {{total}}"
+    "progressLabel": "Szene {{current}} von {{total}}",
+    "sectionLabel": "Bereiche",
+    "home": "Start",
+    "chat": "Chat",
+    "monitor": "Monitor"
+  },
+  "chat": {
+    "empty": "Starten Sie ein Gespräch mit QPT.",
+    "placeholder": "Geben Sie Ihre Nachricht ein…",
+    "placeholderReply": "QPT ist noch nicht angeschlossen. Backend-Integration folgt bald.",
+    "send": "Senden"
+  },
+  "monitor": {
+    "title": "Monitor",
+    "cpu": "CPU",
+    "memory": "Speicher",
+    "gpu": "GPU",
+    "status": "Status"
   },
   "scene1": {
     "line": "Die Zukunft der künstlichen Intelligenz gehört nicht der Elektrizität allein."

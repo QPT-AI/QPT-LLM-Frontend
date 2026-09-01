@@ -4,7 +4,24 @@
     "themeToLight": "Переключить на светлый режим",
     "themeToDark": "Переключить на тёмный режим",
     "languageLabel": "Язык",
-    "progressLabel": "Сцена {{current}} из {{total}}"
+    "progressLabel": "Сцена {{current}} из {{total}}",
+    "sectionLabel": "Разделы",
+    "home": "Главная",
+    "chat": "Чат",
+    "monitor": "Монитор"
+  },
+  "chat": {
+    "empty": "Начните разговор с QPT.",
+    "placeholder": "Введите сообщение…",
+    "placeholderReply": "QPT ещё не подключён. Интеграция с бэкендом скоро появится.",
+    "send": "Отправить"
+  },
+  "monitor": {
+    "title": "Монитор",
+    "cpu": "CPU",
+    "memory": "Память",
+    "gpu": "GPU",
+    "status": "Статус"
   },
   "scene1": {
     "line": "Будущее искусственного интеллекта принадлежит не только электричеству."
