@@ -4,7 +4,24 @@
     "themeToLight": "Switch to light mode",
     "themeToDark": "Switch to dark mode",
     "languageLabel": "Language",
-    "progressLabel": "Scene {{current}} of {{total}}"
+    "progressLabel": "Scene {{current}} of {{total}}",
+    "sectionLabel": "Sections",
+    "home": "Home",
+    "chat": "Chat",
+    "monitor": "Monitor"
+  },
+  "chat": {
+    "empty": "Start a conversation with QPT.",
+    "placeholder": "Type your message…",
+    "placeholderReply": "QPT is not wired up yet. Backend integration coming soon.",
+    "send": "Send"
+  },
+  "monitor": {
+    "title": "Monitor",
+    "cpu": "CPU",
+    "memory": "Memory",
+    "gpu": "GPU",
+    "status": "Status"
   },
   "scene1": {
     "line": "The future of artificial intelligence does not belong to electricity alone."
@@ -42,6 +59,10 @@
   "footer": {
     "thanks": "Thank you for trusting us. We are working to make it happen.",  
     "stayInformed": "Stay informed",
-    "supportUs": "Support us"
+    "supportUs": "Support us",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "you@email.com",
+    "emailError": "Something went wrong — try again",
+    "submit": "Submit"
   }
 }
