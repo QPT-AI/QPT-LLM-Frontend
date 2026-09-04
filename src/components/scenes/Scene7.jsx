@@ -6,11 +6,18 @@ const CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+-/=?";
 export default function Scene7({ active }) {
   const { t } = useTranslation();
   const finalText = t("scene7.final");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const [display, setDisplay] = useState("");
 
   useEffect(() => {
     if (!active) {
       setDisplay("");
+      return undefined;
+    }
+
+    // In reduced motion mode, show the final text instantly
+    if (reducedMotion) {
+      setDisplay(finalText);
       return undefined;
     }
 
@@ -38,7 +45,7 @@ export default function Scene7({ active }) {
     };
 
     render();
-    const flicker = setInterval(render, 42);
+    const flicker = setInterval(render, 60);
     const locker = setInterval(() => {
       if (cursor >= order.length) {
         clearInterval(locker);
@@ -49,13 +56,13 @@ export default function Scene7({ active }) {
       for (let b = 0; b < batchSize && cursor < order.length; b++, cursor++) {
         locked.add(order[cursor]);
       }
-    }, 46);
+    }, 60);
 
     return () => {
       clearInterval(flicker);
       clearInterval(locker);
     };
-  }, [active, finalText]);
+  }, [active, finalText, reducedMotion]);
 
   return (
     <div className="scene-inner">

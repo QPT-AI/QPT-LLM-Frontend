@@ -4,6 +4,9 @@ import { useTranslation } from "react-i18next";
 export default function Scene6({ active }) {
   const { t } = useTranslation();
 
+  // Respect reduced motion preference
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   // Resolve the translated string on every render so length is always correct
   const generatedText = t("scene6.generatedText");
 
@@ -15,6 +18,11 @@ export default function Scene6({ active }) {
       return undefined;
     }
     setRevealed(0);
+    // In reduced motion mode, show the text instantly
+    if (reducedMotion) {
+      setRevealed(generatedText.length);
+      return undefined;
+    }
     const id = setInterval(() => {
       setRevealed((r) => {
         if (r >= generatedText.length) {
@@ -25,7 +33,7 @@ export default function Scene6({ active }) {
       });
     }, 44);
     return () => clearInterval(id);
-  }, [active, generatedText]); // ← generatedText in deps so language switches restart the animation
+  }, [active, generatedText, reducedMotion]); // ← generatedText in deps so language switches restart the animation
 
   const done = revealed >= generatedText.length;
 
@@ -39,7 +47,7 @@ export default function Scene6({ active }) {
             lineHeight: 1.5,
             whiteSpace: "pre-wrap",
             wordBreak: "break-word",
-            color: "#e7e9e6",
+            color: "var(--ink)",
             margin: 0,
           }}
         >

@@ -53,6 +53,13 @@ function useScanAnimation(active) {
   useEffect(() => {
     if (!active) { setRevealed(-1); setPhase("idle"); return; }
 
+    // Respect reduced motion preference
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      setPhase("idle");
+      return;
+    }
+
     function clearTimers() { timers.current.forEach(clearTimeout); timers.current = []; }
 
     function runCycle() {
@@ -82,10 +89,19 @@ function useScanAnimation(active) {
 
 function ParticleField({ paradigm, width, height, seed }) {
   const canvasRef = useRef(null);
+  const reducedMotion = useRef(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const cfg       = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
   const color     = PARADIGM_META[paradigm].color;
 
   useEffect(() => {
+
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    mq.addEventListener("change", handleChange);
+    reducedMotion.current = mq.matches;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -105,16 +121,20 @@ function ParticleField({ paradigm, width, height, seed }) {
 
     let raf;
     function draw() {
+      if (reducedMotion.current) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = color;
+        return;
+      }
       ctx.clearRect(0, 0, width, height);
       const t = Date.now() / 1000;
+      ctx.globalAlpha = 0.25 + 0.35 * Math.sin(t * 2.1);
+      ctx.fillStyle = color;
       for (const p of particles) {
         p.x += p.vx;
         p.y += p.vy;
         if (p.x < 0 || p.x > width)  p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
-        const alpha = 0.25 + 0.35 * Math.sin(t * 2.1 + p.phase);
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle   = color;
         if (cfg.shape === "line") {
           ctx.strokeStyle = color;
           ctx.lineWidth   = 1.5;
@@ -132,7 +152,10 @@ function ParticleField({ paradigm, width, height, seed }) {
       raf = requestAnimationFrame(draw);
     }
     draw();
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      mq.removeEventListener("change", handleChange);
+      cancelAnimationFrame(raf);
+    };
   }, [paradigm, width, height, seed, cfg, color]);
 
   return (
@@ -224,7 +247,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
         fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
         fontWeight: 700,
         fontSize: `clamp(0.65rem, 1.1vw, 0.95rem)`,
-        color: isRevealed ? color : "rgba(255,255,255,0.18)",
+        color: isRevealed ? color : `rgba(var(--ink), 0.18)`,
         transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
         textShadow: isRevealed ? `0 0 14px ${color}88` : "none",
       }}>
@@ -239,8 +262,8 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
         display: "flex",
         alignItems: "center",
         paddingLeft: "clamp(9px,1.4vw,16px)",
-        border: `1px solid ${isRevealed ? color + "44" : "rgba(255,255,255,0.08)"}`,
-        borderLeft: `2.5px solid ${isRevealed ? color : "rgba(255,255,255,0.14)"}`,
+        border: `1px solid ${isRevealed ? color + "44" : "rgba(var(--ink), 0.08)"}`,
+        borderLeft: `2.5px solid ${isRevealed ? color : "rgba(var(--ink), 0.14)"}`,
         background: isRevealed
           ? `linear-gradient(90deg, ${color}16 0%, ${color}07 55%, transparent 100%)`
           : "rgba(255,255,255,0.02)",
@@ -250,7 +273,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
           "background 380ms cubic-bezier(0.16,1,0.3,1)",
           "box-shadow 380ms cubic-bezier(0.16,1,0.3,1)",
         ].join(", "),
-        boxShadow: isRevealed ? `inset 0 0 0 1px ${color}1a, 0 0 18px ${color}10` : "none",
+        boxShadow: isRevealed ? `inset 0 0 0 1px rgba(var(--ink), 0.1a), 0 0 18px rgba(var(--ink), 0.1)` : "none",
         overflow: "hidden",
         borderRadius: "0 3px 3px 0",
       }}>
@@ -269,7 +292,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
           fontFamily: "var(--font-body, 'Inter', sans-serif)",
           fontWeight: isRevealed ? 500 : 400,
           fontSize: "clamp(0.68rem, 1.05vw, 0.85rem)",
-          color: isRevealed ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+          color: isRevealed ? `rgba(var(--ink), 0.9)` : `rgba(var(--ink), 0.3)`,
           letterSpacing: "0.01em",
           transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
           whiteSpace: "nowrap",
@@ -303,7 +326,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
         justifyContent: "center",
         fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
         fontSize: "clamp(0.52rem, 0.76vw, 0.62rem)",
-        color: isRevealed ? color + "88" : "rgba(255,255,255,0.14)",
+        color: isRevealed ? color + "88" : `rgba(var(--ink), 0.14)`,
         transition: "color 380ms",
       }}>
         {String(layer.id + 1).padStart(2, "0")}
@@ -320,19 +343,25 @@ export default function Scene5({ active }) {
 
   // Measure container for particle canvases
   const containerRef = useRef(null);
+  const rafRef = useRef(null);
   const [particleW, setParticleW] = useState(300);
   const [rowH, setRowH]           = useState(34);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    const obs = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setParticleW(Math.floor(width * 0.72));
-      const computed = Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3));
-      setRowH(computed);
-    });
-    obs.observe(containerRef.current);
-    return () => obs.disconnect();
+    const handleResize = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const { width, height } = containerRef.current.getBoundingClientRect();
+        setParticleW(Math.floor(width * 0.72));
+        const computed = Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3));
+        setRowH(computed);
+      });
+    };
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
   return (
@@ -352,24 +381,25 @@ export default function Scene5({ active }) {
             QPT
           </span>
 
-          <p
-            className="stroke-lg"
-            style={{
-              fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
-              fontWeight: 700,
-              fontSize: "clamp(1.1rem, 2.4vw, 2rem)",
-              lineHeight: 1.3,
-              margin: "clamp(10px,1.8vw,18px) 0",
-              maxWidth: "26ch",
-            }}
-          >
+<p
+              className="stroke-lg"
+              style={{
+                fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
+                fontWeight: 700,
+                fontSize: "clamp(1.1rem, 2.4vw, 2rem)",
+                lineHeight: 1.3,
+                margin: "clamp(10px,1.8vw,18px) 0",
+                maxWidth: "26ch",
+                color: "var(--ink)",
+              }}
+            >
             {t(
               "scene5.statement",
               "A new era of hybrid computing — every layer runs on its optimal substrate."
             )}
           </p>
 
-          <p className="body-line" style={{ maxWidth: "33ch", fontSize: "clamp(0.76rem,1.1vw,0.9rem)" }}>
+          <p className="body-line" style={{ maxWidth: "33ch", fontSize: "clamp(0.76rem,1.1vw,0.9rem)", color: "var(--ink)" }}>
             {t(
               "scene5.sub",
               "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic."

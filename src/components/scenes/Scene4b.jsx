@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
@@ -11,8 +11,8 @@ const MIN_COLOR = "#5fd8ff";
 const MAX_COLOR = "#ffb454";
 
 const LANDSCAPE_EXTENT = 2.2;
-const SEGMENTS = 110;
-const PARTICLE_COUNT = 5;
+const SEGMENTS = 60;
+const PARTICLE_COUNT = 3;
 const TRAIL_LENGTH = 28;
 
 // --- Energy landscape definition -------------------------------------
@@ -168,7 +168,20 @@ function Terrain() {
   const geo = useTerrainGeometry();
   const matRef = useRef();
   const uniforms = useMemo(() => ({ uTime: { value: 0 } }), []);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    reducedMotion.current = mq.matches;
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  const reducedMotion = useRef(false);
+
   useFrame((state) => {
+    if (reducedMotion.current) return;
     if (matRef.current) matRef.current.uniforms.uTime.value = state.clock.elapsedTime;
   });
   return (
@@ -289,7 +302,20 @@ function FormulaLabel() {
   const texture = useMemo(() => makeFormulaTexture(formula, "#ffffff"), []);
 
   const groupRef = useRef();
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    reducedMotion.current = mq.matches;
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  const reducedMotion = useRef(false);
+
   useFrame((state) => {
+    if (reducedMotion.current) return;
     // Gentle bobbing
     if (groupRef.current) {
       groupRef.current.position.y = 2.1 + Math.sin(state.clock.elapsedTime * 0.8) * 0.06;
@@ -336,7 +362,20 @@ function GradientWalkers() {
   const sphereRefs = useRef([]);
   const lineGeomRefs = useRef([]);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    reducedMotion.current = mq.matches;
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  const reducedMotion = useRef(false);
+
   useFrame((state, delta) => {
+    if (reducedMotion.current) return;
     const dt = Math.min(delta, 0.05);
     const t = state.clock.elapsedTime;
     const stepSize = 0.3;
@@ -437,7 +476,20 @@ function GradientWalkers() {
 
 function DescentScene() {
   const rootRef = useRef();
+  const reducedMotion = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    reducedMotion.current = mq.matches;
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
   useFrame((state, delta) => {
+    if (reducedMotion.current) return;
     state.camera.lookAt(0, 0.15, 0);
     if (rootRef.current) rootRef.current.rotation.y += delta * 0.1;
   });
