@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ui/ThemeToggle";
 import LanguageSwitcher from "./ui/LanguageSwitcher";
+import LoginButton from "./ui/LoginButton";
 import ProgressRail from "./ui/ProgressRail";
 
 const Scene1 = lazy(() => import("./scenes/Scene1"));
@@ -165,6 +166,7 @@ export default function SceneManager() {
         <div className="chrome-controls">
           <LanguageSwitcher />
           <ThemeToggle />
+          <LoginButton />
         </div>
       </header>
 

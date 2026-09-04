@@ -8,7 +8,8 @@
     "sectionLabel": "Bereiche",
     "home": "Start",
     "chat": "Chat",
-    "monitor": "Monitor"
+    "monitor": "Monitor",
+    "continue": "Weiter"
   },
   "chat": {
     "empty": "Starten Sie ein Gespräch mit QPT.",
@@ -57,7 +58,7 @@
     "suffix": " eine wichtige Rolle in diesem Prozess spielen."
   },
   "footer": {
-    "thanks": "Danke, dass Sie uns vertrauen. Wir arbeiten daran, dies zu erreichen.",
+    "thanks": "Danke für Ihr Vertrauen",
     "stayInformed": "Bleiben Sie informiert",
     "supportUs": "Unterstützen Sie uns",
     "emailLabel": "E-Mail-Adresse",

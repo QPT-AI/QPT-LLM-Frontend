@@ -389,6 +389,39 @@ a {
   outline-offset: 2px;
 }
 
+.login-btn {
+  display: flex;
+  align-items: center;
+  height: clamp(34px, 8vw, 38px);
+  padding: 0 clamp(12px, 2.6vw, 16px);
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 220ms var(--ease-out), background 220ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.login-btn:hover {
+  border-color: var(--frame);
+  background: var(--bg-raise);
+}
+
+.login-btn:active {
+  transform: scale(0.96);
+}
+
+.login-btn:focus-visible {
+  outline: 2px solid var(--quantum);
+  outline-offset: 2px;
+}
+
 .lang-option-btn {
   display: block;
   width: 100%;
@@ -943,6 +976,7 @@ a {
 @media (hover: none) and (pointer: coarse) {
   .icon-btn:hover,
   .lang-active-btn:hover,
+  .login-btn:hover,
   .footer-btn:hover {
     /* avoid sticky hover states after tap on touch devices */
     border-color: var(--hairline);

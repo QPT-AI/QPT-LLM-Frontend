@@ -8,7 +8,8 @@
     "sectionLabel": "Secciones",
     "home": "Inicio",
     "chat": "Chat",
-    "monitor": "Monitor"
+    "monitor": "Monitor",
+    "continue": "Continuar"
   },
   "chat": {
     "empty": "Inicia una conversación con QPT.",
@@ -57,7 +58,7 @@
     "suffix": " también jugarán un papel importante en este proceso."
   },
   "footer": {
-    "thanks": "Gracias por confiar en nosotros, Estamos trabajando para lograrlo",
+    "thanks": "Gracias por confiar en nosotros",
     "stayInformed": "Mantente informado",
     "supportUs": "Apóyanos",
     "emailLabel": "Correo electrónico",

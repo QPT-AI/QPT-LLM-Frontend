@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "../components/ui/ThemeToggle";
 import LanguageSwitcher from "../components/ui/LanguageSwitcher";
+import LoginButton from "../components/ui/LoginButton";
 
 export default function Layout({ children }) {
   const { t } = useTranslation();
@@ -27,6 +28,7 @@ export default function Layout({ children }) {
         <div className="chrome-controls">
           <LanguageSwitcher />
           <ThemeToggle />
+          <LoginButton />
         </div>
       </header>
       <main className="app-main">{children}</main>
