@@ -1,4 +1,4 @@
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
@@ -8,11 +8,11 @@ const QUANTUM = "#5bad1e";
 const PULSE_COLOR = "#a855f7"; // purple - the traveling "sending" packet
 
 // ---- Tunables for the effects -----------------------------------------
-const GHOST_COUNT = 5; // number of trailing echo meshes per particle
-const TRAIL_SAMPLES = 48; // frames of position history retained per particle
+const GHOST_COUNT = 3; // number of trailing echo meshes per particle
+const TRAIL_SAMPLES = 32; // frames of position history retained per particle
 const GHOST_STEP = Math.floor(TRAIL_SAMPLES / (GHOST_COUNT + 1)); // spacing between ghosts in the buffer
-const GHOST_SCALE = [0.8, 0.65, 0.5, 0.38, 0.28]; // nearest -> farthest
-const GHOST_OPACITY = [0.42, 0.3, 0.2, 0.12, 0.07]; // nearest -> farthest
+const GHOST_SCALE = [0.8, 0.65, 0.5]; // nearest -> farthest
+const GHOST_OPACITY = [0.42, 0.3, 0.2]; // nearest -> farthest
 
 const CYCLE_LENGTH = 4.5; // seconds between teleport / reconnection events
 const PULSE_WINDOW = 1.0; // seconds the data-pulse travels along the rod before a swap
@@ -105,7 +105,20 @@ function EntangledPair() {
   const justSwappedRef = useRef(false);
   const primedRef = useRef(false);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = (e) => {
+      reducedMotion.current = e.matches;
+    };
+    reducedMotion.current = mq.matches;
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  const reducedMotion = useRef(false);
+
   useFrame((state, delta) => {
+    if (reducedMotion.current) return;
     const t = state.clock.elapsedTime;
     if (groupRef.current) groupRef.current.rotation.y += delta * 0.14;
 

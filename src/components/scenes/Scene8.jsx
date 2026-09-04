@@ -20,9 +20,8 @@ export default function Scene8() {
         <footer className="footer-strip">
           <span className="footer-thanks stroke-hair">{t("footer.thanks")}</span>
           <div className="footer-actions">
-            <EmailCapture />
             <button type="button" className="footer-btn primary">
-              {t("footer.supportUs")}
+              contact@qpt-ai.com
             </button>
           </div>
         </footer>

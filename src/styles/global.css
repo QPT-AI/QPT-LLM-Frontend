@@ -29,9 +29,9 @@
   --bg: #0b0d0e;
   --bg-alt: #131619;
   --bg-raise: #191d20;
-  --ink: #f5f6f4;
-  --ink-dim: rgba(245, 246, 244, 0.62);
-  --ink-faint: rgba(245, 246, 244, 0.34);
+  --ink: #ffffff;
+  --ink-dim: rgba(255, 255, 255, 0.62);
+  --ink-faint: rgba(255, 255, 255, 0.34);
   --outline: #ffffff;
   --outline-glow: rgba(255, 255, 255, 0.32);
   --hairline: rgba(255, 255, 255, 0.14);
@@ -43,9 +43,9 @@
   --bg: #f5f6f4;
   --bg-alt: #e9eae6;
   --bg-raise: #ffffff;
-  --ink: #101213;
-  --ink-dim: rgba(16, 18, 19, 0.64);
-  --ink-faint: rgba(16, 18, 19, 0.36);
+  --ink: #000000;
+  --ink-dim: rgba(0, 0, 0, 0.64);
+  --ink-faint: rgba(0, 0, 0, 0.36);
   --outline: #000000;
   --outline-glow: rgba(0, 0, 0, 0.22);
   --hairline: rgba(0, 0, 0, 0.14);
@@ -909,6 +909,30 @@ a {
   }
   .chrome-top {
     top: max(10px, env(safe-area-inset-top));
+  }
+}
+
+/* -----------------------------------------------------------
+   Scene 5 — extra-narrow phone & very small viewports
+   ----------------------------------------------------------- */
+
+@media (max-width: 360px) {
+  .split .scene-text {
+    padding: clamp(12px, 4vw, 20px);
+  }
+  .scene-text p {
+    font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+  }
+  .body-line {
+    font-size: clamp(0.65rem, 1.2vw, 0.85rem);
+  }
+  .legend span {
+    font-size: clamp(0.5rem, 0.7vw, 0.6rem);
+  }
+
+  /* Reduce particle density per row */
+  .instrument-frame {
+    padding: clamp(4px, 1vw, 10px) clamp(2px, 0.5vw, 6px);
   }
 }
 

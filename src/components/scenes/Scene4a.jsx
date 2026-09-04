@@ -261,7 +261,7 @@ function FormulaCard() {
         lineHeight: 1.5,
         pointerEvents: "none",
         userSelect: "none",
-        maxWidth: "280px",
+        maxWidth: "320px",
       }}
     >
       <div
@@ -275,31 +275,15 @@ function FormulaCard() {
           fontWeight: 600,
         }}
       >
-        Gibbs Entropy
+        Ising Energy
       </div>
-      <div style={{ fontSize: "17px", marginBottom: "4px" }}>
-        S = −k<sub>B</sub> Σ p<sub>i</sub> ln p<sub>i</sub>
-      </div>
-      <div style={{ fontSize: "14px", opacity: 0.85, marginBottom: "4px" }}>
-        For a single bit:
-      </div>
-      <div style={{ fontSize: "15px", opacity: 0.9 }}>
-        S = −k<sub>B</sub>[p ln p + (1−p)ln(1−p)]
-      </div>
-      <div
-        style={{
-          marginTop: "6px",
-          fontSize: "11px",
-          opacity: 0.45,
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        p = e<sup>−βE₁</sup> / (e<sup>−βE₀</sup> + e<sup>−βE₁</sup>)
+      <div style={{ fontSize: "17px" }}>
+        E(<b>s</b>) = − Σ<sub>i&lt;j</sub> J<sub>ij</sub> s<sub>i</sub> s<sub>j</sub>
+        &nbsp;−&nbsp; Σ<sub>i</sub> h<sub>i</sub> s<sub>i</sub>
       </div>
     </div>
   );
 }
-
 
 
 export default function Scene4({ active }) {
@@ -312,20 +296,23 @@ export default function Scene4({ active }) {
             <span className="eyebrow-dot" style={{ background: THERMO }} />
             {t("scene4.eyebrow")}
           </span>
-            <div style={{ margin: "10px 0 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "baseline", gap: "0.02em" }}>
-              <span className="letter-giant stroke-lg" style={{ color: THERMO, flexShrink: 0 }}>
-                T
-              </span>
-              <span className="letter-suffix stroke-sm" style={{ flexShrink: 0 }}>
-                hermodynamic
-              </span>
-            </div>
+          <div style={{ margin: "10px 0 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "baseline", gap: "0.02em" }}>
+            <span className="letter-giant stroke-lg" style={{ color: THERMO, flexShrink: 0 }}>
+              T
+            </span>
+            <span className="letter-suffix stroke-sm" style={{ flexShrink: 0 }}>
+              hermodynamic
+            </span>
+          </div>
           <p className="body-line" style={{ maxWidth: "38ch" }}>
             {t("scene4.description")}
           </p>
         </div>
         <div className="visual-pane">
-          <div className="instrument-frame">{active ? <Visual /> : null}</div>
+          <div className="instrument-frame" style={{ position: "relative" }}>
+            {active ? <Visual /> : null}
+            <FormulaCard />
+          </div>
         </div>
       </div>
     </div>
