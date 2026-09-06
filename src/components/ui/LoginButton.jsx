@@ -1,12 +1,16 @@
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { LOGIN_URL } from "../../config/constants";
+import { useAuth } from "../../context/AuthContext";
 
 export default function LoginButton() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) return null;
 
   return (
-    <a href={LOGIN_URL} className="login-btn">
+    <Link to="/login" className="login-btn">
       {t("nav.continue")}
-    </a>
+    </Link>
   );
 }

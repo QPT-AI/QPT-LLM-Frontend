@@ -11,6 +11,14 @@
     "monitor": "Monitor",
     "continue": "Continue"
   },
+  "login": {
+    "title": "Sign in to QPT",
+    "subtitle": "Authenticate to continue to the future of computing.",
+    "google": "Login with Google",
+    "processing": "Signing in…",
+    "error": "Sign-in failed. Please try again.",
+    "back": "Back to home"
+  },
   "chat": {
     "empty": "Start a conversation with QPT.",
     "placeholder": "Type your message…",
@@ -40,7 +48,12 @@
     "description": "Thermodynamic Natural optimization that harnesses thermal fluctuations to explore better solutions."
   },
   "scene5": {
-    "statement": "QPT — the first language model to combine the best of three types of computing to achieve greater efficiency and lower cost."
+    "statement": "QPT — the first language model to combine the best of three types of computing to achieve greater efficiency and lower cost.",
+    "detail": "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic.",
+    "quantum": "Quantum",
+    "photonic": "Photonic",
+    "thermodynamic": "Thermodynamic",
+    "classical": "Classical"
   },
   "scene6": {
     "eyebrow": "Model output",

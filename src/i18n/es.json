@@ -11,6 +11,14 @@
     "monitor": "Monitor",
     "continue": "Continuar"
   },
+  "login": {
+    "title": "Inicia sesión en QPT",
+    "subtitle": "Autentícate para continuar hacia el futuro de la computación.",
+    "google": "Iniciar sesión con Google",
+    "processing": "Iniciando sesión…",
+    "error": "Error al iniciar sesión. Inténtalo de nuevo.",
+    "back": "Volver al inicio"
+  },
   "chat": {
     "empty": "Inicia una conversación con QPT.",
     "placeholder": "Escribe tu mensaje…",
@@ -40,7 +48,12 @@
     "description": "Optimización natural termodinámica que aprovecha las fluctuaciones térmicas para explorar mejores soluciones."
   },
   "scene5": {
-    "statement": "QPT — el primer modelo de lenguaje que combina lo mejor de tres tipos de computación para lograr mayor eficiencia y menor costo."
+    "statement": "QPT — el primer modelo de lenguaje que combina lo mejor de tres tipos de computación para lograr mayor eficiencia y menor costo.",
+    "detail": "Cada componente del transformer se asigna al paradigma de computación que mejor expresa su matemática subyacente: clásica, cuántica, fotónica o termodinámica.",
+    "quantum": "Cuántica",
+    "photonic": "Fotónica",
+    "thermodynamic": "Termodinámica",
+    "classical": "Clásica"
   },
   "scene6": {
     "eyebrow": "Salida del modelo",
