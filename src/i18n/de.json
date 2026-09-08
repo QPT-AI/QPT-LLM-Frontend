@@ -52,7 +52,7 @@
     "detail": "Jede Transformer-Komponente wird dem Rechenparadigma zugeordnet, das ihre zugrundeliegende Mathematik am besten widerspiegelt – klassisch, Quanten-, photonisch oder thermodynamisch.",
     "quantum": "Quanten",
     "photonic": "Photonisch",
-    "thermodynamic": "Thermodynamisch",
+    "thermo": "Thermodynamisch",
     "classical": "Klassisch"
   },
   "scene6": {

@@ -10,7 +10,7 @@ const CLASSICAL = "#8a8a8a";
 const PARADIGM_META = {
   quantum:   { color: QUANTUM,   label: "Quantum",       glyph: "Q" },
   photonic:  { color: PHOTONIC,  label: "Photonic",      glyph: "P" },
-  thermo:    { color: THERMO,    label: "Thermodynamic", glyph: "T" },
+  thermodynamic:{ color: THERMO,    label: "Thermodynamic", glyph: "T" },
   classical: { color: CLASSICAL, label: "Classical",     glyph: "C" },
 };
 
@@ -21,12 +21,12 @@ const LAYERS = [
   { id: 2,  label: "Positional Encoding",    paradigm: "photonic"  },
   { id: 3,  label: "Attention Mechanism",    paradigm: "photonic"  },
   { id: 4,  label: "Feed-Forward Network",   paradigm: "photonic"  },
-  { id: 5,  label: "Normalization",          paradigm: "thermo"    },
+  { id: 5,  label: "Normalization",          paradigm: "thermodynamic"    },
   { id: 6,  label: "Residual Connections",   paradigm: "classical" },
   { id: 7,  label: "Transformer Blocks",     paradigm: "classical" },
   { id: 8,  label: "Output Projection",      paradigm: "quantum"   },
-  { id: 9,  label: "Softmax / Distribution", paradigm: "thermo"    },
-  { id: 10, label: "Sampling / Decoding",    paradigm: "thermo"    },
+  { id: 9,  label: "Softmax / Distribution", paradigm: "thermodynamic"    },
+  { id: 10, label: "Sampling / Decoding",    paradigm: "thermodynamic"    },
 ];
 
 // Animation timing
@@ -39,7 +39,7 @@ const LAYER_STAGGER_MS = SCAN_DURATION_MS / LAYERS.length;
 const PARTICLE_CONFIGS = {
   quantum:   { count: 6, shape: "circle", size: 3, speed: 1.4 },
   photonic:  { count: 8, shape: "line",   size: 4, speed: 2.2 },
-  thermo:    { count: 7, shape: "circle", size: 2, speed: 0.9 },
+  thermodynamic:    { count: 7, shape: "circle", size: 2, speed: 0.9 },
   classical: { count: 4, shape: "circle", size: 2, speed: 0.5 },
 };
 
