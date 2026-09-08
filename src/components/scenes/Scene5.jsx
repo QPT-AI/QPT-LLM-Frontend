@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // ── Brand palette (matches rest of app) ──────────────────────────────────────
@@ -8,200 +8,503 @@ const THERMO    = "#e8690a";
 const CLASSICAL = "#8a8a8a";
 
 const PARADIGM_META = {
-  quantum:   { color: QUANTUM,   label: "Quantum",       glyph: "Q" },
-  photonic:  { color: PHOTONIC,  label: "Photonic",      glyph: "P" },
-  thermodynamic:{ color: THERMO,    label: "Thermodynamic", glyph: "T" },
-  classical: { color: CLASSICAL, label: "Classical",     glyph: "C" },
+  quantum:       { color: QUANTUM,   label: "Quantum",       glyph: "Q" },
+  photonic:      { color: PHOTONIC,  label: "Photonic",      glyph: "P" },
+  thermodynamic: { color: THERMO,    label: "Thermodynamic", glyph: "T" },
+  classical:     { color: CLASSICAL, label: "Classical",     glyph: "C" },
 };
 
 // LLM pipeline with paradigm assignment
 const LAYERS = [
   { id: 0,  label: "Tokenizer",              paradigm: "classical" },
-  { id: 1,  label: "Token Embeddings",       paradigm: "quantum"   },
-  { id: 2,  label: "Positional Encoding",    paradigm: "photonic"  },
-  { id: 3,  label: "Attention Mechanism",    paradigm: "photonic"  },
-  { id: 4,  label: "Feed-Forward Network",   paradigm: "photonic"  },
-  { id: 5,  label: "Normalization",          paradigm: "thermodynamic"    },
+  { id: 1,  label: "Token Embeddings",       paradigm: "quantum" },
+  { id: 2,  label: "Positional Encoding",    paradigm: "photonic" },
+  { id: 3,  label: "Attention Mechanism",    paradigm: "photonic" },
+  { id: 4,  label: "Feed-Forward Network",   paradigm: "photonic" },
+  { id: 5,  label: "Normalization",          paradigm: "thermodynamic" },
   { id: 6,  label: "Residual Connections",   paradigm: "classical" },
   { id: 7,  label: "Transformer Blocks",     paradigm: "classical" },
-  { id: 8,  label: "Output Projection",      paradigm: "quantum"   },
-  { id: 9,  label: "Softmax / Distribution", paradigm: "thermodynamic"    },
-  { id: 10, label: "Sampling / Decoding",    paradigm: "thermodynamic"    },
+  { id: 8,  label: "Output Projection",      paradigm: "quantum" },
+  { id: 9,  label: "Softmax / Distribution", paradigm: "thermodynamic" },
+  { id: 10, label: "Sampling / Decoding",    paradigm: "thermodynamic" },
 ];
 
-// Animation timing
-const SCAN_DURATION_MS = 2800;
-const HOLD_MS          = 1800;
-const BETWEEN_CYCLE_MS = 900;
-const LAYER_STAGGER_MS = SCAN_DURATION_MS / LAYERS.length;
+// ── Sweep timeline (one full cycle) ──────────────────────────────────────────
+const INITIAL_DELAY_MS = 400;   // dark grace period before the first sweep
+const SCAN_DURATION_MS = 2800;  // Tokenizer → Sampling / Decoding
+const HOLD_MS          = 1600;  // all stages lit, beam parked on the last row
+const FADE_OUT_MS      = 420;   // beam + rows ease back to idle
+const RESTART_DELAY_MS = 480;   // dark pause before the next sweep
+const CYCLE_MS         = SCAN_DURATION_MS + HOLD_MS + FADE_OUT_MS + RESTART_DELAY_MS;
 
-// Particle config per paradigm
+const COLOR_EASE_MS = 90;       // paradigm → paradigm colour glide
+
+// ── Layout ───────────────────────────────────────────────────────────────────
+const COMPACT_BREAKPOINT = 560; // below: fixed rows + scroll-follow
+const COMPACT_ROW_H      = 34;
+const COMPACT_ROW_GAP    = 4;
+const MIN_ROW_H          = 24;
+const MAX_ROW_H          = 42;
+const ROW_GAP            = 3;
+const BEAM_H             = 2;   // scan-line core thickness
+const TRAIL_H            = 44;  // afterglow trailing above the beam
+
+// ── Particle config per paradigm ─────────────────────────────────────────────
 const PARTICLE_CONFIGS = {
-  quantum:   { count: 6, shape: "circle", size: 3, speed: 1.4 },
-  photonic:  { count: 8, shape: "line",   size: 4, speed: 2.2 },
-  thermodynamic:    { count: 7, shape: "circle", size: 2, speed: 0.9 },
-  classical: { count: 4, shape: "circle", size: 2, speed: 0.5 },
+  quantum:       { count: 6, shape: "circle", size: 3, speed: 1.4 },
+  photonic:      { count: 8, shape: "line",   size: 4, speed: 2.2 },
+  thermodynamic: { count: 7, shape: "circle", size: 2, speed: 0.9 },
+  classical:     { count: 4, shape: "circle", size: 2, speed: 0.5 },
 };
 
-// Breakpoint under which the diagram switches to scrollable compact mode
-const COMPACT_BREAKPOINT = 560;
-// Fixed comfortable row height in compact (scrollable) mode
-const COMPACT_ROW_H = 34;
+// ── Small utils ──────────────────────────────────────────────────────────────
+const clamp      = (v, min, max) => Math.max(min, Math.min(max, v));
+const smoothstep = (t) => t * t * (3 - 2 * t);
 
-// ── Scan animation hook ───────────────────────────────────────────────────────
+function hexToRgb(hex) {
+  const h = hex.replace("#", "");
+  return [
+    parseInt(h.slice(0, 2), 16),
+    parseInt(h.slice(2, 4), 16),
+    parseInt(h.slice(4, 6), 16),
+  ];
+}
 
-function useScanAnimation(active) {
-  const [revealed, setRevealed] = useState(-1);
-  const [phase, setPhase]       = useState("idle");
-  const timers = useRef([]);
+const PARADIGM_RGB = Object.fromEntries(
+  Object.entries(PARADIGM_META).map(([k, m]) => [k, hexToRgb(m.color)])
+);
 
+const rgba = (c, a) =>
+  `rgba(${Math.round(c[0])}, ${Math.round(c[1])}, ${Math.round(c[2])}, ${a})`;
+
+const lerpRgb = (a, b, t) => [
+  a[0] + (b[0] - a[0]) * t,
+  a[1] + (b[1] - a[1]) * t,
+  a[2] + (b[2] - a[2]) * t,
+];
+
+// Paradigm colour under a given y — blends across the gap between two rows.
+function paradigmColorAtY(y, metrics) {
+  if (!metrics.length) return PARADIGM_RGB.classical;
+  const first = metrics[0];
+  const last  = metrics[metrics.length - 1];
+  if (y <= first.top) return PARADIGM_RGB[first.paradigm];
+  if (y >= last.top + last.height) return PARADIGM_RGB[last.paradigm];
+  for (let i = 0; i < metrics.length; i++) {
+    const m = metrics[i];
+    if (y >= m.top && y < m.top + m.height) return PARADIGM_RGB[m.paradigm];
+  }
+  for (let i = 0; i < metrics.length - 1; i++) {
+    const a = metrics[i];
+    const b = metrics[i + 1];
+    const aEnd = a.top + a.height;
+    if (y >= aEnd && y < b.top) {
+      const t = (y - aEnd) / Math.max(1, b.top - aEnd);
+      return lerpRgb(PARADIGM_RGB[a.paradigm], PARADIGM_RGB[b.paradigm], t);
+    }
+  }
+  return PARADIGM_RGB[last.paradigm];
+}
+
+// ── Motion preference (live-updating) ────────────────────────────────────────
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
   useEffect(() => {
-    if (!active) { setRevealed(-1); setPhase("idle"); return; }
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = (e) => setReduced(e.matches);
+    setReduced(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reducedMotion) {
+// ── Sweep engine ─────────────────────────────────────────────────────────────
+// One rAF clock drives the beam, the row reveals, the paradigm colour and the
+// status readout. Reveals are *derived from the beam position* (a row flips the
+// moment the beam crosses its vertical centre), so they can never drift.
+// Per-frame visuals are written imperatively (transform/opacity) — React only
+// re-renders when a row flips or the phase changes (~15 times per cycle).
+
+function useScanAnimation({ active, containerRef, rowRefs, compact }) {
+  const [revealed, setRevealed] = useState(-1);    // highest revealed layer index
+  const [phase, setPhase]       = useState("idle"); // idle|waiting|scanning|holding|fading
+  const beamRef   = useRef(null);
+  const trailRef  = useRef(null);
+  const metricsRef = useRef([]);                   // measured row geometry
+  const compactRef = useRef(compact);
+  const reduced = usePrefersReducedMotion();
+
+  useEffect(() => { compactRef.current = compact; }, [compact]);
+
+  // Real geometry of the rendered rows (offsets already include the gaps).
+  const measure = useCallback(() => {
+    const els = rowRefs.current;
+    if (els.length !== LAYERS.length || els.some((el) => !el)) return;
+    metricsRef.current = els.map((el, i) => ({
+      top:       el.offsetTop,
+      height:    el.offsetHeight,
+      paradigm:  LAYERS[i].paradigm,
+    }));
+  }, [rowRefs]);
+
+  // Keep geometry fresh: resize, font swap, compact switch, row re-sizing.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    measure();
+    if (typeof ResizeObserver === "undefined") {
+      const onResize = () => measure();
+      window.addEventListener("resize", onResize, { passive: true });
+      return () => window.removeEventListener("resize", onResize);
+    }
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [containerRef, measure]);
+
+  // The sweep loop.
+  useEffect(() => {
+    const hideBeam = () => {
+      const b = beamRef.current;
+      if (b) b.style.opacity = "0";
+    };
+
+    if (!active) {
       setPhase("idle");
+      setRevealed(-1);
+      hideBeam();
       return;
     }
 
-    function clearTimers() { timers.current.forEach(clearTimeout); timers.current = []; }
-
-    function runCycle() {
-      setPhase("scanning");
-      setRevealed(-1);
-      LAYERS.forEach((_, i) => {
-        const t = setTimeout(() => setRevealed(i), LAYER_STAGGER_MS * i + 320);
-        timers.current.push(t);
-      });
-      const holdT = setTimeout(() => {
-        setPhase("holding");
-        const restartT = setTimeout(() => { clearTimers(); runCycle(); }, HOLD_MS);
-        timers.current.push(restartT);
-      }, SCAN_DURATION_MS + BETWEEN_CYCLE_MS);
-      timers.current.push(holdT);
+    if (reduced) {
+      // Static, fully-revealed pipeline — no motion at all.
+      setPhase("idle");
+      setRevealed(LAYERS.length - 1);
+      hideBeam();
+      return;
     }
 
-    const initT = setTimeout(runCycle, 400);
-    timers.current.push(initT);
-    return clearTimers;
-  }, [active]);
+    const container = containerRef.current;
+    let raf = 0;
+    let running = true;
+    let cycleStart = null;
+    let lastNow = 0;
+    let currentColor = PARADIGM_RGB[LAYERS[0].paradigm].slice();
+    let colorSnapped = false;
+    let userScrolled = false;   // user owns the scroll until the next cycle
+    let lastReveal = -2;
+    let lastPhase  = "";
 
-  return { revealed, phase };
-}
+    const markUserScroll = () => { userScrolled = true; };
+    const scrollEvents = ["pointerdown", "wheel", "touchstart"];
+    scrollEvents.forEach((ev) =>
+      container?.addEventListener(ev, markUserScroll, { passive: true })
+    );
 
-// ── Particle canvas ───────────────────────────────────────────────────────────
+    const frame = (now) => {
+      if (!running) return;
 
-function ParticleField({ paradigm, width, height, seed }) {
-  const canvasRef = useRef(null);
-  const reducedMotion = useRef(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const cfg   = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
-  const color = PARADIGM_META[paradigm].color;
+      if (cycleStart === null) { cycleStart = now + INITIAL_DELAY_MS; lastNow = now; }
+      const dt = clamp(now - lastNow, 0, 64);
+      lastNow = now;
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = (e) => { reducedMotion.current = e.matches; };
-    mq.addEventListener("change", handleChange);
-    reducedMotion.current = mq.matches;
+      let metrics = metricsRef.current;
+      if (metrics.length !== LAYERS.length) { measure(); metrics = metricsRef.current; }
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width  = width  * dpr;
-    canvas.height = height * dpr;
-    ctx.scale(dpr, dpr);
+      if (metrics.length === LAYERS.length) {
+        let t = now - cycleStart;
 
-    const rng = (n) => Math.abs(Math.sin(seed * 9301 + n * 49297 + n) % 1);
-    const particles = Array.from({ length: cfg.count }, (_, i) => ({
-      x:     rng(i * 3)     * width,
-      y:     rng(i * 3 + 1) * height,
-      vx:    (rng(i * 3 + 2) - 0.5) * cfg.speed,
-      vy:    (rng(i * 7 + 1) - 0.5) * cfg.speed,
-      phase: rng(i * 11)    * Math.PI * 2,
-    }));
+        if (t >= CYCLE_MS) {
+          // New cycle: re-read geometry (fonts/layout may have shifted).
+          cycleStart = now;
+          t = 0;
+          userScrolled = false;
+          colorSnapped = false;
+          measure();
+          metrics = metricsRef.current;
+        }
 
-    let raf;
-    function draw() {
-      if (reducedMotion.current) {
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = color;
-        return;
-      }
-      ctx.clearRect(0, 0, width, height);
-      const t = Date.now() / 1000;
-      ctx.globalAlpha = 0.25 + 0.35 * Math.sin(t * 2.1);
-      ctx.fillStyle = color;
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-        if (p.x < 0 || p.x > width)  p.vx *= -1;
-        if (p.y < 0 || p.y > height) p.vy *= -1;
-        if (cfg.shape === "line") {
-          ctx.strokeStyle = color;
-          ctx.lineWidth   = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(p.x - 4, p.y);
-          ctx.lineTo(p.x + 4, p.y);
-          ctx.stroke();
-        } else {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, cfg.size, 0, Math.PI * 2);
-          ctx.fill();
+        // Beam path = exactly the layer stack: top of row 0 → bottom of last row.
+        const firstTop    = metrics[0].top;
+        const lastBottom  = metrics[metrics.length - 1].top + metrics[metrics.length - 1].height;
+        const span        = Math.max(1, lastBottom - firstTop);
+
+        let y = firstTop;
+        let opacity = 0;
+        let revealCount = 0;
+        let phaseNow = "waiting";
+
+        if (t < 0) {
+          // Pre-sweep grace period — dark.
+        } else if (t < SCAN_DURATION_MS) {
+          phaseNow = "scanning";
+          y = firstTop + smoothstep(t / SCAN_DURATION_MS) * span;
+          opacity = Math.min(1, t / 160);
+          // A row reveals the instant the beam crosses its centre.
+          for (let i = 0; i < metrics.length; i++) {
+            if (y >= metrics[i].top + metrics[i].height / 2) revealCount = i + 1;
+          }
+        } else if (t < SCAN_DURATION_MS + HOLD_MS) {
+          phaseNow = "holding";
+          y = lastBottom;
+          opacity = 0.4;
+          revealCount = metrics.length;
+        } else if (t < SCAN_DURATION_MS + HOLD_MS + FADE_OUT_MS) {
+          phaseNow = "fading";
+          y = lastBottom;
+          opacity = 0.4 * (1 - (t - SCAN_DURATION_MS - HOLD_MS) / FADE_OUT_MS);
+        }
+        // else: "waiting" — dark pause before the next sweep (defaults cover it).
+
+        // Discrete React state — only when it actually changes.
+        if (revealCount - 1 !== lastReveal) { lastReveal = revealCount - 1; setRevealed(lastReveal); }
+        if (phaseNow !== lastPhase)         { lastPhase = phaseNow; setPhase(phaseNow); }
+
+        // Paradigm colour under the beam, eased between stages
+        // (frame-rate independent exponential smoothing).
+        const target = paradigmColorAtY(y, metrics);
+        if (!colorSnapped) { currentColor = target.slice(); colorSnapped = true; }
+        else currentColor = lerpRgb(currentColor, target, 1 - Math.exp(-dt / COLOR_EASE_MS));
+
+        // Paint the beam imperatively — compositor-friendly, zero re-renders.
+        const beam = beamRef.current;
+        if (beam) {
+          beam.style.transform = `translate3d(0, ${(y - BEAM_H / 2).toFixed(1)}px, 0)`;
+          beam.style.opacity = opacity.toFixed(3);
+          beam.style.background =
+            `linear-gradient(90deg, transparent 0%, ${rgba(currentColor, 0.12)} 14%, ${rgba(currentColor, 0.95)} 50%, ${rgba(currentColor, 0.12)} 86%, transparent 100%)`;
+          // Glow reads on dark themes; the faint dark micro-shadow (last value)
+          // only matters on light themes — no theme detection needed.
+          beam.style.boxShadow =
+            `0 0 12px 2px ${rgba(currentColor, 0.32)}, 0 0 3px 1px ${rgba(currentColor, 0.6)}, 0 1px 3px rgba(0, 0, 0, 0.2)`;
+        }
+        const trail = trailRef.current;
+        if (trail) {
+          trail.style.background =
+            `linear-gradient(180deg, transparent 0%, ${rgba(currentColor, 0.09)} 100%)`;
+        }
+
+        // Compact mode: the scroller follows the beam; user touch/wheel
+        // takes over the scroll until the next cycle begins.
+        if (container && compactRef.current) {
+          const maxScroll = container.scrollHeight - container.clientHeight;
+          if (maxScroll > 2 && !userScrolled) {
+            if (phaseNow === "scanning" || phaseNow === "holding") {
+              const targetScroll = clamp(y - container.clientHeight * 0.42, 0, maxScroll);
+              container.scrollTop += (targetScroll - container.scrollTop) * (1 - Math.exp(-dt / 140));
+            } else {
+              container.scrollTop *= Math.exp(-dt / 160);
+              if (container.scrollTop < 0.5) container.scrollTop = 0;
+            }
+          }
         }
       }
-      ctx.globalAlpha = 1;
-      raf = requestAnimationFrame(draw);
-    }
-    draw();
-    return () => {
-      mq.removeEventListener("change", handleChange);
-      cancelAnimationFrame(raf);
-    };
-  }, [paradigm, width, height, seed, cfg, color]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}
-    />
-  );
+      raf = requestAnimationFrame(frame);
+    };
+
+    raf = requestAnimationFrame(frame);
+
+    return () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      scrollEvents.forEach((ev) =>
+        container?.removeEventListener(ev, markUserScroll)
+      );
+    };
+  }, [active, reduced, containerRef, measure]);
+
+  return { revealed, phase, beamRef, trailRef };
 }
 
-// ── Scanner sweep line ────────────────────────────────────────────────────────
-// Color derives from --ink, which the app already flips per theme:
-// light ink on dark backgrounds, dark ink on light backgrounds.
-// No theme detection needed — it always contrasts.
+// ── Scan beam (purely imperative target — driven by the engine above) ────────
+// Lives INSIDE the scrollable layer stack, so in compact mode it scrolls
+// with the rows and is followed by the auto-scroll.
 
-function ScanLine({ phase }) {
-  const lineRef = useRef(null);
-
-  useEffect(() => {
-    if (phase !== "scanning") return;
-    const el = lineRef.current;
-    if (!el) return;
-    el.style.transition = "none";
-    el.style.top = "0%";
-    void el.offsetHeight;
-    el.style.transition = `top ${SCAN_DURATION_MS}ms cubic-bezier(0.4,0,0.6,1)`;
-    el.style.top = "100%";
-  }, [phase]);
-
-  if (phase === "idle") return null;
+function ScanLine({ beamRef, trailRef }) {
   return (
     <div
-      ref={lineRef}
+      ref={beamRef}
+      aria-hidden="true"
       style={{
         position: "absolute",
         left: 0,
         right: 0,
-        top: "0%",
-        height: 2,
-        background:
-          "linear-gradient(90deg, transparent 0%, rgba(var(--ink), 0.45) 20%, rgba(var(--ink), 0.9) 50%, rgba(var(--ink), 0.45) 80%, transparent 100%)",
+        top: 0,
+        height: BEAM_H,
+        opacity: 0,
+        transform: "translate3d(0, -6px, 0)",
         zIndex: 20,
         pointerEvents: "none",
-        boxShadow: "0 0 16px 6px rgba(var(--ink), 0.18)",
+        willChange: "transform, opacity",
       }}
+    >
+      {/* Afterglow trailing above the beam */}
+      <div
+        ref={trailRef}
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: "100%",
+          height: TRAIL_H,
+          pointerEvents: "none",
+        }}
+      />
+    </div>
+  );
+}
+
+// ── Instrument status strip (always in sync with the beam) ───────────────────
+
+function StatusStrip({ phase, revealed }) {
+  const { t } = useTranslation();
+  const total   = LAYERS.length;
+  const current = revealed >= 0 && revealed < total ? LAYERS[revealed] : null;
+  const meta    = current ? PARADIGM_META[current.paradigm] : null;
+  const nn      = String(clamp(revealed + 1, 1, total)).padStart(2, "0");
+  const showChip = meta && (phase === "scanning" || phase === "holding");
+
+  const status =
+    phase === "scanning" ? `${t("scene5.status.sweep", "SWEEP")} ${nn}/${String(total).padStart(2, "0")}`
+    : phase === "holding" ? t("scene5.status.complete", "SWEEP COMPLETE")
+    : phase === "fading"  ? t("scene5.status.reset", "RESET")
+    : t("scene5.status.standby", "PIPELINE STANDBY");
+
+  return (
+    <div style={{
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+      padding: "0 clamp(2px, 0.6vw, 6px) clamp(5px, 0.8vw, 8px)",
+      borderBottom: "1px solid rgba(var(--ink), 0.10)",
+      fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+      fontSize: "clamp(0.54rem, 0.8vw, 0.66rem)",
+      letterSpacing: "0.14em",
+      textTransform: "uppercase",
+      color: "rgba(var(--ink), 0.55)",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+    }}>
+      <span style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+        <span
+          className={phase === "scanning" ? "scene5-pulse" : undefined}
+          style={{
+            width: 5, height: 5, borderRadius: "50%", flexShrink: 0,
+            background: meta ? meta.color : "rgba(var(--ink), 0.4)",
+            boxShadow: meta ? `0 0 6px ${meta.color}88` : "none",
+          }}
+        />
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{status}</span>
+      </span>
+
+      {showChip ? (
+        <span style={{
+          display: "flex", alignItems: "center", gap: 6,
+          color: meta.color, opacity: 0.85, flexShrink: 0,
+        }}>
+          <span style={{
+            width: 4, height: 4, borderRadius: "50%",
+            background: meta.color, boxShadow: `0 0 6px ${meta.color}80`,
+          }} />
+          {t(`scene5.${current.paradigm}`, meta.label)}
+        </span>
+      ) : (
+        <span style={{ flexShrink: 0, opacity: 0.7 }}>
+          {String(total).padStart(2, "0")} {t("scene5.status.stages", "STAGES")}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ── Particle canvas ──────────────────────────────────────────────────────────
+
+function ParticleField({ paradigm, width, height, seed }) {
+  const canvasRef = useRef(null);
+  const reduced = usePrefersReducedMotion();
+  const cfg   = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
+  const color = PARADIGM_META[paradigm].color;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width  = Math.max(1, Math.floor(width  * dpr));
+    canvas.height = Math.max(1, Math.floor(height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const rng = (n) => Math.abs(Math.sin(seed * 9301 + n * 49297 + n) % 1);
+    const particles = Array.from({ length: cfg.count }, (_, i) => ({
+      x:  rng(i * 3)     * width,
+      y:  rng(i * 3 + 1) * height,
+      vx: (rng(i * 3 + 2) - 0.5) * cfg.speed,
+      vy: (rng(i * 7 + 1) - 0.5) * cfg.speed,
+    }));
+
+    const drawParticle = (p, alpha) => {
+      ctx.globalAlpha = alpha;
+      if (cfg.shape === "line") {
+        // Photonic streaks point along their direction of travel.
+        const ang = Math.atan2(p.vy, p.vx);
+        const len = cfg.size;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(p.x - Math.cos(ang) * len, p.y - Math.sin(ang) * len);
+        ctx.lineTo(p.x + Math.cos(ang) * len, p.y + Math.sin(ang) * len);
+        ctx.stroke();
+      } else {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, cfg.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // Reduced motion: one static frame, no loop.
+    if (reduced) {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach((p, i) => drawParticle(p, 0.2 + 0.08 * (i % 3)));
+      ctx.globalAlpha = 1;
+      return;
+    }
+
+    let raf = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+      const t = Date.now() / 1000;
+      const alpha = clamp(0.25 + 0.35 * Math.sin(t * 2.1), 0.08, 0.6);
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > width)  { p.vx *= -1; p.x = clamp(p.x, 0, width); }
+        if (p.y < 0 || p.y > height) { p.vy *= -1; p.y = clamp(p.y, 0, height); }
+        drawParticle(p, alpha);
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(raf);
+  }, [paradigm, width, height, seed, cfg, color, reduced]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{ position: "absolute", top: 0, left: 0, width, height, pointerEvents: "none" }}
     />
   );
 }
@@ -236,12 +539,16 @@ function Legend() {
 
 // ── Single pipeline row ───────────────────────────────────────────────────────
 
-function LayerRow({ layer, isRevealed, rowH, particleW, compact }) {
+function LayerRow({ layer, isRevealed, rowH, particleW, compact, rowRef }) {
   const { color, glyph } = PARADIGM_META[layer.paradigm];
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center", height: rowH, flexShrink: 0 }}>
-
+    <div
+      ref={rowRef}
+      role="listitem"
+      className="scene5-row"
+      style={{ position: "relative", display: "flex", alignItems: "center", height: rowH, flexShrink: 0 }}
+    >
       {/* Glyph badge — flush left, vertically centered, never clipped */}
       <div style={{
         flexShrink: 0,
@@ -358,49 +665,66 @@ function ParadigmTag({ paradigm }) {
 
 export default function Scene5({ active }) {
   const { t } = useTranslation();
-  const { revealed, phase } = useScanAnimation(active);
 
-  // Measure container for particle canvases + compact mode
   const containerRef = useRef(null);
-  const rafRef = useRef(null);
+  const rowRefs      = useRef([]);   // filled by LayerRow ref callbacks
+
   const [particleW, setParticleW] = useState(300);
   const [rowH, setRowH]           = useState(34);
   const [compact, setCompact]     = useState(false);
 
+  const { revealed, phase, beamRef, trailRef } = useScanAnimation({
+    active,
+    containerRef,
+    rowRefs,
+    compact,
+  });
+
+  // Responsive sizing via ResizeObserver (container-driven, not window-driven).
   useEffect(() => {
-    const measure = () => {
-      const el = containerRef.current;
-      if (!el) return;
+    const el = containerRef.current;
+    if (!el) return;
+
+    const measurePane = () => {
       const { width, height } = el.getBoundingClientRect();
       const isCompact = width < COMPACT_BREAKPOINT;
       setCompact(isCompact);
       setParticleW(Math.max(80, Math.floor(width * 0.72)));
-      // Compact mode: fixed comfortable row height — the container scrolls
-      // instead of squeezing. Desktop: fit rows to available height.
+      // Compact: fixed comfortable row height — the container scrolls.
+      // Desktop: fit rows to the available height.
       setRowH(
         isCompact
           ? COMPACT_ROW_H
-          : Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3))
+          : clamp(
+              Math.floor((height - 12) / LAYERS.length) - ROW_GAP,
+              MIN_ROW_H,
+              MAX_ROW_H
+            )
       );
     };
-    const handleResize = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(measure);
-    };
-    measure();
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
+
+    measurePane();
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(measurePane);
+      ro.observe(el);
+      return () => ro.disconnect();
+    }
+    const onResize = () => measurePane();
+    window.addEventListener("resize", onResize, { passive: true });
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   return (
     <div className="scene-inner">
-      {/* Hide scrollbar only on the mobile scrollable diagram */}
       <style>{`
         .scene5-scroll { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .scene5-scroll::-webkit-scrollbar { display: none; }
+        @keyframes scene5-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+        .scene5-pulse { animation: scene5-pulse 1.1s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .scene5-pulse { animation: none; }
+          .scene5-row, .scene5-row * { transition: none !important; }
+        }
       `}</style>
 
       {/* Ambient blobs */}
@@ -443,32 +767,37 @@ export default function Scene5({ active }) {
         </div>
 
         {/* ── Diagram side ───────────────────────────────────────────────── */}
-        <div className="visual-pane">
+        <div className="visual-pane" style={{ minWidth: 0 }}>
           <div
             className="instrument-frame"
-            style={{ padding: "clamp(8px,1.6vw,18px) clamp(4px,0.9vw,12px)" }}
+            style={{
+              padding: "clamp(8px,1.6vw,18px) clamp(4px,0.9vw,12px)",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
+            <StatusStrip phase={phase} revealed={revealed} />
+
             <div
               ref={containerRef}
+              role="list"
+              aria-label={t("scene5.aria.pipeline", "Model pipeline stages")}
               className={compact ? "scene5-scroll" : undefined}
               style={{
                 position: "relative",
-                width: "100%",
-                height: "100%",
-                minHeight: 320,
+                flex: "1 1 auto",
+                minHeight: 300,
                 display: "flex",
                 flexDirection: "column",
-                gap: compact ? 4 : 3,
-                // Mobile: scroll over the animation instead of squeezing rows
+                gap: compact ? COMPACT_ROW_GAP : ROW_GAP,
                 justifyContent: compact ? "flex-start" : "center",
-                overflowY: compact ? "auto" : "visible",
+                marginTop: "clamp(4px, 0.8vw, 8px)",
+                overflowY: compact ? "auto" : "hidden",
                 overflowX: "hidden",
                 paddingRight: compact ? 2 : 0,
               }}
             >
-              <ScanLine phase={phase} />
-
-              {LAYERS.map((layer) => (
+              {LAYERS.map((layer, i) => (
                 <LayerRow
                   key={layer.id}
                   layer={layer}
@@ -476,8 +805,12 @@ export default function Scene5({ active }) {
                   rowH={rowH}
                   particleW={particleW}
                   compact={compact}
+                  rowRef={(el) => { rowRefs.current[i] = el; }}
                 />
               ))}
+
+              {/* Scan beam — inside the layer stack, scrolls with it */}
+              <ScanLine beamRef={beamRef} trailRef={trailRef} />
             </div>
           </div>
         </div>
