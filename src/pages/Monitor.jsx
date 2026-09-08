@@ -5,7 +5,7 @@ export default function Monitor() {
   const { t } = useTranslation();
 
   return (
-    <Layout>
+    <Layout minimal>
       <section className="monitor-page">
         <h1 className="monitor-title">{t("monitor.title")}</h1>
         <div className="monitor-grid">

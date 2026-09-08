@@ -78,5 +78,121 @@
     "emailPlaceholder": "tucorreo@email.com",
     "emailError": "Algo salió mal — inténtalo de nuevo",
     "submit": "Enviar"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "Cuántica · Fotónica · Termodinámica — Una Computadora",
+      "uvp": "Mientras algunos apuestan por construir el mejor <em>componente individual</em> para su computadora, nosotros apostamos por el <em>trabajo colaborativo</em> — unir todas estas piezas para crear la mejor computadora posible.",
+      "stats": {
+        "paradigmsProd": "paradigmas en producción",
+        "paradigmsRoadmap": "paradigmas en la hoja de ruta",
+        "phases": "fases hacia la propiedad integral del stack"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · Análisis de Mercado",
+      "title": "En la intersección de todas las olas de financiación.",
+      "lead": "QPT se sitúa en la convergencia de cinco de las corrientes de capital y subvenciones más fuertes de la tecnología actual. Cada ola financia una parte de la pila; QPT es la única posición que califica para todas a la vez.",
+      "legend": {
+        "quantum": "Cuántica",
+        "ai": "IA",
+        "sustainable": "Sostenible",
+        "research": "Investigación",
+        "openSource": "Código abierto",
+        "quantumDesc": "becas y programas de computación cuántica",
+        "aiDesc": "financiación de modelos fundacionales y LLM",
+        "sustainableDesc": "iniciativas de eficiencia energética",
+        "researchDesc": "programas de computación científica",
+        "openSourceDesc": "soporte de infraestructura abierta"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · Oficiales Clave y Equipo",
+      "title": "Construido por personas que abarcan cada paradigma.",
+      "ceo": {
+        "role": "Director Ejecutivo",
+        "desc": "Define la tesis colaborativa: ningún componente gana solo — la unión de paradigmas sí."
+      },
+      "ctoMulti": {
+        "role": "CTO Multi-Paradigma",
+        "desc": "Arquitectura la estrategia de intercambio de capas cuánticas, fotónicas y termodinámicas en toda la pila."
+      },
+      "ctoAi": {
+        "role": "CTO de LLM e IA",
+        "desc": "Lidera los programas de modelos de lenguaje autorregresivos y de difusión y los pipelines de entrenamiento híbridos."
+      },
+      "legal": {
+        "role": "Gerente Legal y Administrativo",
+        "desc": "Gestiona el posicionamiento en subvenciones, el cumplimiento y las operaciones en cinco ecosistemas de financiación."
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · Hoja de Ruta — Diez Fases",
+      "title": "De la simulación al hardware propio.",
+      "p1": {
+        "title": "LM autorregresivo y de difusión semiprofesional",
+        "desc": "Construimos nuestros propios modelos de lenguaje de base — tanto autorregresivos como de difusión — como sustrato contra el que se entrena cada fase posterior."
+      },
+      "p2": {
+        "title": "LM de otros paradigmas por simulación, ×3",
+        "desc": "Simular cómputo cuántico, fotónico y termodinámico y entrenar LM nativos de cada paradigma — antes de tocar hardware real."
+      },
+      "p3": {
+        "title": "Mezcla híbrida — paradigma por capa",
+        "desc": "Mezclar cómputo cuántico, fotónico y termodinámico dentro de cada capa del modelo — la tesis central de QPT en código."
+      },
+      "p4": {
+        "title": "Mejorar el rendimiento autorregresivo y de difusión",
+        "desc": "Realimentar todo lo aprendido en los modelos base: LM autorregresivos y de difusión más rápidos, más baratos y mejores."
+      },
+      "p5": {
+        "title": "Crear nuestros propios algoritmos híbridos",
+        "desc": "Dejar de tomar prestado y empezar a inventar: algoritmos híbridos propietarios que explotan nativamente el hardware de paradigma mixto."
+      },
+      "p6": {
+        "title": "Entrenar con algoritmos híbridos + simulación",
+        "desc": "Primeros entrenamientos completos impulsados enteramente por nuestros algoritmos híbridos, validados con simulación a escala."
+      },
+      "p7": {
+        "title": "Entrenar en hardware de paradigma alquilado",
+        "desc": "Pasar de la simulación a hardware cuántico, fotónico y termodinámico alquilado real para entrenamientos en vivo."
+      },
+      "p8": {
+        "title": "Comprar nuestro propio hardware de paradigma y entrenar",
+        "desc": "Ser dueños del sustrato: adquirir máquinas cuánticas, fotónicas y termodinámicas y entrenar los modelos en nuestra propia flota."
+      },
+      "p9": {
+        "title": "Expandirse hacia nuevos horizontes",
+        "desc": "Ir más allá de los tres paradigmas originales y seguir creando algoritmos híbridos propios para los sustratos que vengan."
+      },
+      "p10": {
+        "title": "Ser dueños de las computadoras biológica y ternaria",
+        "desc": "Adquirir una computadora biológica (redes neuronales naturales) y la computadora de trits (ternaria) de Huawei — y entrenar los modelos en ambas."
+      },
+      "spectrum": "Todos los paradigmas considerados juntos"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "Cuántica",
+      "photonic": "Fotónica",
+      "thermic": "Térmica",
+      "hybrid": "Híbrido",
+      "simulation": "Simulación",
+      "bio": "Bio",
+      "ternary": "Ternario"
+    },
+    "goal": {
+      "eyebrow": "04 · El Objetivo",
+      "title": "Maximizar la <acc>eficiencia</acc> — intercambiando capas hasta encontrar la combinación perfecta de paradigmas.",
+      "cost": { "v": "↓ Costo", "k": "Economía del cómputo" },
+      "quality": { "v": "↑ Calidad", "k": "Salida del modelo" },
+      "time": { "v": "↓ Tiempo", "k": "Velocidad de entrenamiento e inferencia" },
+      "energy": { "v": "↓ Energía", "k": "Vatios por token" },
+      "lead": "El objetivo es maximizar la eficiencia de un modelo de lenguaje en cuatro ejes — costo, calidad, tiempo y consumo de energía — intercambiando cada capa para encontrar la combinación perfecta de paradigmas."
+    },
+    "footer": {
+      "brand": "QPT — COMPUTACIÓN MULTI-PARADIGMA",
+      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+    }
   }
 }

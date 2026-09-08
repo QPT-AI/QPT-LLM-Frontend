@@ -78,5 +78,121 @@
     "emailPlaceholder": "you@email.com",
     "emailError": "Something went wrong — try again",
     "submit": "Submit"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "Quantum · Photonic · Thermodynamic — One Computer",
+      "uvp": "While some bet on building the best <em>single component</em> for their computer, we bet on <em>collaborative work</em> — coming together to unite all these pieces and make the best possible computer.",
+      "stats": {
+        "paradigmsProd": "paradigms in production",
+        "paradigmsRoadmap": "paradigms on the roadmap",
+        "phases": "phases to full-stack ownership"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · Market Analysis",
+      "title": "At the intersection of every funding wave.",
+      "lead": "QPT sits at the convergence of five of the strongest capital and grant currents in technology today. Each wave funds a piece of the stack; QPT is the only position that qualifies for all of them at once.",
+      "legend": {
+        "quantum": "Quantum",
+        "ai": "AI",
+        "sustainable": "Sustainable",
+        "research": "Research",
+        "openSource": "Open source",
+        "quantumDesc": "quantum computing grants & programs",
+        "aiDesc": "foundation-model & LLM funding",
+        "sustainableDesc": "energy-efficiency initiatives",
+        "researchDesc": "scientific computing programs",
+        "openSourceDesc": "open-infrastructure support"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · Key Officers & Team",
+      "title": "Built by people who span every paradigm.",
+      "ceo": {
+        "role": "Chief Executive Officer",
+        "desc": "Sets the collaborative thesis: no single component wins alone — the union of paradigms does."
+      },
+      "ctoMulti": {
+        "role": "Multi-Paradigm CTO",
+        "desc": "Architects the quantum, photonic, and thermodynamic layer-swapping strategy across the stack."
+      },
+      "ctoAi": {
+        "role": "LLM & AI CTO",
+        "desc": "Leads the autoregressive and diffusion language-model programs and hybrid training pipelines."
+      },
+      "legal": {
+        "role": "Legal & Administrative Manager",
+        "desc": "Owns grant positioning, compliance, and operations across five funding ecosystems."
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · Roadmap — Ten Phases",
+      "title": "From simulation to owned hardware.",
+      "p1": {
+        "title": "Semi-professional autoregressive & diffusion LM",
+        "desc": "Build our own baseline language models — both the autoregressive and the diffusion families — as the substrate every later phase trains against."
+      },
+      "p2": {
+        "title": "Other-paradigm LMs by simulation, ×3",
+        "desc": "Simulate quantum, photonic, and thermodynamic compute and train paradigm-native LMs on each — before touching real hardware."
+      },
+      "p3": {
+        "title": "Hybrid mixing — paradigm per layer",
+        "desc": "Mix quantum, photonic, and thermodynamic computation inside each layer of the model — the core QPT thesis in code."
+      },
+      "p4": {
+        "title": "Improve autoregressive & diffusion performance",
+        "desc": "Feed everything learned back into the baseline models: faster, cheaper, better autoregressive and diffusion LMs."
+      },
+      "p5": {
+        "title": "Produce our own hybrid algorithms",
+        "desc": "Stop borrowing and start inventing: proprietary hybrid algorithms that natively exploit mixed-paradigm hardware."
+      },
+      "p6": {
+        "title": "Train with hybrid algorithms + simulation",
+        "desc": "First full training runs driven entirely by our own hybrid algorithms, validated in simulation at scale."
+      },
+      "p7": {
+        "title": "Train on rented paradigm hardware",
+        "desc": "Move from simulation to real rented quantum, photonic, and thermodynamic hardware for live training runs."
+      },
+      "p8": {
+        "title": "Buy our own paradigm hardware & train",
+        "desc": "Own the substrate: acquire quantum, photonic, and thermodynamic machines and train the models on our own fleet."
+      },
+      "p9": {
+        "title": "Expand to new horizons",
+        "desc": "Push past the original three paradigms and keep producing our own hybrid algorithms for the substrates that follow."
+      },
+      "p10": {
+        "title": "Own biological & ternary computers",
+        "desc": "Acquire a biological computer (natural neural networks) and Huawei's trits (ternary) computer — and train the models on both."
+      },
+      "spectrum": "All paradigms considered together"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "Quantum",
+      "photonic": "Photonic",
+      "thermic": "Thermic",
+      "hybrid": "Hybrid",
+      "simulation": "Simulation",
+      "bio": "Bio",
+      "ternary": "Ternary"
+    },
+    "goal": {
+      "eyebrow": "04 · The Goal",
+      "title": "Maximize <acc>efficiency</acc> — by swapping layers until we find the perfect paradigm combination.",
+      "cost": { "v": "↓ Cost", "k": "Compute economics" },
+      "quality": { "v": "↑ Quality", "k": "Model output" },
+      "time": { "v": "↓ Time", "k": "Training & inference speed" },
+      "energy": { "v": "↓ Energy", "k": "Watts per token" },
+      "lead": "The objective is to maximize the efficiency of a language model along four axes — cost, quality, time, and energy consumption — by swapping out each layer to find the perfect paradigm combination."
+    },
+    "footer": {
+      "brand": "QPT — MULTI-PARADIGM COMPUTING",
+      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+    }
   }
 }

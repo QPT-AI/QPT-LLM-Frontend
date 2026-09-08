@@ -78,5 +78,121 @@
     "emailPlaceholder": "deine@email.com",
     "emailError": "Etwas ist schiefgelaufen — bitte erneut versuchen",
     "submit": "Absenden"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "Quanten · Photonisch · Thermodynamisch — Ein Computer",
+      "uvp": "Während einige darauf setzen, das beste <em>einzelne Bauteil</em> für ihren Computer zu bauen, setzen wir auf <em>gemeinsame Arbeit</em> — all diese Teile zu vereinen und den bestmöglichen Computer zu schaffen.",
+      "stats": {
+        "paradigmsProd": "Paradigmen in Produktion",
+        "paradigmsRoadmap": "Paradigmen auf der Roadmap",
+        "phases": "Phasen bis zur vollen Stack-Eigenverantwortung"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · Marktanalyse",
+      "title": "Am Schnittpunkt jeder Finanzierungswelle.",
+      "lead": "QPT sitzt an der Konvergenz der fünf stärksten Kapital- und Förderströme der heutigen Technologie. Jede Welle finanziert einen Teil des Stacks; QPT ist die einzige Position, die für alle gleichzeitig in Frage kommt.",
+      "legend": {
+        "quantum": "Quanten",
+        "ai": "KI",
+        "sustainable": "Nachhaltig",
+        "research": "Forschung",
+        "openSource": "Open Source",
+        "quantumDesc": "Förderung & Programme für Quantencomputing",
+        "aiDesc": "Finanzierung von Foundation-Modellen und LLMs",
+        "sustainableDesc": "Energieeffizienz-Initiativen",
+        "researchDesc": "Programme für wissenschaftliches Rechnen",
+        "openSourceDesc": "Unterstützung offener Infrastruktur"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · Schlüsselpersonen & Team",
+      "title": "Gebaut von Menschen, die jedes Paradigma kennen.",
+      "ceo": {
+        "role": "Chief Executive Officer",
+        "desc": "Prägt die kollaborative These: Kein einzelnes Bauteil gewinnt allein — die Vereinigung der Paradigmen gewinnt."
+      },
+      "ctoMulti": {
+        "role": "Multi-Paradigma CTO",
+        "desc": "Entwirft die Strategie des Schichtwechsels zwischen Quanten-, Photonik- und Thermodynamik-Architekturen über den ganzen Stack."
+      },
+      "ctoAi": {
+        "role": "LLM- & KI-CTO",
+        "desc": "Leitet die autoregressiven und Diffusions-Sprachmodell-Programme sowie hybride Trainingspipelines."
+      },
+      "legal": {
+        "role": "Leiter Recht & Verwaltung",
+        "desc": "Verantwortlich für Förderpositionierung, Compliance und Betrieb in fünf Finanzierungs-Ökosystemen."
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · Roadmap — Zehn Phasen",
+      "title": "Von der Simulation zur eigenen Hardware.",
+      "p1": {
+        "title": "Semiprofessionelles autoregressives & Diffusions-LM",
+        "desc": "Wir bauen unsere eigenen Basis-Sprachmodelle — mit autoregressiver als auch mit Diffusions-Architektur — als Grundlage, gegen die jede spätere Phase trainiert."
+      },
+      "p2": {
+        "title": "LMs anderer Paradigmen per Simulation, ×3",
+        "desc": "Quanten-, Photonik- und Thermodynamik-Rechnen simulieren und darauf paradigmennative LMs trainieren — bevor reale Hardware angefasst wird."
+      },
+      "p3": {
+        "title": "Hybrides Mischen — Paradigma pro Schicht",
+        "desc": "Quanten-, Photonik- und Thermodynamik-Berechnung innerhalb jeder Modellschicht mischen — die Kern-These von QPT in Code."
+      },
+      "p4": {
+        "title": "Autoregressive & Diffusions-Leistung verbessern",
+        "desc": "Alles Gelernte in die Basismodelle zurückspeisen: schnellere, günstigere, bessere autoregressive und Diffusions-LMs."
+      },
+      "p5": {
+        "title": "Eigene hybride Algorithmen entwickeln",
+        "desc": "Nicht mehr ausleihen, sondern erfinden: proprietäre hybride Algorithmen, die Mixed-Paradigma-Hardware nativ ausnutzen."
+      },
+      "p6": {
+        "title": "Trainieren mit hybriden Algorithmen + Simulation",
+        "desc": "Erste vollständige Trainingsläufe, vollständig von unseren eigenen hybriden Algorithmen getrieben und im großen Maßstab simuliert validiert."
+      },
+      "p7": {
+        "title": "Trainieren auf gemieteter Paradigma-Hardware",
+        "desc": "Von der Simulation zu echter gemieteter Quanten-, Photonik- und Thermodynamik-Hardware für Live-Trainingsläufe."
+      },
+      "p8": {
+        "title": "Eigene Paradigma-Hardware kaufen & trainieren",
+        "desc": "Den Untergrund besitzen: Quanten-, Photonik- und Thermodynamik-Maschinen erwerben und die Modelle auf eigener Flotte trainieren."
+      },
+      "p9": {
+        "title": "Zu neuen Horizonten erweitern",
+        "desc": "Über die ursprünglichen drei Paradigmen hinausgehen und weiterhin eigene hybride Algorithmen für die folgenden Untergründe produzieren."
+      },
+      "p10": {
+        "title": "Biologische & ternäre Computer besitzen",
+        "desc": "Einen biologischen Computer (natürliche neuronale Netze) und Huaweis Trits- (ternären) Computer erwerben — und die Modelle auf beiden trainieren."
+      },
+      "spectrum": "Alle Paradigmen zusammen betrachtet"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "Quanten",
+      "photonic": "Photonisch",
+      "thermic": "Thermisch",
+      "hybrid": "Hybrid",
+      "simulation": "Simulation",
+      "bio": "Bio",
+      "ternary": "Ternär"
+    },
+    "goal": {
+      "eyebrow": "04 · Das Ziel",
+      "title": "Maximieren Sie die <acc>Effizienz</acc> — durch Schichtwechsel, bis wir die perfekte Paradigma-Kombination finden.",
+      "cost": { "v": "↓ Kosten", "k": "Compute-Ökonomie" },
+      "quality": { "v": "↑ Qualität", "k": "Modellausgabe" },
+      "time": { "v": "↓ Zeit", "k": "Lern- & Inferenzgeschwindigkeit" },
+      "energy": { "v": "↓ Energie", "k": "Watt pro Token" },
+      "lead": "Ziel ist es, die Effizienz eines Sprachmodells entlang vier Achsen zu maximieren — Kosten, Qualität, Zeit und Energieverbrauch — indem jede Schicht ausgetauscht wird, um die perfekte Paradigma-Kombination zu finden."
+    },
+    "footer": {
+      "brand": "QPT — MULTI-PARADIGMA-COMPUTING",
+      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+    }
   }
 }

@@ -17,7 +17,7 @@ export default function Chat() {
   }
 
   return (
-    <Layout>
+    <Layout minimal>
       <section className="chat-page">
         <div className="chat-scroll">
           {messages.length === 0 ? (

@@ -158,11 +158,7 @@ export default function SceneManager() {
     <div className="scene-viewport" style={{ position: "fixed", inset: 0, overflow: "hidden" }}>
       {items}
 
-      <header className="chrome chrome-top">
-        <span className="wordmark stroke-hair brand-mark">
-          <img src="/favicon.png" alt="Logo" className="brand-logo" />
-          <span className="brand-text">QPT</span>
-        </span>
+      <header className="chrome chrome-top minimal">
         <div className="chrome-controls">
           <LanguageSwitcher />
           <ThemeToggle />

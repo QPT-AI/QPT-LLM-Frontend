@@ -8,25 +8,25 @@ const THERMO    = "#e8690a";
 const CLASSICAL = "#8a8a8a";
 
 const PARADIGM_META = {
-  quantum:   { color: QUANTUM,   label: "Quantum",        glyph: "Q" },
-  photonic:  { color: PHOTONIC,  label: "Photonic",       glyph: "P" },
-  thermo:    { color: THERMO,    label: "Thermodynamic",  glyph: "T" },
-  classical: { color: CLASSICAL, label: "Classical",      glyph: "C" },
+  quantum:   { color: QUANTUM,   label: "Quantum",       glyph: "Q" },
+  photonic:  { color: PHOTONIC,  label: "Photonic",      glyph: "P" },
+  thermo:    { color: THERMO,    label: "Thermodynamic", glyph: "T" },
+  classical: { color: CLASSICAL, label: "Classical",     glyph: "C" },
 };
 
 // LLM pipeline with paradigm assignment
 const LAYERS = [
-  { id: 0,  label: "Tokenizer",                paradigm: "classical" },
-  { id: 1,  label: "Token Embeddings",         paradigm: "quantum"   },
-  { id: 2,  label: "Positional Encoding",      paradigm: "photonic"  },
-  { id: 3,  label: "Attention Mechanism",      paradigm: "photonic"  },
-  { id: 4,  label: "Feed-Forward Network",     paradigm: "photonic"  },
-  { id: 5,  label: "Normalization",            paradigm: "thermo"    },
-  { id: 6,  label: "Residual Connections",     paradigm: "classical" },
-  { id: 7,  label: "Transformer Blocks",       paradigm: "classical" },
-  { id: 8,  label: "Output Projection",        paradigm: "quantum"   },
-  { id: 9,  label: "Softmax / Distribution",   paradigm: "thermo"    },
-  { id: 10, label: "Sampling / Decoding",      paradigm: "thermo"    },
+  { id: 0,  label: "Tokenizer",              paradigm: "classical" },
+  { id: 1,  label: "Token Embeddings",       paradigm: "quantum"   },
+  { id: 2,  label: "Positional Encoding",    paradigm: "photonic"  },
+  { id: 3,  label: "Attention Mechanism",    paradigm: "photonic"  },
+  { id: 4,  label: "Feed-Forward Network",   paradigm: "photonic"  },
+  { id: 5,  label: "Normalization",          paradigm: "thermo"    },
+  { id: 6,  label: "Residual Connections",   paradigm: "classical" },
+  { id: 7,  label: "Transformer Blocks",     paradigm: "classical" },
+  { id: 8,  label: "Output Projection",      paradigm: "quantum"   },
+  { id: 9,  label: "Softmax / Distribution", paradigm: "thermo"    },
+  { id: 10, label: "Sampling / Decoding",    paradigm: "thermo"    },
 ];
 
 // Animation timing
@@ -43,6 +43,11 @@ const PARTICLE_CONFIGS = {
   classical: { count: 4, shape: "circle", size: 2, speed: 0.5 },
 };
 
+// Breakpoint under which the diagram switches to scrollable compact mode
+const COMPACT_BREAKPOINT = 560;
+// Fixed comfortable row height in compact (scrollable) mode
+const COMPACT_ROW_H = 34;
+
 // ── Scan animation hook ───────────────────────────────────────────────────────
 
 function useScanAnimation(active) {
@@ -53,7 +58,6 @@ function useScanAnimation(active) {
   useEffect(() => {
     if (!active) { setRevealed(-1); setPhase("idle"); return; }
 
-    // Respect reduced motion preference
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
       setPhase("idle");
@@ -90,15 +94,12 @@ function useScanAnimation(active) {
 function ParticleField({ paradigm, width, height, seed }) {
   const canvasRef = useRef(null);
   const reducedMotion = useRef(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const cfg       = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
-  const color     = PARADIGM_META[paradigm].color;
+  const cfg   = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
+  const color = PARADIGM_META[paradigm].color;
 
   useEffect(() => {
-
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = (e) => {
-      reducedMotion.current = e.matches;
-    };
+    const handleChange = (e) => { reducedMotion.current = e.matches; };
     mq.addEventListener("change", handleChange);
     reducedMotion.current = mq.matches;
 
@@ -167,6 +168,9 @@ function ParticleField({ paradigm, width, height, seed }) {
 }
 
 // ── Scanner sweep line ────────────────────────────────────────────────────────
+// Color derives from --ink, which the app already flips per theme:
+// light ink on dark backgrounds, dark ink on light backgrounds.
+// No theme detection needed — it always contrasts.
 
 function ScanLine({ phase }) {
   const lineRef = useRef(null);
@@ -192,10 +196,11 @@ function ScanLine({ phase }) {
         right: 0,
         top: "0%",
         height: 2,
-        background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 20%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.5) 80%, transparent 100%)",
+        background:
+          "linear-gradient(90deg, transparent 0%, rgba(var(--ink), 0.45) 20%, rgba(var(--ink), 0.9) 50%, rgba(var(--ink), 0.45) 80%, transparent 100%)",
         zIndex: 20,
         pointerEvents: "none",
-        boxShadow: "0 0 16px 6px rgba(255,255,255,0.15)",
+        boxShadow: "0 0 16px 6px rgba(var(--ink), 0.18)",
       }}
     />
   );
@@ -204,6 +209,7 @@ function ScanLine({ phase }) {
 // ── Legend strip ──────────────────────────────────────────────────────────────
 
 function Legend() {
+  const { t } = useTranslation();
   return (
     <div style={{ display: "flex", gap: "clamp(10px,2vw,22px)", flexWrap: "wrap" }}>
       {Object.entries(PARADIGM_META).map(([key, meta]) => (
@@ -220,7 +226,7 @@ function Legend() {
             color: meta.color,
             textTransform: "uppercase",
           }}>
-            {meta.label}
+            {t(`scene5.${key}`, meta.label)}
           </span>
         </div>
       ))}
@@ -230,23 +236,23 @@ function Legend() {
 
 // ── Single pipeline row ───────────────────────────────────────────────────────
 
-function LayerRow({ layer, isRevealed, rowH, particleW }) {
-  const { color, label: paradigmLabel, glyph } = PARADIGM_META[layer.paradigm];
+function LayerRow({ layer, isRevealed, rowH, particleW, compact }) {
+  const { color, glyph } = PARADIGM_META[layer.paradigm];
 
   return (
-    <div style={{ position: "relative", display: "flex", alignItems: "center", height: rowH }}>
+    <div style={{ position: "relative", display: "flex", alignItems: "center", height: rowH, flexShrink: 0 }}>
 
-      {/* Glyph badge */}
+      {/* Glyph badge — flush left, vertically centered, never clipped */}
       <div style={{
         flexShrink: 0,
-        width: rowH * 1.15,
+        width: compact ? rowH : rowH * 1.15,
         height: rowH,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
         fontWeight: 700,
-        fontSize: `clamp(0.65rem, 1.1vw, 0.95rem)`,
+        fontSize: `clamp(0.6rem, 1.1vw, 0.95rem)`,
         color: isRevealed ? color : `rgba(var(--ink), 0.18)`,
         transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
         textShadow: isRevealed ? `0 0 14px ${color}88` : "none",
@@ -257,11 +263,12 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
       {/* Main block */}
       <div style={{
         flex: 1,
+        minWidth: 0,
         height: "100%",
         position: "relative",
         display: "flex",
         alignItems: "center",
-        paddingLeft: "clamp(9px,1.4vw,16px)",
+        paddingLeft: "clamp(8px,1.4vw,16px)",
         border: `1px solid ${isRevealed ? color + "44" : "rgba(var(--ink), 0.08)"}`,
         borderLeft: `2.5px solid ${isRevealed ? color : "rgba(var(--ink), 0.14)"}`,
         background: isRevealed
@@ -271,13 +278,11 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
           "border-color 380ms cubic-bezier(0.16,1,0.3,1)",
           "border-left-color 380ms cubic-bezier(0.16,1,0.3,1)",
           "background 380ms cubic-bezier(0.16,1,0.3,1)",
-          "box-shadow 380ms cubic-bezier(0.16,1,0.3,1)",
         ].join(", "),
-        boxShadow: isRevealed ? `inset 0 0 0 1px rgba(var(--ink), 0.1a), 0 0 18px rgba(var(--ink), 0.1)` : "none",
         overflow: "hidden",
         borderRadius: "0 3px 3px 0",
       }}>
-        {isRevealed && (
+        {isRevealed && !compact && (
           <ParticleField
             paradigm={layer.paradigm}
             width={particleW || 200}
@@ -291,48 +296,62 @@ function LayerRow({ layer, isRevealed, rowH, particleW }) {
           zIndex: 2,
           fontFamily: "var(--font-body, 'Inter', sans-serif)",
           fontWeight: isRevealed ? 500 : 400,
-          fontSize: "clamp(0.68rem, 1.05vw, 0.85rem)",
+          fontSize: "clamp(0.62rem, 1.05vw, 0.85rem)",
           color: isRevealed ? `rgba(var(--ink), 0.9)` : `rgba(var(--ink), 0.3)`,
           letterSpacing: "0.01em",
           transition: "color 380ms cubic-bezier(0.16,1,0.3,1)",
           whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          paddingRight: compact ? 8 : 70,
         }}>
           {layer.label}
         </span>
 
-        <span style={{
-          position: "absolute",
-          right: "clamp(8px,1.3vw,14px)",
-          zIndex: 2,
-          fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
-          fontSize: "clamp(0.52rem, 0.78vw, 0.64rem)",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: isRevealed ? color : "transparent",
-          opacity: isRevealed ? 0.8 : 0,
-          transition: "color 380ms cubic-bezier(0.16,1,0.3,1), opacity 380ms cubic-bezier(0.16,1,0.3,1)",
-        }}>
-          {paradigmLabel}
-        </span>
+        {/* Paradigm tag — hidden on phones */}
+        {!compact && (
+          <span style={{
+            position: "absolute",
+            right: "clamp(8px,1.3vw,14px)",
+            zIndex: 2,
+            fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+            fontSize: "clamp(0.52rem, 0.78vw, 0.64rem)",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: isRevealed ? color : "transparent",
+            opacity: isRevealed ? 0.8 : 0,
+            transition: "color 380ms cubic-bezier(0.16,1,0.3,1), opacity 380ms cubic-bezier(0.16,1,0.3,1)",
+          }}>
+            <ParadigmTag paradigm={layer.paradigm} />
+          </span>
+        )}
       </div>
 
-      {/* Row index */}
-      <div style={{
-        flexShrink: 0,
-        width: rowH * 1.05,
-        height: rowH,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
-        fontSize: "clamp(0.52rem, 0.76vw, 0.62rem)",
-        color: isRevealed ? color + "88" : `rgba(var(--ink), 0.14)`,
-        transition: "color 380ms",
-      }}>
-        {String(layer.id + 1).padStart(2, "0")}
-      </div>
+      {/* Row index — hidden on phones */}
+      {!compact && (
+        <div style={{
+          flexShrink: 0,
+          width: rowH * 1.05,
+          height: rowH,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--font-mono, 'IBM Plex Mono', monospace)",
+          fontSize: "clamp(0.52rem, 0.76vw, 0.62rem)",
+          color: isRevealed ? color + "88" : `rgba(var(--ink), 0.14)`,
+          transition: "color 380ms",
+        }}>
+          {String(layer.id + 1).padStart(2, "0")}
+        </div>
+      )}
     </div>
   );
+}
+
+// Small helper so paradigm tags translate too
+function ParadigmTag({ paradigm }) {
+  const { t } = useTranslation();
+  return <>{t(`scene5.${paradigm}`, PARADIGM_META[paradigm].label)}</>;
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
@@ -341,22 +360,34 @@ export default function Scene5({ active }) {
   const { t } = useTranslation();
   const { revealed, phase } = useScanAnimation(active);
 
-  // Measure container for particle canvases
+  // Measure container for particle canvases + compact mode
   const containerRef = useRef(null);
   const rafRef = useRef(null);
   const [particleW, setParticleW] = useState(300);
   const [rowH, setRowH]           = useState(34);
+  const [compact, setCompact]     = useState(false);
 
   useEffect(() => {
+    const measure = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const { width, height } = el.getBoundingClientRect();
+      const isCompact = width < COMPACT_BREAKPOINT;
+      setCompact(isCompact);
+      setParticleW(Math.max(80, Math.floor(width * 0.72)));
+      // Compact mode: fixed comfortable row height — the container scrolls
+      // instead of squeezing. Desktop: fit rows to available height.
+      setRowH(
+        isCompact
+          ? COMPACT_ROW_H
+          : Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3))
+      );
+    };
     const handleResize = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setParticleW(Math.floor(width * 0.72));
-        const computed = Math.max(24, Math.min(42, Math.floor((height - 20) / LAYERS.length) - 3));
-        setRowH(computed);
-      });
+      rafRef.current = requestAnimationFrame(measure);
     };
+    measure();
     window.addEventListener("resize", handleResize, { passive: true });
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -366,6 +397,12 @@ export default function Scene5({ active }) {
 
   return (
     <div className="scene-inner">
+      {/* Hide scrollbar only on the mobile scrollable diagram */}
+      <style>{`
+        .scene5-scroll { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .scene5-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
+
       {/* Ambient blobs */}
       <div className="ambient-relics" aria-hidden="true">
         <span className="relic-blob" style={{ width: 260, height: 260, top: "4%",  left: "2%",  background: QUANTUM  }} />
@@ -381,29 +418,23 @@ export default function Scene5({ active }) {
             QPT
           </span>
 
-<p
-              className="stroke-lg"
-              style={{
-                fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
-                fontWeight: 700,
-                fontSize: "clamp(1.1rem, 2.4vw, 2rem)",
-                lineHeight: 1.3,
-                margin: "clamp(10px,1.8vw,18px) 0",
-                maxWidth: "26ch",
-                color: "var(--ink)",
-              }}
-            >
-            {t(
-              "scene5.statement",
-              "A new era of hybrid computing — every layer runs on its optimal substrate."
-            )}
+          <p
+            className="stroke-lg"
+            style={{
+              fontFamily: "var(--font-display, 'Space Grotesk', sans-serif)",
+              fontWeight: 700,
+              fontSize: "clamp(1.1rem, 2.4vw, 2rem)",
+              lineHeight: 1.3,
+              margin: "clamp(10px,1.8vw,18px) 0",
+              maxWidth: "26ch",
+              color: "var(--ink)",
+            }}
+          >
+            {t("scene5.statement", "QPT — the first language model to combine the best of three types of computing to achieve greater efficiency and lower cost.")}
           </p>
 
           <p className="body-line" style={{ maxWidth: "33ch", fontSize: "clamp(0.76rem,1.1vw,0.9rem)", color: "var(--ink)" }}>
-            {t(
-              "scene5.sub",
-              "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic."
-            )}
+            {t("scene5.detail", "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic.")}
           </p>
 
           <div style={{ marginTop: "clamp(14px,2.2vw,24px)" }}>
@@ -419,14 +450,20 @@ export default function Scene5({ active }) {
           >
             <div
               ref={containerRef}
+              className={compact ? "scene5-scroll" : undefined}
               style={{
                 position: "relative",
                 width: "100%",
                 height: "100%",
+                minHeight: 320,
                 display: "flex",
                 flexDirection: "column",
-                gap: 3,
-                justifyContent: "center",
+                gap: compact ? 4 : 3,
+                // Mobile: scroll over the animation instead of squeezing rows
+                justifyContent: compact ? "flex-start" : "center",
+                overflowY: compact ? "auto" : "visible",
+                overflowX: "hidden",
+                paddingRight: compact ? 2 : 0,
               }}
             >
               <ScanLine phase={phase} />
@@ -438,6 +475,7 @@ export default function Scene5({ active }) {
                   isRevealed={layer.id <= revealed}
                   rowH={rowH}
                   particleW={particleW}
+                  compact={compact}
                 />
               ))}
             </div>
