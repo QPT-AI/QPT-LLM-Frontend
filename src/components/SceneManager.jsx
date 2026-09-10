@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ui/ThemeToggle";
 import LanguageSwitcher from "./ui/LanguageSwitcher";
@@ -159,6 +160,9 @@ export default function SceneManager() {
       {items}
 
       <header className="chrome chrome-top minimal">
+        <Link to="/" className="brand-mark" aria-label="QPT home">
+          <img src="/favicon.png" alt="QPT logo" className="brand-logo" />
+        </Link>
         <div className="chrome-controls">
           <LanguageSwitcher />
           <ThemeToggle />
