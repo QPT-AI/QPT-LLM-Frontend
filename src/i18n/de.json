@@ -107,23 +107,23 @@
       }
     },
     "team": {
-      "eyebrow": "02 · Schlüsselpersonen & Team",
-      "title": "Gebaut von Menschen, die jedes Paradigma kennen.",
+      "eyebrow": "02 · Führungskräfte & Team",
+      "title": "Entwickelt von Menschen, die jeden Paradigmenwechsel beherrschen.",
       "ceo": {
-        "role": "Chief Executive Officer",
-        "desc": "Prägt die kollaborative These: Kein einzelnes Bauteil gewinnt allein — die Vereinigung der Paradigmen gewinnt."
+        "role": "Chief Executive Officer (CEO)",
+        "desc": "Internationaler Referent mit über 10 Vorträgen in drei Sprachen, dreifacher Gewinner des Preises für das beste Systemtechnik-Projekt an der EAFIT und Gewinner des Claude Hackathons 2025."
       },
       "ctoMulti": {
-        "role": "Multi-Paradigma CTO",
-        "desc": "Entwirft die Strategie des Schichtwechsels zwischen Quanten-, Photonik- und Thermodynamik-Architekturen über den ganzen Stack."
+        "role": "CTO für Multi-Paradigmen-Systeme",
+        "desc": "Leiter der Forschungsgruppe für Quantencomputing an der EAFIT, Vertreter der IEEE-Hochschulgruppe an der EAFIT und Referent zum Thema Integration von Quantencomputing und KI."
       },
       "ctoAi": {
-        "role": "LLM- & KI-CTO",
-        "desc": "Leitet die autoregressiven und Diffusions-Sprachmodell-Programme sowie hybride Trainingspipelines."
+        "role": "CTO für LLM & KI",
+        "desc": "Bekannter Referent für seinen Vortrag über den Aufbau eines Transformers von Grund auf (bereits mehr als dreimal gehalten) und Leiter der KI-Forschungsgruppe Aperture an der Universidad Nacional, Medellín."
       },
       "legal": {
-        "role": "Leiter Recht & Verwaltung",
-        "desc": "Verantwortlich für Förderpositionierung, Compliance und Betrieb in fünf Finanzierungs-Ökosystemen."
+        "role": "Leiterin Recht & Verwaltung",
+        "desc": "Geschäftsführerin bei Alyso, Auszeichnung mit Ehrenpreis an der UPB und der Universität Nebrija (Spanien) sowie Doppelabschluss in Recht der Europäischen Union."
       }
     },
     "phases": {
