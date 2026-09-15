@@ -118,12 +118,8 @@
         "desc": "Líder del Semillero de Computación Cuántica de EAFIT, representante del capítulo estudiantil de la IEEE en EAFIT y conferencista en integración de computación cuántica con IA."
       },
       "ctoAi": {
-        "role": "CTO de LLMs e IA",
-        "desc": "Conferencista destacado reconocido por su charla sobre cómo construir un Transformer desde cero (presentada más de tres veces) y líder del Semillero de Investigación en IA ,Aperture de la Universidad Nacional, Medellín."
-      },
-      "legal": {
-        "role": "Gerente Legal y Administrativa",
-        "desc": "Gerente General en Alyso, mención de honor en la UPB y en la Universidad Nebrija (España), con doble titulación en Derecho de la Unión Europea."
+        "role": "CTO de LLM e IA",
+        "desc": "Lidera los programas de modelos de lenguaje autorregresivos y de difusión y los pipelines de entrenamiento híbridos."
       }
     },
     "phases": {

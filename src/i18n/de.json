@@ -120,10 +120,6 @@
       "ctoAi": {
         "role": "CTO für LLM & KI",
         "desc": "Bekannter Referent für seinen Vortrag über den Aufbau eines Transformers von Grund auf (bereits mehr als dreimal gehalten) und Leiter der KI-Forschungsgruppe Aperture an der Universidad Nacional, Medellín."
-      },
-      "legal": {
-        "role": "Leiterin Recht & Verwaltung",
-        "desc": "Geschäftsführerin bei Alyso, Auszeichnung mit Ehrenpreis an der UPB und der Universität Nebrija (Spanien) sowie Doppelabschluss in Recht der Europäischen Union."
       }
     },
     "phases": {

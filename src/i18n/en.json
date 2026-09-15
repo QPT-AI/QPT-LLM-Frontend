@@ -120,10 +120,6 @@
       "ctoAi": {
         "role": "LLM & AI CTO",
         "desc": "Featured speaker renowned for his talk on building a transformer from scratch (presented over three times) and leader of the AI Research Group Aperture at Universidad Nacional, Medellín."
-      },
-      "legal": {
-        "role": "Legal & Administrative Manager",
-        "desc": "General Manager at Alyso, honor roll recipient at UPB and Universidad Nebrija (Spain), with a dual degree in European Union Law."
       }
     },
     "phases": {

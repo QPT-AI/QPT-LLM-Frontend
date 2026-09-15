@@ -188,14 +188,7 @@ export default function OnePager() {
               <div className="name">Jeronimo Hoyos</div>
               <div className="desc">{t("onePager.team.ctoAi.desc")}</div>
             </div>
-            <div className="op-member op-instrument">
-              <div className="role">
-                <span className="op-dot" style={{ background: "var(--ternary)" }}></span>
-                {t("onePager.team.legal.role")}
-              </div>
-              <div className="name">Karina Villegas Uribe</div>
-              <div className="desc">{t("onePager.team.legal.desc")}</div>
-            </div>
+            
           </div>
         </section>
 
