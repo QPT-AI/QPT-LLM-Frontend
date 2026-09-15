@@ -120,10 +120,6 @@
       "ctoAi": {
         "role": "CTO de LLM e IA",
         "desc": "Lidera los programas de modelos de lenguaje autorregresivos y de difusión y los pipelines de entrenamiento híbridos."
-      },
-      "legal": {
-        "role": "Gerente Legal y Administrativo",
-        "desc": "Gestiona el posicionamiento en subvenciones, el cumplimiento y las operaciones en cinco ecosistemas de financiación."
       }
     },
     "phases": {

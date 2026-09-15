@@ -120,10 +120,6 @@
       "ctoAi": {
         "role": "LLM- & KI-CTO",
         "desc": "Leitet die autoregressiven und Diffusions-Sprachmodell-Programme sowie hybride Trainingspipelines."
-      },
-      "legal": {
-        "role": "Leiter Recht & Verwaltung",
-        "desc": "Verantwortlich für Förderpositionierung, Compliance und Betrieb in fünf Finanzierungs-Ökosystemen."
       }
     },
     "phases": {

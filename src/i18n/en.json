@@ -120,10 +120,6 @@
       "ctoAi": {
         "role": "LLM & AI CTO",
         "desc": "Leads the autoregressive and diffusion language-model programs and hybrid training pipelines."
-      },
-      "legal": {
-        "role": "Legal & Administrative Manager",
-        "desc": "Owns grant positioning, compliance, and operations across five funding ecosystems."
       }
     },
     "phases": {
