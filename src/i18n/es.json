@@ -107,15 +107,15 @@
       }
     },
     "team": {
-      "eyebrow": "02 · Oficiales Clave y Equipo",
-      "title": "Construido por personas que abarcan cada paradigma.",
+      "eyebrow": "02 · Directivos Clave y Equipo",
+      "title": "Creado por personas que abarcan cada paradigma.",
       "ceo": {
-        "role": "Director Ejecutivo",
-        "desc": "Define la tesis colaborativa: ningún componente gana solo — la unión de paradigmas sí."
+        "role": "Director Ejecutivo (CEO)",
+        "desc": "Conferencista internacional con más de 10 charlas impartidas en tres idiomas, tres veces ganador del premio al Mejor Proyecto de Ingeniería de Sistemas de EAFIT y ganador de la Hackathon de Claude 2025."
       },
       "ctoMulti": {
-        "role": "CTO Multi-Paradigma",
-        "desc": "Arquitectura la estrategia de intercambio de capas cuánticas, fotónicas y termodinámicas en toda la pila."
+        "role": "CTO de Paradigmas Múltiples",
+        "desc": "Líder del Semillero de Computación Cuántica de EAFIT, representante del capítulo estudiantil de la IEEE en EAFIT y conferencista en integración de computación cuántica con IA."
       },
       "ctoAi": {
         "role": "CTO de LLM e IA",

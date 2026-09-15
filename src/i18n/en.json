@@ -111,15 +111,15 @@
       "title": "Built by people who span every paradigm.",
       "ceo": {
         "role": "Chief Executive Officer",
-        "desc": "Sets the collaborative thesis: no single component wins alone — the union of paradigms does."
+        "desc": "SInternational speaker with over 10 talks delivered across three languages, three-time winner of EAFIT’s Best Systems Engineering Project, and Claude Hackathon winner 2025."
       },
       "ctoMulti": {
         "role": "Multi-Paradigm CTO",
-        "desc": "Architects the quantum, photonic, and thermodynamic layer-swapping strategy across the stack."
+        "desc": "Leader of the Quantum Computing Research Group at EAFIT, IEEE Student Chapter representative at EAFIT, and speaker on integrating quantum computing with AI."
       },
       "ctoAi": {
         "role": "LLM & AI CTO",
-        "desc": "Leads the autoregressive and diffusion language-model programs and hybrid training pipelines."
+        "desc": "Featured speaker renowned for his talk on building a transformer from scratch (presented over three times) and leader of the AI Research Group Aperture at Universidad Nacional, Medellín."
       }
     },
     "phases": {
