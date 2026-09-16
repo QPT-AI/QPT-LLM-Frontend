@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "../../styles/Scene6.css";
 
 export default function Scene6({ active }) {
   const { t } = useTranslation();

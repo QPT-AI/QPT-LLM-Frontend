@@ -341,6 +341,7 @@ export default function OnePager() {
         <footer className="op-footer">
           <span>{t("onePager.footer.brand")}</span>
           <span>{t("onePager.footer.tags")}</span>
+          <span>{t("onePager.footer.copyright")}</span>
         </footer>
       </div>
     </>

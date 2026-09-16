@@ -77,7 +77,8 @@
     "emailLabel": "E-Mail-Adresse",
     "emailPlaceholder": "deine@email.com",
     "emailError": "Etwas ist schiefgelaufen — bitte erneut versuchen",
-    "submit": "Absenden"
+    "submit": "Absenden",
+    "copyright": "©2026 Alle Rechte vorbehalten"
   },
   "onePager": {
     "hero": {
@@ -186,9 +187,10 @@
       "energy": { "v": "↓ Energie", "k": "Watt pro Token" },
       "lead": "Ziel ist es, die Effizienz eines Sprachmodells entlang vier Achsen zu maximieren — Kosten, Qualität, Zeit und Energieverbrauch — indem jede Schicht ausgetauscht wird, um die perfekte Paradigma-Kombination zu finden."
     },
-    "footer": {
-      "brand": "QPT — MULTI-PARADIGMA-COMPUTING",
-      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+"footer": {
+      "brand": "QPT — MULTI-PARADIGM-COMPUTING",
+      "tags": "QUANTUM · PHOTONISCH · THERMODYNAMISCH · TERNÄR · BIOLOGISCH",
+      "copyright": "©2026 Alle Rechte vorbehalten"
     }
   }
 }

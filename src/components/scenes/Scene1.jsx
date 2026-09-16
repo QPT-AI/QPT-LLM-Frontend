@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import "../../styles/Scene1.css";
 
 export default function Scene1() {
   const { t } = useTranslation();

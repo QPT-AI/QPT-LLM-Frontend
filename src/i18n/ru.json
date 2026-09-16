@@ -77,7 +77,8 @@
     "emailLabel": "Электронная почта",
     "emailPlaceholder": "you@email.com",
     "emailError": "Что-то пошло не так — попробуйте снова",
-    "submit": "Отправить"
+    "submit": "Отправить",
+    "copyright": "©2026 Все права защищены"
   },
   "onePager": {
     "hero": {
@@ -188,7 +189,8 @@
     },
     "footer": {
       "brand": "QPT — МУЛЬТИПАРАДИГМЕННЫЕ ВЫЧИСЛЕНИЯ",
-      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO",
+      "copyright": "©2026 Все права защищены"
     }
   }
 }

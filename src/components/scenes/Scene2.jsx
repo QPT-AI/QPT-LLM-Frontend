@@ -344,6 +344,100 @@ function EntangledPair() {
   );
 }
 
+// ---- Scene-wide background texture -------------------------------------
+// A quiet, always-on backdrop (no dependency on `active`, since it's CSS/SVG
+// rather than the 3D canvas) that sits behind the whole split layout, not
+// just the visual pane: gradient wash -> topographic contour lines ->
+// sub-surface circuit grid -> entangled node pairs. Motion is slow and
+// low-amplitude on purpose; see the animation durations in the stylesheet.
+const TEXTURE_NODES = [
+  { x: 70, y: 110 }, { x: 210, y: 70 }, { x: 340, y: 200 }, { x: 480, y: 90 },
+  { x: 610, y: 210 }, { x: 730, y: 120 }, { x: 150, y: 320 }, { x: 300, y: 380 },
+  { x: 460, y: 340 }, { x: 630, y: 380 }, { x: 80, y: 420 }, { x: 710, y: 410 },
+];
+
+const TEXTURE_LINKS = [
+  [0, 2], [2, 4], [1, 3], [3, 5], [6, 7], [7, 8], [8, 9], [10, 6], [9, 11],
+];
+
+function SceneTexture() {
+  const gridLines = useMemo(() => {
+    const vertical = Array.from({ length: 11 }, (_, i) => i * 80);
+    const horizontal = Array.from({ length: 9 }, (_, i) => i * 60);
+    return { vertical, horizontal };
+  }, []);
+
+  const rings = useMemo(
+    () =>
+      TEXTURE_LINKS.map(([a, b], i) => {
+        const na = TEXTURE_NODES[a];
+        const nb = TEXTURE_NODES[b];
+        const mx = (na.x + nb.x) / 2;
+        const my = (na.y + nb.y) / 2;
+        const dx = nb.x - na.x;
+        const dy = nb.y - na.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+        return { key: `ring-${i}`, mx, my, dist, angle, delay: i * 0.9 };
+      }),
+    []
+  );
+
+  return (
+    <div className="scene2-texture" aria-hidden="true">
+      <div className="scene2-texture-gradient" />
+      <svg className="scene2-texture-svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+        {/* Layer 1 — topographic phase-space contours */}
+        <path className="scene2-contour" d="M-20,90 C120,40 260,140 400,90 S680,40 820,100" strokeDasharray="6 10" />
+        <path className="scene2-contour alt" d="M-20,180 C140,240 260,120 420,180 S700,240 820,190" strokeDasharray="4 12" />
+        <path className="scene2-contour" d="M-20,300 C160,260 300,360 460,300 S720,250 820,310" strokeDasharray="8 8" />
+        <path className="scene2-contour alt" d="M-20,400 C160,440 320,360 480,410 S700,450 820,400" strokeDasharray="5 10" />
+
+        {/* Layer 2 — embedded micro-circuitry grid */}
+        <g>
+          {gridLines.vertical.map((x) => (
+            <line key={`v-${x}`} className="scene2-circuit-line" x1={x} y1="0" x2={x} y2="500" />
+          ))}
+          {gridLines.horizontal.map((y) => (
+            <line key={`h-${y}`} className="scene2-circuit-line" x1="0" y1={y} x2="800" y2={y} />
+          ))}
+        </g>
+
+        {/* Layer 3 — entanglement rings between linked qubit nodes */}
+        <g>
+          {rings.map((r) => (
+            <ellipse
+              key={r.key}
+              className="scene2-ring"
+              cx={r.mx}
+              cy={r.my}
+              rx={r.dist / 2 + 10}
+              ry="14"
+              transform={`rotate(${r.angle} ${r.mx} ${r.my})`}
+              style={{ animationDelay: `${r.delay}s` }}
+            />
+          ))}
+        </g>
+
+        {/* Subatomic state-particle nodes */}
+        <g>
+          {TEXTURE_NODES.map((n, i) => (
+            <circle
+              key={`node-${i}`}
+              className="scene2-node"
+              cx={n.x}
+              cy={n.y}
+              r="2.1"
+              style={{ animationDelay: `${i * 0.45}s` }}
+            />
+          ))}
+        </g>
+      </svg>
+      <div className="scene2-texture-vignette" />
+    </div>
+  );
+}
+
 function Visual() {
   const { isDark } = useTheme();
   return (
@@ -362,6 +456,7 @@ export default function Scene2({ active }) {
   const { t } = useTranslation();
   return (
     <div className="scene-inner">
+      <SceneTexture />
       <div className="split">
         <div className="scene-text">
           <span className="eyebrow stroke-hair">
