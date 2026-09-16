@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import "../../styles/Scene5.css";
 
 // ── Brand palette (matches rest of app) ──────────────────────────────────────
 const QUANTUM   = "#5bad1e";

@@ -3,6 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
+import "../../styles/Scene4.css";
 
 const THERMO = "#e8690a";
 const COOL = "#1c3d49";

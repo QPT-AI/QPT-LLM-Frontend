@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import EmailCapture from "../ui/EmailCapture";
+import "../../styles/Scene8.css";
 
 export default function Scene8() {
   const { t } = useTranslation();
@@ -25,6 +26,7 @@ export default function Scene8() {
               {t("footer.supportUs")}
             </button>
           </div>
+          <span className="footer-copyright">{t("footer.copyright")}</span>
         </footer>
       </div>
     </div>

@@ -1,0 +1,76 @@
+/* ============================================================
+    Scene 5 — intro card + ambient relics
+    ============================================================ */
+
+.ambient-relics {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.relic-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  opacity: 0.22;
+  animation: relicFloat 14s ease-in-out infinite;
+}
+
+@keyframes relicFloat {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(2%, -3%) scale(1.06);
+  }
+}
+
+.relic-wave {
+  position: absolute;
+  opacity: 0.3;
+  animation: relicDrift 20s linear infinite;
+}
+
+@keyframes relicDrift {
+  0% {
+    transform: translateX(-2%);
+  }
+  50% {
+    transform: translateX(2%);
+  }
+  100% {
+    transform: translateX(-2%);
+  }
+}
+
+.intro-card {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 64px);
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  backdrop-filter: blur(6px);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: cardIn 900ms var(--ease-out) 160ms forwards;
+}
+
+@keyframes cardIn {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.intro-statement {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.3rem, 3.2vw, 2.5rem);
+  line-height: 1.32;
+  margin: 18px 0 0;
+}

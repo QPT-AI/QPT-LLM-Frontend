@@ -1,0 +1,13 @@
+/* ============================================================
+    Scene 7 — glitch resolve
+    ============================================================ */
+
+.glitch-text {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 5vw, 4rem);
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  max-width: 26ch;
+  margin: 0 auto;
+}

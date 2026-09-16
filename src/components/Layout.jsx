@@ -35,6 +35,9 @@ export default function Layout({ children, hideLoginButton = false, bare = false
         </header>
       )}
       <main className={bare ? "app-main app-main-bare" : "app-main"}>{children}</main>
+      <footer className="layout-footer">
+        <span>{t("footer.copyright")}</span>
+      </footer>
     </div>
   );
 }

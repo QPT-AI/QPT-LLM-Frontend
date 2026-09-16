@@ -77,7 +77,8 @@
     "emailLabel": "Email address",
     "emailPlaceholder": "you@email.com",
     "emailError": "Something went wrong — try again",
-    "submit": "Submit"
+    "submit": "Submit",
+    "copyright": "©2026 All rights reserved"
   },
   "onePager": {
     "hero": {
@@ -188,7 +189,8 @@
     },
     "footer": {
       "brand": "QPT — MULTI-PARADIGM COMPUTING",
-      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO"
+      "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO",
+      "copyright": "©2026 All rights reserved"
     }
   }
 }
