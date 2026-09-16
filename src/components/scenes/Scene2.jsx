@@ -3,6 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
+import "../../styles/Scene2.css";
 
 const QUANTUM = "#5bad1e";
 const PULSE_COLOR = "#a855f7"; // purple - the traveling "sending" packet

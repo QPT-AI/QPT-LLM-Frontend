@@ -3,7 +3,19 @@
   --entangle: #a855f7; /* violet accent, shared with Scene 2's 3D data-pulse */
 }
 
+/* --- Containment: keep the backdrop behind this scene and inside its bounds ---
+   If .scene-inner / .split already have rules elsewhere, merge these props in. */
+
+.scene-inner > .split {
+  position: relative;
+  z-index: 1; /* text + 3D pane sit above the backdrop */
+}
+
 .scene2-texture {
+  /* Single source of truth — these MATCH the constants in Scene2.jsx */
+  --q-accent: #5bad1e;                  /* == QUANTUM      */
+  --q-pulse: var(--entangle, #a855f7);  /* == PULSE_COLOR  */
+
   position: absolute;
   inset: -6%;
   overflow: hidden;
@@ -17,8 +29,8 @@
   background:
     radial-gradient(ellipse at 18% 22%, rgba(168, 85, 247, 0.14), transparent 40%),
     radial-gradient(ellipse at 84% 74%, rgba(168, 85, 247, 0.10), transparent 44%),
-    radial-gradient(ellipse at 50% 48%, rgba(26, 171, 124, 0.22), transparent 62%),
-    linear-gradient(160deg, #071b12 0%, #0d3b30 46%, #0a2f2f 76%, #071b12 100%);
+    radial-gradient(ellipse at 50% 48%, rgba(91, 173, 30, 0.22), transparent 62%),
+    linear-gradient(160deg, #06180d 0%, #123d17 46%, #0c2f18 76%, #06180d 100%);
   animation: scene2-drift 34s ease-in-out infinite;
 }
 
@@ -26,8 +38,8 @@
   background:
     radial-gradient(ellipse at 18% 22%, rgba(168, 85, 247, 0.10), transparent 40%),
     radial-gradient(ellipse at 84% 74%, rgba(168, 85, 247, 0.08), transparent 44%),
-    radial-gradient(ellipse at 50% 48%, rgba(26, 171, 124, 0.14), transparent 62%),
-    linear-gradient(160deg, #e4ece7 0%, #d7ece5 46%, #dcecec 76%, #e9eae6 100%);
+    radial-gradient(ellipse at 50% 48%, rgba(91, 173, 30, 0.14), transparent 62%),
+    linear-gradient(160deg, #e7ece2 0%, #e2ecd7 46%, #e6ecdc 76%, #eaeae6 100%);
   opacity: 0.7;
 }
 
@@ -50,14 +62,14 @@
 
 .scene2-contour {
   fill: none;
-  stroke: var(--bio);
+  stroke: var(--q-accent);
   stroke-opacity: 0.32;
   stroke-width: 1;
   animation: scene2-contour-flow 30s linear infinite;
 }
 
 .scene2-contour.alt {
-  stroke: var(--quantum);
+  stroke: var(--q-pulse);
   stroke-opacity: 0.2;
   animation-duration: 40s;
   animation-direction: reverse;
@@ -78,7 +90,7 @@
 }
 
 .scene2-node {
-  fill: var(--quantum);
+  fill: var(--q-accent);
   animation: scene2-node-pulse 7s ease-in-out infinite;
 }
 
@@ -89,7 +101,7 @@
 
 .scene2-ring {
   fill: none;
-  stroke: var(--entangle);
+  stroke: var(--q-pulse);
   stroke-width: 0.8;
   opacity: 0.22;
   transform-box: fill-box;
@@ -105,6 +117,14 @@
 .scene2-texture-vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, transparent 38%, var(--bg) 100%);
+  background: radial-gradient(ellipse at 50% 50%, transparent 38%, var(--bg, #06180d) 100%);
   opacity: 0.6;
+}
+
+/* Respect the same preference the 3D scene honors */
+@media (prefers-reduced-motion: reduce) {
+  .scene2-texture-gradient,
+  .scene2-contour,
+  .scene2-node,
+  .scene2-ring { animation: none; }
 }
