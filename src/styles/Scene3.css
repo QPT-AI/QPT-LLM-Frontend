@@ -1,0 +1,83 @@
+/* Scene3.css — holographic foil, scoped to Scene3 only */
+
+.holo-bg {
+  position: absolute;   /* was fixed — now confined to .scene-inner */
+  inset: 0;
+  z-index: 0;           /* behind scene content, above the scene's own bg */
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+/* keep scene content above the foil */
+.scene-inner > .split { position: relative; z-index: 1; }
+
+.holo-bg > * {
+  position: absolute;
+  inset: 0;
+}
+
+/* 1 — Diffraction grating */
+.holo-grating {
+  background-image: repeating-linear-gradient(
+    115deg,
+    transparent 0px,
+    transparent 2px,
+    currentColor 2px,
+    currentColor 3px
+  );
+}
+.holo-bg.holo-dark  .holo-grating { color: #fff; opacity: 0.07; mix-blend-mode: screen; }
+.holo-bg.holo-light .holo-grating { color: #000; opacity: 0.05; mix-blend-mode: multiply; }
+
+/* 2 — Iridescent sheen */
+.holo-sheen {
+  background: linear-gradient(
+    115deg,
+    rgba(240, 171, 0, 0)      0%,
+    rgba(240, 171, 0, 0.30)  12%,
+    rgba(180, 180, 180, 0.26) 30%,
+    rgba(240, 171, 0, 0.30)  48%,
+    rgba(150, 150, 150, 0.26) 66%,
+    rgba(240, 171, 0, 0.30)  84%,
+    rgba(240, 171, 0, 0)    100%
+  );
+  background-size: 260% 100%;
+  mix-blend-mode: screen;
+  opacity: 0.7;
+  animation: holoSheen 22s ease-in-out infinite;
+}
+.holo-bg.holo-light .holo-sheen { mix-blend-mode: multiply; opacity: 0.4; }
+
+/* 3 — Soft diagonal highlight */
+.holo-sweep {
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  background-position: 120% 0%;
+  mix-blend-mode: screen;
+  animation: holoSweep 15s ease-in-out infinite;
+}
+.holo-bg.holo-light .holo-sweep {
+  background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.45) 50%, transparent 60%);
+  mix-blend-mode: overlay;
+}
+
+@keyframes holoSheen {
+  0%   { background-position:   0% 0%; }
+  50%  { background-position: 100% 0%; }
+  100% { background-position:   0% 0%; }
+}
+@keyframes holoSweep {
+  0%, 75% { background-position: 120% 0%; }
+  100%    { background-position: -20% 0%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-sheen, .holo-sweep { animation: none; }
+  .holo-sheen { background-position: 40% 0%; }
+  .holo-sweep { display: none; }
+}

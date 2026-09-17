@@ -1,26 +1,21 @@
-/* ============================================================
-   Scene 4 — ambient thermal field (SCOPED)
-   Every selector is prefixed .scene4-* and lives behind Scene 4
-   only. Nothing here affects any other scene or page.
-   ============================================================ */
 
 .scene4-root {
-  position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
 }
 
 /* Content sits above the field. */
 .scene4-content {
   position: relative;
   z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 /* --- the heat field ----------------------------------------------------
    Bleeds past the .scene padding so it reaches the viewport edges.
-   The parent .scene already has overflow: hidden, so the bleed is safe.
    ---------------------------------------------------------------------- */
 
 .scene4-heat {
@@ -31,146 +26,280 @@
   overflow: hidden;
 }
 
+/* Slow-flowing thermal wash: a wide multi-stop heat-map ramp whose
+   position sweeps diagonally across the field, so the *whole* surface
+   reads as moving heat. */
+.scene4-heat-flow {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    115deg,
+    rgba(4, 2, 2, 0) 0%,
+    rgba(28, 6, 4, 0.28) 16%,
+    rgba(120, 18, 10, 0.3) 34%,
+    rgba(199, 46, 20, 0.3) 52%,
+    rgba(238, 120, 24, 0.3) 70%,
+    rgba(250, 196, 60, 0.28) 84%,
+    rgba(255, 236, 194, 0.24) 100%
+  );
+  background-size: 240% 240%;
+  filter: blur(64px);
+  opacity: 0.92;
+  will-change: background-position;
+  animation: scene4Flow 44s ease-in-out infinite alternate;
+}
+
 .scene4-heat-layer {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(92px);
   will-change: transform;
 }
 
-/* Deep base warmth — the slowest, largest mass. */
-.scene4-heat-layer.is-base {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(107, 34, 6, 0.55) 0%,
-    rgba(61, 17, 3, 0.4) 42%,
-    transparent 72%
-  );
-  width: 120%;
-  height: 120%;
-  left: -14%;
-  top: -10%;
-  animation: scene4Drift1 68s ease-in-out infinite alternate;
-}
-
-/* Mid transition shade — amber/orange core. */
-.scene4-heat-layer.is-mid {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(192, 86, 15, 0.42) 0%,
-    rgba(150, 56, 10, 0.26) 46%,
-    transparent 74%
-  );
-  width: 80%;
-  height: 88%;
-  right: -8%;
-  top: 2%;
-  animation: scene4Drift2 54s ease-in-out infinite alternate;
-}
-
-/* The one warm highlight. Kept faint on purpose. */
-.scene4-heat-layer.is-hot {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(237, 170, 74, 0.3) 0%,
-    rgba(217, 127, 31, 0.18) 44%,
-    transparent 70%
-  );
-  width: 52%;
-  height: 56%;
-  left: 22%;
-  bottom: 4%;
-  animation: scene4Drift3 61s ease-in-out infinite alternate;
-}
-
-/* Cold sink — pulls one corner back down the spectrum so the field
-   reads as a gradient rather than a single warm wash. */
+/* Cold sink — near-black. Anchors one side of the field at the bottom
+   of the spectrum so the hot zones read hot by contrast. */
 .scene4-heat-layer.is-cold {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(8, 4, 2, 0.6) 0%,
-    rgba(12, 6, 3, 0.34) 48%,
-    transparent 76%
+    rgba(2, 1, 1, 0.78) 0%,
+    rgba(20, 6, 3, 0.44) 46%,
+    transparent 74%
   );
-  width: 74%;
-  height: 80%;
-  left: -6%;
-  bottom: -12%;
-  animation: scene4Drift4 76s ease-in-out infinite alternate;
+  width: 80%;
+  height: 86%;
+  left: -8%;
+  bottom: -14%;
+  animation: scene4Drift4 46s ease-in-out infinite alternate;
+}
+
+/* Low transition — dark red / ember, the base of the warm band. */
+.scene4-heat-layer.is-base {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(120, 20, 8, 0.5) 0%,
+    rgba(70, 12, 5, 0.32) 44%,
+    transparent 72%
+  );
+  width: 94%;
+  height: 98%;
+  left: -18%;
+  top: -12%;
+  animation: scene4Drift1 40s ease-in-out infinite alternate;
+}
+
+/* Mid transition — red into orange, the core of the warm band. */
+.scene4-heat-layer.is-mid {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(224, 60, 24, 0.44) 0%,
+    rgba(176, 42, 16, 0.26) 46%,
+    transparent 74%
+  );
+  width: 78%;
+  height: 84%;
+  right: -6%;
+  top: 4%;
+  animation: scene4Drift2 34s ease-in-out infinite alternate;
+}
+
+/* Warm highlight — orange into yellow, approaching the peak. */
+.scene4-heat-layer.is-hot {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(248, 162, 32, 0.42) 0%,
+    rgba(228, 110, 18, 0.24) 46%,
+    transparent 72%
+  );
+  width: 60%;
+  height: 64%;
+  right: 4%;
+  bottom: -6%;
+  animation: scene4Drift3 38s ease-in-out infinite alternate;
+}
+
+/* Peak zone — the hottest reading: bright white core, yellow halo,
+   red-hot rim. Small and mobile: it travels the farthest so the
+   hot spot appears to race across the surface. */
+.scene4-heat-layer.is-peak {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 250, 232, 0.58) 0%,
+    rgba(255, 208, 120, 0.34) 30%,
+    rgba(230, 74, 30, 0.18) 56%,
+    transparent 74%
+  );
+  width: 40%;
+  height: 44%;
+  left: 40%;
+  top: 30%;
+  filter: blur(70px);
+  animation: scene4Drift5 28s ease-in-out infinite alternate;
+}
+
+/* --- entropy layer -----------------------------------------------------
+   Granular hot cells that drift in different directions and interfere,
+   so overlapping cells brighten into shifting hot spots — the visual of
+   a disordered, high-entropy heat field. Additive (screen) blend over
+   the smooth ramp; a slow "breathe" scale keeps the speckle churning.
+   ---------------------------------------------------------------------- */
+.scene4-entropy {
+  position: absolute;
+  inset: -25%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  filter: blur(24px);
+  will-change: background-position, transform;
+  background-repeat: repeat;
+  background-image:
+    radial-gradient(circle at 18% 24%, rgba(255, 214, 120, 0.55) 0, rgba(255, 214, 120, 0) 22%),
+    radial-gradient(circle at 72% 16%, rgba(255, 132, 40, 0.5) 0, rgba(255, 132, 40, 0) 20%),
+    radial-gradient(circle at 42% 62%, rgba(240, 70, 28, 0.5) 0, rgba(240, 70, 28, 0) 24%),
+    radial-gradient(circle at 86% 74%, rgba(255, 246, 220, 0.5) 0, rgba(255, 246, 220, 0) 18%),
+    radial-gradient(circle at 8% 82%, rgba(224, 60, 24, 0.45) 0, rgba(224, 60, 24, 0) 22%),
+    radial-gradient(circle at 58% 44%, rgba(250, 170, 60, 0.5) 0, rgba(250, 170, 60, 0) 20%);
+  background-size: 44% 44%, 44% 44%, 60% 60%, 60% 60%, 52% 52%, 52% 52%;
+  animation: scene4EntropyDrift 34s linear infinite alternate,
+    scene4EntropyBreathe 19s ease-in-out infinite alternate;
 }
 
 /* Settles the field back toward the page background at the edges so it
-   never competes with the type. */
+   never competes with the type. Centred slightly toward the visual
+   side so the text column stays the calmest part of the slide. */
 .scene4-heat-veil {
   position: absolute;
   inset: -12vw;
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 70% 70% at 50% 50%,
-    transparent 30%,
+    ellipse 72% 72% at 62% 50%,
+    transparent 28%,
     var(--bg) 100%
   );
   opacity: 0.72;
 }
 
-/* Slow, low-amplitude drift. No scale pulsing, no opacity flicker. */
+/* --- motion ------------------------------------------------------------
+   Wider, faster drift; a diagonal flow sweep; and the entropy churn.
+   Transform / background-position only.
+   ---------------------------------------------------------------------- */
+
+@keyframes scene4Flow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
 
 @keyframes scene4Drift1 {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-4%, -3%, 0);
   }
   100% {
-    transform: translate3d(6%, 4%, 0);
+    transform: translate3d(10%, 7%, 0);
   }
 }
 
 @keyframes scene4Drift2 {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(6%, -4%, 0);
   }
   100% {
-    transform: translate3d(-7%, 6%, 0);
+    transform: translate3d(-12%, 9%, 0);
   }
 }
 
 @keyframes scene4Drift3 {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-6%, 4%, 0);
   }
   100% {
-    transform: translate3d(9%, -5%, 0);
+    transform: translate3d(13%, -8%, 0);
   }
 }
 
 @keyframes scene4Drift4 {
   0% {
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(-4%, 5%, 0);
   }
   100% {
-    transform: translate3d(5%, -6%, 0);
+    transform: translate3d(8%, -10%, 0);
+  }
+}
+
+/* The peak travels farthest — the most visible "heat moving". */
+@keyframes scene4Drift5 {
+  0% {
+    transform: translate3d(-16%, 12%, 0);
+  }
+  100% {
+    transform: translate3d(18%, -14%, 0);
+  }
+}
+
+/* Each cell field slides a different way, so they interfere and churn. */
+@keyframes scene4EntropyDrift {
+  0% {
+    background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
+  }
+  100% {
+    background-position: 120% 80%, -90% 60%, 70% -110%, -80% -70%, 130% -40%, -60% 100%;
+  }
+}
+
+@keyframes scene4EntropyBreathe {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.08);
   }
 }
 
 /* --- light theme -------------------------------------------------------
-   Same spectrum, paper-white cold end, lower overall intensity so dark
-   body text stays comfortable to read on top of it.
+   Same black-body ramp, paper-white cold end, lower overall intensity
+   so dark body text stays comfortable to read on top of it.
    ---------------------------------------------------------------------- */
+
+[data-theme="light"] .scene4-heat-flow {
+  background: linear-gradient(
+    115deg,
+    rgba(240, 236, 226, 0) 0%,
+    rgba(236, 214, 196, 0.24) 18%,
+    rgba(224, 150, 110, 0.24) 38%,
+    rgba(216, 96, 60, 0.24) 56%,
+    rgba(226, 150, 60, 0.22) 74%,
+    rgba(240, 206, 140, 0.2) 88%,
+    rgba(248, 236, 208, 0.18) 100%
+  );
+  opacity: 0.82;
+}
+
+[data-theme="light"] .scene4-heat-layer.is-cold {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(231, 225, 214, 0.78) 0%,
+    rgba(231, 225, 214, 0.42) 48%,
+    transparent 76%
+  );
+}
 
 [data-theme="light"] .scene4-heat-layer.is-base {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(227, 179, 120, 0.44) 0%,
-    rgba(232, 211, 174, 0.32) 44%,
-    transparent 72%
+    rgba(214, 120, 80, 0.34) 0%,
+    rgba(198, 96, 56, 0.2) 46%,
+    transparent 74%
   );
 }
 
 [data-theme="light"] .scene4-heat-layer.is-mid {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(217, 141, 69, 0.34) 0%,
-    rgba(196, 100, 31, 0.2) 46%,
+    rgba(214, 92, 52, 0.34) 0%,
+    rgba(194, 74, 36, 0.2) 46%,
     transparent 74%
   );
 }
@@ -178,38 +307,46 @@
 [data-theme="light"] .scene4-heat-layer.is-hot {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(194, 58, 16, 0.2) 0%,
-    rgba(163, 60, 12, 0.12) 44%,
-    transparent 70%
+    rgba(228, 152, 58, 0.32) 0%,
+    rgba(212, 120, 40, 0.18) 46%,
+    transparent 72%
   );
 }
 
-[data-theme="light"] .scene4-heat-layer.is-cold {
+[data-theme="light"] .scene4-heat-layer.is-peak {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(231, 225, 214, 0.75) 0%,
-    rgba(231, 225, 214, 0.4) 48%,
-    transparent 76%
+    rgba(255, 252, 244, 0.66) 0%,
+    rgba(250, 214, 150, 0.3) 32%,
+    rgba(214, 92, 52, 0.12) 58%,
+    transparent 74%
   );
+}
+
+/* On paper the cells read as warm shadows rather than glow, so multiply
+   instead of screen and keep the intensity low. */
+[data-theme="light"] .scene4-entropy {
+  mix-blend-mode: multiply;
+  opacity: 0.3;
+  background-image:
+    radial-gradient(circle at 18% 24%, rgba(214, 120, 40, 0.42) 0, transparent 22%),
+    radial-gradient(circle at 72% 16%, rgba(214, 96, 44, 0.4) 0, transparent 20%),
+    radial-gradient(circle at 42% 62%, rgba(198, 72, 40, 0.4) 0, transparent 24%),
+    radial-gradient(circle at 86% 74%, rgba(224, 150, 70, 0.38) 0, transparent 18%),
+    radial-gradient(circle at 8% 82%, rgba(190, 70, 40, 0.36) 0, transparent 22%),
+    radial-gradient(circle at 58% 44%, rgba(220, 130, 50, 0.4) 0, transparent 20%);
 }
 
 [data-theme="light"] .scene4-heat-veil {
   opacity: 0.66;
 }
 
-/* The visual pane stays fully transparent so the field reads as one
-   continuous surface behind both columns. */
-.scene4-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-
 /* --- reduced motion: hold the field still ------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
-  .scene4-heat-layer {
+  .scene4-heat-flow,
+  .scene4-heat-layer,
+  .scene4-entropy {
     animation: none;
   }
 }

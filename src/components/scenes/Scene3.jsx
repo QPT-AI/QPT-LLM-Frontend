@@ -4,7 +4,7 @@ import { Line, Trail } from "@react-three/drei";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
-
+import "../../styles/Scene3.css";
 const PHOTONIC = "#f0ab00";
 
 const X_START   = -2.6;
@@ -102,7 +102,16 @@ function TravelingPulse({ frequency, speed }) {
     </Trail>
   );
 }
-
+function HoloBackground() {
+  const { isDark } = useTheme();
+  return (
+    <div className={`holo-bg ${isDark ? "holo-dark" : "holo-light"}`} aria-hidden="true">
+      <div className="holo-grating" />
+      <div className="holo-sheen" />
+      <div className="holo-sweep" />
+    </div>
+  );
+}
 function SquareWaveFormula({ isDark }) {
   return (
     <div
@@ -183,8 +192,10 @@ function Visual({ frequency = 5, speed = 0.55 }) {
 
 export default function Scene3({ active, frequency = 5, speed = 1.55 }) {
   const { t } = useTranslation();
+
   return (
     <div className="scene-inner">
+      <HoloBackground />
       <div className="split">
         <div className="visual-pane">
           <div className="instrument-frame">

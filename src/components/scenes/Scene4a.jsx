@@ -289,29 +289,40 @@ function FormulaCard() {
 export default function Scene4({ active }) {
   const { t } = useTranslation();
   return (
-    <div className="scene-inner">
-      <div className="split">
-        <div className="scene-text">
-          <span className="eyebrow stroke-hair">
-            <span className="eyebrow-dot" style={{ background: THERMO }} />
-            {t("scene4.eyebrow")}
-          </span>
-          <div style={{ margin: "10px 0 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "baseline", gap: "0.02em" }}>
-            <span className="letter-giant stroke-lg" style={{ color: THERMO, flexShrink: 0 }}>
-              T
+    <div className="scene-inner scene4-root">
+      {/* whole-slide thermal background */}
+      <div className="scene4-heat" aria-hidden="true">
+        <div className="scene4-heat-flow" />
+        <div className="scene4-heat-layer is-cold" />
+        <div className="scene4-heat-layer is-base" />
+        <div className="scene4-heat-layer is-mid" />
+        <div className="scene4-heat-layer is-hot" />
+        <div className="scene4-heat-layer is-peak" />
+        <div className="scene4-entropy" />
+      </div>
+      <div className="scene4-heat-veil" aria-hidden="true" />
+
+      <div className="scene4-content">
+        <div className="split">
+          <div className="scene-text">
+            <span className="eyebrow stroke-hair">
+              <span className="eyebrow-dot" style={{ background: THERMO }} />
+              {t("scene4.eyebrow")}
             </span>
-            <span className="letter-suffix stroke-sm" style={{ flexShrink: 0 }}>
-              hermodynamic
-            </span>
+            <div style={{ margin: "10px 0 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "baseline", gap: "0.02em" }}>
+              <span className="letter-giant stroke-lg" style={{ color: THERMO, flexShrink: 0 }}>
+                T
+              </span>
+              <span className="letter-suffix stroke-sm" style={{ flexShrink: 0 }}>
+                hermodynamic
+              </span>
+            </div>
+            <p className="body-line" style={{ maxWidth: "38ch" }}>
+              {t("scene4.description")}
+            </p>
           </div>
-          <p className="body-line" style={{ maxWidth: "38ch" }}>
-            {t("scene4.description")}
-          </p>
-        </div>
-        <div className="visual-pane">
-          <div className="instrument-frame" style={{ position: "relative" }}>
-            {active ? <Visual /> : null}
-            <FormulaCard />
+          <div className="visual-pane">
+            <div className="instrument-frame">{active ? <Visual /> : null}</div>
           </div>
         </div>
       </div>

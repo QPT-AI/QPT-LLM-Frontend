@@ -503,7 +503,47 @@ function DescentScene() {
     </group>
   );
 }
-
+function FormulaCard() {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: "14px",
+        left: "14px",
+        background: "rgba(10, 12, 18, 0.55)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "12px",
+        padding: "14px 18px",
+        fontFamily: "'Times New Roman', Times, serif",
+        color: "#e2e8f0",
+        lineHeight: 1.5,
+        pointerEvents: "none",
+        userSelect: "none",
+        maxWidth: "320px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "10px",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          color: THERMO,
+          marginBottom: "6px",
+          fontFamily: "system-ui, sans-serif",
+          fontWeight: 600,
+        }}
+      >
+        Ising Energy
+      </div>
+      <div style={{ fontSize: "17px" }}>
+        E(<b>s</b>) = − Σ<sub>i&lt;j</sub> J<sub>ij</sub> s<sub>i</sub> s<sub>j</sub>
+        &nbsp;−&nbsp; Σ<sub>i</sub> h<sub>i</sub> s<sub>i</sub>
+      </div>
+    </div>
+  );
+}
 function Visual() {
   const { isDark } = useTheme();
   return (
@@ -519,13 +559,26 @@ function Visual() {
 export default function Scene4({ active }) {
   const { t } = useTranslation();
   return (
-    <div className="scene-inner">
-      <div className="split">
-        <div className="scene-text">
-          <span className="eyebrow stroke-hair">
-            <span className="eyebrow-dot" style={{ background: THERMO }} />
-            {t("scene4.eyebrow")}
-          </span>
+    <div className="scene-inner scene4-root">
+      {/* whole-slide thermal background */}
+      <div className="scene4-heat" aria-hidden="true">
+        <div className="scene4-heat-flow" />
+        <div className="scene4-heat-layer is-cold" />
+        <div className="scene4-heat-layer is-base" />
+        <div className="scene4-heat-layer is-mid" />
+        <div className="scene4-heat-layer is-hot" />
+        <div className="scene4-heat-layer is-peak" />
+        <div className="scene4-entropy" />
+      </div>
+      <div className="scene4-heat-veil" aria-hidden="true" />
+
+      <div className="scene4-content">
+        <div className="split">
+          <div className="scene-text">
+            <span className="eyebrow stroke-hair">
+              <span className="eyebrow-dot" style={{ background: THERMO }} />
+              {t("scene4.eyebrow")}
+            </span>
             <div style={{ margin: "10px 0 20px", whiteSpace: "nowrap", display: "inline-flex", alignItems: "baseline", gap: "0.02em" }}>
               <span className="letter-giant stroke-lg" style={{ color: THERMO, flexShrink: 0 }}>
                 T
@@ -534,12 +587,16 @@ export default function Scene4({ active }) {
                 hermodynamic
               </span>
             </div>
-          <p className="body-line" style={{ maxWidth: "38ch" }}>
-            {t("scene4.description")}
-          </p>
-        </div>
-        <div className="visual-pane">
-          <div className="instrument-frame">{active ? <Visual /> : null}</div>
+            <p className="body-line" style={{ maxWidth: "38ch" }}>
+              {t("scene4.description")}
+            </p>
+          </div>
+          <div className="visual-pane">
+            <div className="instrument-frame" style={{ position: "relative" }}>
+              {active ? <Visual /> : null}
+              <FormulaCard />
+            </div>
+          </div>
         </div>
       </div>
     </div>
