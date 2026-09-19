@@ -346,11 +346,20 @@ function EntangledPair() {
 }
 
 // ---- Scene-wide background texture -------------------------------------
-// A quiet, always-on backdrop (no dependency on `active`, since it's CSS/SVG
-// rather than the 3D canvas) that sits behind the whole split layout, not
-// just the visual pane: gradient wash -> topographic contour lines ->
-// sub-surface circuit grid -> entangled node pairs. Motion is slow and
-// low-amplitude on purpose; see the animation durations in the stylesheet.
+// Always-on backdrop (CSS/SVG rather than the 3D canvas, so it has no
+// dependency on `active`) sitting behind the whole split layout. Built to the
+// QPT design manual: neutral ink hairlines draw the structure, Quantum
+// #5BAD1E appears only as three accent nodes plus one faint bloom, nothing is
+// dashed or decorative, and every animation is slow opacity / a few pixels of
+// translate.
+//
+// Layer order: depth wash -> quantum bloom -> instrument grid -> registration
+// marks -> probability contours -> entanglement links + rings -> qubit nodes.
+
+const TEX_W = 800;
+const TEX_H = 500;
+const GRID_STEP = 40; // minor grid pitch; every 4th line is drawn as major
+
 const TEXTURE_NODES = [
   { x: 70, y: 110 }, { x: 210, y: 70 }, { x: 340, y: 200 }, { x: 480, y: 90 },
   { x: 610, y: 210 }, { x: 730, y: 120 }, { x: 150, y: 320 }, { x: 300, y: 380 },
@@ -361,14 +370,76 @@ const TEXTURE_LINKS = [
   [0, 2], [2, 4], [1, 3], [3, 5], [6, 7], [7, 8], [8, 9], [10, 6], [9, 11],
 ];
 
+// Quantum accent is rationed: 3 of 12 nodes, all on the visual side of the
+// mask, keeps the paradigm colour well under the manual's ~8-10% budget.
+const ACCENT_NODES = new Set([2, 7, 9]);
+
+// Registration ticks on major intersections - an engineering-drawing cue that
+// reads as instrumentation rather than ornament.
+const MARK_POINTS = [
+  { x: 320, y: 160 }, { x: 480, y: 160 }, { x: 320, y: 320 }, { x: 480, y: 320 },
+  { x: 640, y: 240 }, { x: 160, y: 240 },
+];
+const MARK_LEN = 8;
+
+// |psi|^2-style probability envelope sampled into a polyline: two summed sines
+// under a Gaussian envelope, so each band reads as a phase-space contour
+// instead of a decorative swoosh.
+function wavePath(baseY, amp, k, phase, steps = 72) {
+  const points = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = -40 + t * (TEX_W + 80);
+    const u = (t - 0.5) * 2; // -1..1 across the pane
+    const envelope = Math.exp(-1.6 * u * u);
+    const wave =
+      Math.sin(t * Math.PI * 2 * k + phase) +
+      0.45 * Math.sin(t * Math.PI * 2 * k * 2.3 + phase * 1.7);
+    const y = baseY + wave * amp * envelope;
+    points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  return `M${points.join(" L")}`;
+}
+
+// dur/dx drive the horizontal drift of the band group; durY/dy the vertical
+// bob of the path inside it. The two periods are deliberately coprime-ish so
+// neighbouring bands never settle into a visible common rhythm. dy is held to
+// 6px on bands 2-5: the gaps there measure ~17 viewBox units (~31px on screen
+// at slice scale), so 6px each way cannot close them.
+const CONTOURS = [
+  { baseY: 62, amp: 26, k: 1.1, phase: 0.4, dur: "38s", dx: "40px", durY: "27s", dy: "9px" },
+  { baseY: 138, amp: 20, k: 1.6, phase: 2.1, dur: "46s", dx: "32px", durY: "33s", dy: "9px" },
+  { baseY: 214, amp: 28, k: 0.9, phase: 4.0, dur: "34s", dx: "44px", durY: "25s", dy: "6px" },
+  { baseY: 296, amp: 22, k: 1.4, phase: 1.2, dur: "52s", dx: "30px", durY: "41s", dy: "6px" },
+  { baseY: 372, amp: 26, k: 1.2, phase: 3.3, dur: "40s", dx: "38px", durY: "29s", dy: "6px" },
+  { baseY: 444, amp: 18, k: 1.8, phase: 5.0, dur: "48s", dx: "28px", durY: "37s", dy: "6px" },
+];
+
 function SceneTexture() {
-  const gridLines = useMemo(() => {
-    const vertical = Array.from({ length: 11 }, (_, i) => i * 80);
-    const horizontal = Array.from({ length: 9 }, (_, i) => i * 60);
+  const { isDark } = useTheme();
+
+  const grid = useMemo(() => {
+    const vertical = [];
+    for (let x = 0; x <= TEX_W; x += GRID_STEP) vertical.push(x);
+    const horizontal = [];
+    for (let y = 0; y <= TEX_H; y += GRID_STEP) horizontal.push(y);
     return { vertical, horizontal };
   }, []);
 
-  const rings = useMemo(
+  const contours = useMemo(
+    () =>
+      CONTOURS.map((c, i) => ({
+        key: `contour-${i}`,
+        d: wavePath(c.baseY, c.amp, c.k, c.phase),
+        alt: i % 2 === 1,
+        bandStyle: { "--dur": c.dur, "--dx": c.dx, "--d": `${i * -7}s` },
+        pathStyle: { "--dur-y": c.durY, "--dy": c.dy },
+      })),
+    []
+  );
+
+  // Midpoint / length / angle for the entanglement ring drawn over each link.
+  const links = useMemo(
     () =>
       TEXTURE_LINKS.map(([a, b], i) => {
         const na = TEXTURE_NODES[a];
@@ -379,62 +450,138 @@ function SceneTexture() {
         const dy = nb.y - na.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-        return { key: `ring-${i}`, mx, my, dist, angle, delay: i * 0.9 };
+        return { key: `link-${i}`, na, nb, mx, my, dist, angle, delay: i * 0.9 };
       }),
     []
   );
 
   return (
-    <div className="scene2-texture" aria-hidden="true">
-      <div className="scene2-texture-gradient" />
-      <svg className="scene2-texture-svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
-        {/* Layer 1 — topographic phase-space contours */}
-        <path className="scene2-contour" d="M-20,90 C120,40 260,140 400,90 S680,40 820,100" strokeDasharray="6 10" />
-        <path className="scene2-contour alt" d="M-20,180 C140,240 260,120 420,180 S700,240 820,190" strokeDasharray="4 12" />
-        <path className="scene2-contour" d="M-20,300 C160,260 300,360 460,300 S720,250 820,310" strokeDasharray="8 8" />
-        <path className="scene2-contour alt" d="M-20,400 C160,440 320,360 480,410 S700,450 820,400" strokeDasharray="5 10" />
+    <div className={`qtex${isDark ? "" : " is-light"}`} aria-hidden="true">
+      <div className="qtex-wash" />
+      <div className="qtex-bloom" />
 
-        {/* Layer 2 — embedded micro-circuitry grid */}
+      <svg
+        className="qtex-svg"
+        viewBox={`0 0 ${TEX_W} ${TEX_H}`}
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {/* Layer 1 - instrument grid */}
         <g>
-          {gridLines.vertical.map((x) => (
-            <line key={`v-${x}`} className="scene2-circuit-line" x1={x} y1="0" x2={x} y2="500" />
+          {grid.vertical.map((x, i) => (
+            <line
+              key={`gv-${x}`}
+              className={`qtex-grid${i % 4 === 0 ? " major" : ""}`}
+              x1={x}
+              y1="0"
+              x2={x}
+              y2={TEX_H}
+            />
           ))}
-          {gridLines.horizontal.map((y) => (
-            <line key={`h-${y}`} className="scene2-circuit-line" x1="0" y1={y} x2="800" y2={y} />
-          ))}
-        </g>
-
-        {/* Layer 3 — entanglement rings between linked qubit nodes */}
-        <g>
-          {rings.map((r) => (
-            <ellipse
-              key={r.key}
-              className="scene2-ring"
-              cx={r.mx}
-              cy={r.my}
-              rx={r.dist / 2 + 10}
-              ry="14"
-              transform={`rotate(${r.angle} ${r.mx} ${r.my})`}
-              style={{ animationDelay: `${r.delay}s` }}
+          {grid.horizontal.map((y, i) => (
+            <line
+              key={`gh-${y}`}
+              className={`qtex-grid${i % 4 === 0 ? " major" : ""}`}
+              x1="0"
+              y1={y}
+              x2={TEX_W}
+              y2={y}
             />
           ))}
         </g>
 
-        {/* Subatomic state-particle nodes */}
+        {/* Layer 2 - registration marks */}
+        <g>
+          {MARK_POINTS.map((m, i) => (
+            <g key={`mark-${i}`}>
+              <line
+                className="qtex-mark"
+                x1={m.x - MARK_LEN}
+                y1={m.y}
+                x2={m.x + MARK_LEN}
+                y2={m.y}
+              />
+              <line
+                className="qtex-mark"
+                x1={m.x}
+                y1={m.y - MARK_LEN}
+                x2={m.x}
+                y2={m.y + MARK_LEN}
+              />
+            </g>
+          ))}
+        </g>
+
+        {/* Layer 3 - probability / phase-space contours */}
+        <g fill="none">
+          {contours.map((c) => (
+            <g key={c.key} className={`qtex-band${c.alt ? " alt" : ""}`} style={c.bandStyle}>
+              <path className="qtex-contour" d={c.d} style={c.pathStyle} />
+            </g>
+          ))}
+        </g>
+
+        {/* Layer 4 - entanglement links and their rings */}
+        <g fill="none">
+          {links.map((l) => (
+            <line
+              key={`${l.key}-line`}
+              className="qtex-link"
+              x1={l.na.x}
+              y1={l.na.y}
+              x2={l.nb.x}
+              y2={l.nb.y}
+            />
+          ))}
+          {links.map((l) => (
+            <ellipse
+              key={`${l.key}-ring`}
+              className="qtex-ring"
+              cx={l.mx}
+              cy={l.my}
+              rx={l.dist / 2 + 10}
+              ry="14"
+              transform={`rotate(${l.angle} ${l.mx} ${l.my})`}
+              style={{ "--d": `${l.delay}s` }}
+            />
+          ))}
+          {/* Information in transit: one dot rides each link, staggered so the
+              pulses never fire in unison. Placement is CSS Motion Path, hence
+              no cx/cy here. */}
+          {links.map((l, i) => (
+            <circle
+              key={`${l.key}-flow`}
+              className="qtex-flow"
+              r="2.6"
+              style={{
+                offsetPath: `path("M ${l.na.x},${l.na.y} L ${l.nb.x},${l.nb.y}")`,
+                "--d": `${i * -1.8}s`,
+              }}
+            />
+          ))}
+        </g>
+
+        {/* Layer 5 - qubit nodes */}
         <g>
           {TEXTURE_NODES.map((n, i) => (
-            <circle
+            <g
               key={`node-${i}`}
-              className="scene2-node"
-              cx={n.x}
-              cy={n.y}
-              r="2.1"
-              style={{ animationDelay: `${i * 0.45}s` }}
-            />
+              className={`qtex-node${ACCENT_NODES.has(i) ? " is-accent" : ""}`}
+            >
+              {ACCENT_NODES.has(i) && (
+                <circle className="qtex-ping" cx={n.x} cy={n.y} r="6" style={{ "--d": `${i * 1.7}s` }} />
+              )}
+              <circle className="qtex-node-ring" cx={n.x} cy={n.y} r="6" fill="none" />
+              <circle
+                className="qtex-node-dot"
+                cx={n.x}
+                cy={n.y}
+                r="2.2"
+                style={{ "--d": `${i * 0.45}s` }}
+              />
+            </g>
           ))}
         </g>
       </svg>
-      <div className="scene2-texture-vignette" />
     </div>
   );
 }
