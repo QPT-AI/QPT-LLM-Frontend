@@ -106,9 +106,14 @@ function HoloBackground() {
   const { isDark } = useTheme();
   return (
     <div className={`holo-bg ${isDark ? "holo-dark" : "holo-light"}`} aria-hidden="true">
-      <div className="holo-grating" />
-      <div className="holo-sheen" />
-      <div className="holo-sweep" />
+      <div className="holo-graticule" />
+      <div className="holo-reflect" />
+      <div className="holo-beam-reflect" />   {/* horizontal smear, synced */}
+      <div className="holo-beam">             {/* animated carrier: horizontal traverse */}
+        <div className="holo-beam-bar" />     {/* the inclined, shiny bar */}
+      </div>
+      <div className="holo-grain" />
+      <div className="holo-vignette" />
     </div>
   );
 }
