@@ -1,4 +1,3 @@
-
 .scene4-root {
   width: 100%;
   height: 100%;
@@ -14,339 +13,187 @@
   align-items: center;
 }
 
-/* --- the heat field ----------------------------------------------------
+/* --- thermal gradient field --------------------------------------------
+   Markup comes from <HeatBackground /> (same in Scene4a and Scene4b).
+
+   A WebGL shader paints the field into .scene4-heat-canvas: smooth colour
+   regions that drift and slowly trade hot for cold, with a hot core and a
+   cold rim that follow the cursor. The shader reads the ramp below, so
+   both themes are tuned here.
+
+   Neutral-first ramp (QPT system): the cold side carries no hue at all —
+   just Ternary-family grays that read as ash — so the Thermodynamic
+   accent (#E8690A) is the only colour in the field, confined to the hot
+   regions. Cold and hot are always separated by the neutral stops, so
+   the two paradigm colours never touch directly.
+
+     --s4-c0  coldest    ash — dimmed Ternary gray (hue-free)
+     --s4-c1  cool       deep neutral gray
+     --s4-c2  neutral    page background
+     --s4-c3  warm       Thermodynamic #E8690A (fixed in both themes)
+     --s4-c4  hottest    white-hot cream (dark) / deep ember (light)
+   (hex values only: #rgb or #rrggbb)
+
+     --s4-flow-speed   drift speed multiplier (1 = default)
+
    Bleeds past the .scene padding so it reaches the viewport edges.
    ---------------------------------------------------------------------- */
 
 .scene4-heat {
+  /* Dilutes the whole field toward the page background so neutrals keep
+     dominating the screen; the accent stays a small, intentional share. */
+  --s4-heat-opacity: 0.88;
+  --s4-flow-speed: 1;
+
+  /* dark ramp (default theme): ash-cold neutrals, ink middle,
+     ember -> white-hot. No blue anywhere on the cold side. */
+  --s4-c0: #3a3e42;
+  --s4-c1: #1a1e23;
+  --s4-c2: #0b0f14;
+  --s4-c3: #e8690a;
+  --s4-c4: #ffd9a3;
+
+  /* cursor position for the CSS fallback (set from JS) */
+  --s4-mx: 50%;
+  --s4-my: 50%;
+  --s4-hover: 0;
+
   position: absolute;
   inset: -12vw;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  opacity: var(--s4-heat-opacity);
+  background: var(--s4-c2);
 }
 
-/* Slow-flowing thermal wash: a wide multi-stop heat-map ramp whose
-   position sweeps diagonally across the field, so the *whole* surface
-   reads as moving heat. */
-.scene4-heat-flow {
+/* Static base under the canvas: shows for the first frame, and animates
+   on its own if WebGL is unavailable. Neutral ground with muted ember
+   bands — the accent is deliberately diluted so ink/gray dominates. */
+.scene4-heat::before {
+  content: "";
   position: absolute;
-  inset: -20%;
+  inset: 0;
   background: linear-gradient(
-    115deg,
-    rgba(4, 2, 2, 0) 0%,
-    rgba(28, 6, 4, 0.28) 16%,
-    rgba(120, 18, 10, 0.3) 34%,
-    rgba(199, 46, 20, 0.3) 52%,
-    rgba(238, 120, 24, 0.3) 70%,
-    rgba(250, 196, 60, 0.28) 84%,
-    rgba(255, 236, 194, 0.24) 100%
+    118deg,
+    var(--s4-c1) 0%,
+    var(--s4-c2) 22%,
+    color-mix(in srgb, var(--s4-c3) 48%, var(--s4-c2)) 42%,
+    var(--s4-c2) 58%,
+    var(--s4-c1) 74%,
+    color-mix(in srgb, var(--s4-c3) 38%, var(--s4-c2)) 90%,
+    var(--s4-c2) 100%
   );
   background-size: 240% 240%;
-  filter: blur(64px);
-  opacity: 0.92;
-  will-change: background-position;
-  animation: scene4Flow 44s ease-in-out infinite alternate;
+  background-position: 35% 45%;
 }
 
-.scene4-heat-layer {
+.scene4-heat-canvas {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(92px);
-  will-change: transform;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.9s ease;
 }
 
-/* Cold sink — near-black. Anchors one side of the field at the bottom
-   of the spectrum so the hot zones read hot by contrast. */
-.scene4-heat-layer.is-cold {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(2, 1, 1, 0.78) 0%,
-    rgba(20, 6, 3, 0.44) 46%,
-    transparent 74%
-  );
-  width: 80%;
-  height: 86%;
-  left: -8%;
-  bottom: -14%;
-  animation: scene4Drift4 46s ease-in-out infinite alternate;
+.scene4-heat[data-ready] .scene4-heat-canvas {
+  opacity: 1;
 }
 
-/* Low transition — dark red / ember, the base of the warm band. */
-.scene4-heat-layer.is-base {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(120, 20, 8, 0.5) 0%,
-    rgba(70, 12, 5, 0.32) 44%,
-    transparent 72%
-  );
-  width: 94%;
-  height: 98%;
-  left: -18%;
-  top: -12%;
-  animation: scene4Drift1 40s ease-in-out infinite alternate;
+/* --- fallback (no WebGL) --------------------------------------------------
+   The base gradient drifts, and an ember core with a neutral ash rim
+   follows the cursor. */
+
+.scene4-heat[data-fallback] .scene4-heat-canvas {
+  display: none;
 }
 
-/* Mid transition — red into orange, the core of the warm band. */
-.scene4-heat-layer.is-mid {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(224, 60, 24, 0.44) 0%,
-    rgba(176, 42, 16, 0.26) 46%,
-    transparent 74%
-  );
-  width: 78%;
-  height: 84%;
-  right: -6%;
-  top: 4%;
-  animation: scene4Drift2 34s ease-in-out infinite alternate;
+.scene4-heat[data-fallback]::before {
+  animation: scene4HeatDrift 36s ease-in-out infinite alternate;
 }
 
-/* Warm highlight — orange into yellow, approaching the peak. */
-.scene4-heat-layer.is-hot {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(248, 162, 32, 0.42) 0%,
-    rgba(228, 110, 18, 0.24) 46%,
-    transparent 72%
-  );
-  width: 60%;
-  height: 64%;
-  right: 4%;
-  bottom: -6%;
-  animation: scene4Drift3 38s ease-in-out infinite alternate;
+.scene4-heat[data-fallback]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--s4-hover);
+  background:
+    radial-gradient(
+      circle 22vmax at var(--s4-mx) var(--s4-my),
+      var(--s4-c4) 0%,
+      var(--s4-c3) 26%,
+      transparent 58%
+    ),
+    radial-gradient(
+      circle 34vmax at var(--s4-mx) var(--s4-my),
+      transparent 44%,
+      var(--s4-c0) 60%,
+      transparent 84%
+    );
 }
 
-/* Peak zone — the hottest reading: bright white core, yellow halo,
-   red-hot rim. Small and mobile: it travels the farthest so the
-   hot spot appears to race across the surface. */
-.scene4-heat-layer.is-peak {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 250, 232, 0.58) 0%,
-    rgba(255, 208, 120, 0.34) 30%,
-    rgba(230, 74, 30, 0.18) 56%,
-    transparent 74%
-  );
-  width: 40%;
-  height: 44%;
-  left: 40%;
-  top: 30%;
-  filter: blur(70px);
-  animation: scene4Drift5 28s ease-in-out infinite alternate;
+.scene4-heat[data-fallback].is-paused::before {
+  animation-play-state: paused;
 }
 
-/* --- entropy layer -----------------------------------------------------
-   Granular hot cells that drift in different directions and interfere,
-   so overlapping cells brighten into shifting hot spots — the visual of
-   a disordered, high-entropy heat field. Additive (screen) blend over
-   the smooth ramp; a slow "breathe" scale keeps the speckle churning.
+@keyframes scene4HeatDrift {
+  from {
+    background-position: 0% 30%;
+  }
+  to {
+    background-position: 100% 70%;
+  }
+}
+
+/* --- veil ----------------------------------------------------------------
+   Settles the field back toward the page background on the text side so
+   the type stays the calmest part of the slide. A plain left-to-right
+   fade, no shapes. This is what keeps body text off the gradient,
+   per the gradient rules.
    ---------------------------------------------------------------------- */
-.scene4-entropy {
-  position: absolute;
-  inset: -25%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-  opacity: 0.5;
-  filter: blur(24px);
-  will-change: background-position, transform;
-  background-repeat: repeat;
-  background-image:
-    radial-gradient(circle at 18% 24%, rgba(255, 214, 120, 0.55) 0, rgba(255, 214, 120, 0) 22%),
-    radial-gradient(circle at 72% 16%, rgba(255, 132, 40, 0.5) 0, rgba(255, 132, 40, 0) 20%),
-    radial-gradient(circle at 42% 62%, rgba(240, 70, 28, 0.5) 0, rgba(240, 70, 28, 0) 24%),
-    radial-gradient(circle at 86% 74%, rgba(255, 246, 220, 0.5) 0, rgba(255, 246, 220, 0) 18%),
-    radial-gradient(circle at 8% 82%, rgba(224, 60, 24, 0.45) 0, rgba(224, 60, 24, 0) 22%),
-    radial-gradient(circle at 58% 44%, rgba(250, 170, 60, 0.5) 0, rgba(250, 170, 60, 0) 20%);
-  background-size: 44% 44%, 44% 44%, 60% 60%, 60% 60%, 52% 52%, 52% 52%;
-  animation: scene4EntropyDrift 34s linear infinite alternate,
-    scene4EntropyBreathe 19s ease-in-out infinite alternate;
-}
 
-/* Settles the field back toward the page background at the edges so it
-   never competes with the type. Centred slightly toward the visual
-   side so the text column stays the calmest part of the slide. */
 .scene4-heat-veil {
   position: absolute;
   inset: -12vw;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 72% 72% at 62% 50%,
-    transparent 28%,
-    var(--bg) 100%
-  );
-  opacity: 0.72;
-}
-
-/* --- motion ------------------------------------------------------------
-   Wider, faster drift; a diagonal flow sweep; and the entropy churn.
-   Transform / background-position only.
-   ---------------------------------------------------------------------- */
-
-@keyframes scene4Flow {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
-}
-
-@keyframes scene4Drift1 {
-  0% {
-    transform: translate3d(-4%, -3%, 0);
-  }
-  100% {
-    transform: translate3d(10%, 7%, 0);
-  }
-}
-
-@keyframes scene4Drift2 {
-  0% {
-    transform: translate3d(6%, -4%, 0);
-  }
-  100% {
-    transform: translate3d(-12%, 9%, 0);
-  }
-}
-
-@keyframes scene4Drift3 {
-  0% {
-    transform: translate3d(-6%, 4%, 0);
-  }
-  100% {
-    transform: translate3d(13%, -8%, 0);
-  }
-}
-
-@keyframes scene4Drift4 {
-  0% {
-    transform: translate3d(-4%, 5%, 0);
-  }
-  100% {
-    transform: translate3d(8%, -10%, 0);
-  }
-}
-
-/* The peak travels farthest — the most visible "heat moving". */
-@keyframes scene4Drift5 {
-  0% {
-    transform: translate3d(-16%, 12%, 0);
-  }
-  100% {
-    transform: translate3d(18%, -14%, 0);
-  }
-}
-
-/* Each cell field slides a different way, so they interfere and churn. */
-@keyframes scene4EntropyDrift {
-  0% {
-    background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
-  }
-  100% {
-    background-position: 120% 80%, -90% 60%, 70% -110%, -80% -70%, 130% -40%, -60% 100%;
-  }
-}
-
-@keyframes scene4EntropyBreathe {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(1.08);
-  }
+  background: var(--bg);
+  opacity: 0.74;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 66%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 66%);
 }
 
 /* --- light theme -------------------------------------------------------
-   Same black-body ramp, paper-white cold end, lower overall intensity
-   so dark body text stays comfortable to read on top of it.
+   Same field, neutral-first ramp: cool Ternary gray cold side, paper
+   neutral middle, Thermodynamic warm side. The accent appears only as a
+   large graphic fill (its correct light-mode role) and never sits under
+   text — the veil keeps the type side on paper.
    ---------------------------------------------------------------------- */
 
-[data-theme="light"] .scene4-heat-flow {
-  background: linear-gradient(
-    115deg,
-    rgba(240, 236, 226, 0) 0%,
-    rgba(236, 214, 196, 0.24) 18%,
-    rgba(224, 150, 110, 0.24) 38%,
-    rgba(216, 96, 60, 0.24) 56%,
-    rgba(226, 150, 60, 0.22) 74%,
-    rgba(240, 206, 140, 0.2) 88%,
-    rgba(248, 236, 208, 0.18) 100%
-  );
-  opacity: 0.82;
-}
+[data-theme="light"] .scene4-heat {
+  --s4-heat-opacity: 0.86;
 
-[data-theme="light"] .scene4-heat-layer.is-cold {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(231, 225, 214, 0.78) 0%,
-    rgba(231, 225, 214, 0.42) 48%,
-    transparent 76%
-  );
-}
-
-[data-theme="light"] .scene4-heat-layer.is-base {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(214, 120, 80, 0.34) 0%,
-    rgba(198, 96, 56, 0.2) 46%,
-    transparent 74%
-  );
-}
-
-[data-theme="light"] .scene4-heat-layer.is-mid {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(214, 92, 52, 0.34) 0%,
-    rgba(194, 74, 36, 0.2) 46%,
-    transparent 74%
-  );
-}
-
-[data-theme="light"] .scene4-heat-layer.is-hot {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(228, 152, 58, 0.32) 0%,
-    rgba(212, 120, 40, 0.18) 46%,
-    transparent 72%
-  );
-}
-
-[data-theme="light"] .scene4-heat-layer.is-peak {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 252, 244, 0.66) 0%,
-    rgba(250, 214, 150, 0.3) 32%,
-    rgba(214, 92, 52, 0.12) 58%,
-    transparent 74%
-  );
-}
-
-/* On paper the cells read as warm shadows rather than glow, so multiply
-   instead of screen and keep the intensity low. */
-[data-theme="light"] .scene4-entropy {
-  mix-blend-mode: multiply;
-  opacity: 0.3;
-  background-image:
-    radial-gradient(circle at 18% 24%, rgba(214, 120, 40, 0.42) 0, transparent 22%),
-    radial-gradient(circle at 72% 16%, rgba(214, 96, 44, 0.4) 0, transparent 20%),
-    radial-gradient(circle at 42% 62%, rgba(198, 72, 40, 0.4) 0, transparent 24%),
-    radial-gradient(circle at 86% 74%, rgba(224, 150, 70, 0.38) 0, transparent 18%),
-    radial-gradient(circle at 8% 82%, rgba(190, 70, 40, 0.36) 0, transparent 22%),
-    radial-gradient(circle at 58% 44%, rgba(220, 130, 50, 0.4) 0, transparent 20%);
+  --s4-c0: #8a8a8a;
+  --s4-c1: #e2e5e7;
+  --s4-c2: #f6f1e8;
+  --s4-c3: #e8690a;
+  --s4-c4: #a84a06;
 }
 
 [data-theme="light"] .scene4-heat-veil {
-  opacity: 0.66;
+  /* slightly stronger veil so dark body text stays comfortable
+     over the ember field */
+  opacity: 0.72;
 }
 
-/* --- reduced motion: hold the field still ------------------------------ */
+/* --- reduced motion: hold the field still ------------------------------
+   The shader also stops drifting (checked in JS); the cursor spot still
+   responds because it is user-driven. */
 
 @media (prefers-reduced-motion: reduce) {
-  .scene4-heat-flow,
-  .scene4-heat-layer,
-  .scene4-entropy {
+  .scene4-heat[data-fallback]::before {
     animation: none;
   }
 }
