@@ -1,25 +1,19 @@
 /* ============================================================
-   Scene3 backdrop — "instrument glass", inclined beam
-   Neutral graticule + brushed reflective surface. One Photonic
-   beam (Spectrum Line) traverses horizontally while the bar
-   leans at --beam-tilt. The bar is oversized and its ends
-   dissolve, so the incline never hard-clips; traversal bounds
-   are vw-based so the wider tilted footprint fully exits before
-   wrapping. The surface answers with a horizontal specular
-   smear — brushed grain smears highlights along the grain.
+   Scene3 backdrop — instrument glass, inclined beam
+   One animated carrier (.holo-beam) holds BOTH the light bar
+   and its reflection. They share a parent, a tilt variable and
+   a rotation origin, so the two inclines are exactly parallel
+   and can never drift apart. Neutrals invert per theme; the
+   paradigm color stays fixed.
    ============================================================ */
 
 .holo-bg {
   /* PHOTONIC — keep in sync with Scene3.jsx */
   --holo-accent-rgb: 240, 171, 0;
-  /* shared by beam + reflection → they can never drift apart */
+  /* shared geometry — used by the bar AND its reflection */
   --beam-width: 18%;
-  /* incline of the light bar; negative mirrors the lean */
-  --beam-tilt: 18deg;
-  /* how far the bar extends past top/bottom before tilting */
-  --beam-overscan: 30%;
-  /* optional: lean the reflection to match the beam (0 = physical) */
-  --reflect-tilt: 0deg;
+  --beam-tilt: 18deg;       /* incline; negative mirrors the lean */
+  --beam-overscan: 30%;     /* how far both extend past top/bottom */
 
   position: absolute;
   inset: 0;
@@ -30,17 +24,16 @@
 }
 .scene-inner > .split { position: relative; z-index: 1; }
 
-/* ------------------------------------------------------------
-   Shared traversal — horizontal, constant velocity, generous
-   vw bounds so the tilted footprint fully clears the screen.
-   The same keyframes drive the beam AND its reflection.
-   ------------------------------------------------------------ */
+/* Traversal — horizontal, constant velocity. Only ONE element
+   runs these keyframes now, so there is nothing to desync.
+   Bounds match the inclined footprint: the pass stays on
+   screen most of the cycle instead of lingering off-stage. */
 @keyframes holoSweep {
-  0%   { transform: translate3d(calc(-100% - 60vw), 0, 0); opacity: 0; filter: brightness(1); }
+  0%   { transform: translate3d(calc(-100% - 35vw), 0, 0); opacity: 0; filter: brightness(1); }
   8%   { opacity: 1; }
   55%  { filter: brightness(1.35); }  /* catches the surface's specular centre */
   92%  { opacity: 1; }
-  100% { transform: translate3d(calc(100% + 120vw), 0, 0); opacity: 0; filter: brightness(1); }
+  100% { transform: translate3d(calc(100% + 105vw), 0, 0); opacity: 0; filter: brightness(1); }
 }
 
 /* ------------------------------------------------------------
@@ -106,12 +99,12 @@
 }
 
 /* ------------------------------------------------------------
-   3 — Specular smear: the beam's reflection in the grain.
-   Same width + same keyframes as the beam → hard-synced.
-   Horizontal on purpose (grain direction); set --reflect-tilt
-   to lean it with the beam instead.
+   3 — The beam carrier: the single animated element.
+   Both children are centered on the carrier and rotate about
+   the same point, so bar and reflection lean in perfect
+   parallel — by construction, not by coincidence.
    ------------------------------------------------------------ */
-.holo-beam-reflect {
+.holo-beam {
   position: absolute;
   top: 0; bottom: 0;
   left: 0;
@@ -120,13 +113,20 @@
   will-change: transform;
   animation: holoSweep 16s linear infinite;
 }
-.holo-beam-reflect::before {
-  content: "";
+
+/* 3a — Reflection: the bar's answer in the brushed grain.
+   Wider than the bar (anisotropic smear), inclined at the
+   SAME angle via the SAME variable, diffused with blur. */
+.holo-beam-shadow {
   position: absolute;
-  top: 0; bottom: 0;
-  left: -85%;                 /* far wider than the beam: anisotropic smear */
-  width: 270%;
-  transform: rotate(var(--reflect-tilt));
+  left: -85%;                /* wider than the carrier: smeared streak */
+  right: -85%;
+  top: calc(-1 * var(--beam-overscan));
+  bottom: calc(-1 * var(--beam-overscan));
+  transform: rotate(var(--beam-tilt));
+  filter: blur(6px);         /* remove for a razor-sharp reflection */
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
   background:
     /* neutral specular streak caught in the grain */
     linear-gradient(90deg,
@@ -142,11 +142,8 @@
       rgba(var(--holo-accent-rgb), 0.06)  50%,
       rgba(var(--holo-accent-rgb), 0.028) 60%,
       rgba(var(--holo-accent-rgb), 0)   100%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
 }
-.holo-bg.holo-light .holo-beam-reflect { mix-blend-mode: normal; }
-.holo-bg.holo-light .holo-beam-reflect::before {
+.holo-bg.holo-light .holo-beam-shadow {
   background:
     linear-gradient(90deg,
       rgba(0, 0, 0, 0)     0%,
@@ -162,30 +159,14 @@
       rgba(var(--holo-accent-rgb), 0)  100%);
 }
 
-/* ------------------------------------------------------------
-   4 — The beam (Spectrum Line), now inclined.
-   .holo-beam      = animated carrier, pure horizontal translate
-   .holo-beam-bar  = the leaning bar: layered shine, bloom,
-                     1px specular line + travelling glint
-   ------------------------------------------------------------ */
-.holo-beam {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 0;
-  width: var(--beam-width);
-  mix-blend-mode: screen;
-  will-change: transform;
-  animation: holoSweep 16s linear infinite;
-}
-
+/* 3b — The bar: layered shine (shoulders → gold core →
+   white-hot filament), bloom halo, 1px line + travelling glint */
 .holo-beam-bar {
   position: absolute;
   left: 0; right: 0;
   top: calc(-1 * var(--beam-overscan));
   bottom: calc(-1 * var(--beam-overscan));
   transform: rotate(var(--beam-tilt));
-  /* ends dissolve — the incline can never hard-clip against
-     the top/bottom screen edges */
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
           mask-image: linear-gradient(180deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
   background:
@@ -209,7 +190,6 @@
       rgba(var(--holo-accent-rgb), 0.05) 62%,
       rgba(var(--holo-accent-rgb), 0)   100%);
 }
-
 /* bloom halo riding with the beam */
 .holo-beam-bar::before {
   content: "";
@@ -222,7 +202,6 @@
     rgba(var(--holo-accent-rgb), 0) 70%);
   filter: blur(12px);
 }
-
 /* 1px specular line + glint sliding down the incline */
 .holo-beam-bar::after {
   content: "";
@@ -232,13 +211,11 @@
   width: 1px;
   margin-left: -0.5px;
   background-image:
-    /* base line */
     linear-gradient(180deg,
       rgba(255, 255, 255, 0)    0%,
       rgba(255, 255, 255, 0.55) 18%,
       rgba(255, 255, 255, 0.55) 82%,
       rgba(255, 255, 255, 0)  100%),
-    /* travelling glint */
     linear-gradient(180deg,
       rgba(255, 255, 255, 0)    0%,
       rgba(255, 255, 255, 0.95) 50%,
@@ -293,13 +270,13 @@
       rgba(var(--holo-accent-rgb), 0.55) 82%,
       rgba(var(--holo-accent-rgb), 0)  100%),
     linear-gradient(180deg,
-      rgba(var(--holo-accent-rgb), 0)  0%,
+      rgba(var(--holo-accent-rgb), 0)    0%,
       rgba(var(--holo-accent-rgb), 0.8) 50%,
       rgba(var(--holo-accent-rgb), 0)  100%);
 }
 
 /* ------------------------------------------------------------
-   5 — Grain + Depth Wash
+   4 — Grain + Depth Wash
    ------------------------------------------------------------ */
 .holo-grain {
   position: absolute;
@@ -323,7 +300,8 @@
 }
 .holo-bg.holo-light .holo-vignette { --vignette: rgba(20, 20, 20, 0.07); }
 
-/* Small screens: gentler incline + drop the minor grid */
+/* Small screens: gentler incline (applies to bar AND shadow
+   automatically, since they share --beam-tilt) */
 @media (max-width: 640px) {
   .holo-bg { --beam-tilt: 12deg; --beam-width: 24%; }
   .holo-graticule {
@@ -336,8 +314,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .holo-graticule { animation: none; opacity: 0.9; }
-  .holo-beam,
-  .holo-beam-reflect {
+  .holo-beam {
     animation: none;
     transform: translate3d(calc(100% + 23vw), 0, 0);  /* parked mid-screen */
     opacity: 0.85;

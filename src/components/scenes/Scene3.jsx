@@ -108,9 +108,9 @@ function HoloBackground() {
     <div className={`holo-bg ${isDark ? "holo-dark" : "holo-light"}`} aria-hidden="true">
       <div className="holo-graticule" />
       <div className="holo-reflect" />
-      <div className="holo-beam-reflect" />   {/* horizontal smear, synced */}
-      <div className="holo-beam">             {/* animated carrier: horizontal traverse */}
-        <div className="holo-beam-bar" />     {/* the inclined, shiny bar */}
+      <div className="holo-beam">            {/* the ONE animated carrier */}
+        <div className="holo-beam-shadow" /> {/* reflection: same parent → same tilt, same position, same clock */}
+        <div className="holo-beam-bar" />    {/* the shiny inclined bar, drawn over its reflection */}
       </div>
       <div className="holo-grain" />
       <div className="holo-vignette" />
