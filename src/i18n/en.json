@@ -25,12 +25,211 @@
     "placeholderReply": "QPT is not wired up yet. Backend integration coming soon.",
     "send": "Send"
   },
+  "paradigms": {
+    "quantum": "Quantum",
+    "photonic": "Photonic",
+    "thermodynamic": "Thermodynamic",
+    "classical": "Classical"
+  },
   "monitor": {
     "title": "Monitor",
-    "cpu": "CPU",
-    "memory": "Memory",
-    "gpu": "GPU",
-    "status": "Status"
+    "back": "Back to site",
+    "awaiting": "Awaiting telemetry",
+    "aria": {
+      "trainingMetrics": "Training metrics",
+      "resizeSplitter": "Resize metrics and diagram panels"
+    },
+    "appbar": {
+      "status": {
+        "sim": "Simulated data",
+        "live": "Live telemetry",
+        "connecting": "Connecting",
+        "error": "Connection error",
+        "idle": "Idle"
+      },
+      "playbackAria": "Playback",
+      "resume": "Resume",
+      "pause": "Pause",
+      "slower": "Slower",
+      "faster": "Faster"
+    },
+    "kpi": {
+      "ariaLabel": "Training vitals",
+      "trainingLoss": "Training loss",
+      "validationLoss": "Validation loss",
+      "perplexity": "Perplexity",
+      "learningRate": "Learning rate",
+      "gradientNorm": "Gradient norm",
+      "gradientNormBadge": "clipped",
+      "throughput": "Throughput",
+      "compute": "Compute",
+      "energyPerToken": "Energy per token",
+      "runCost": "Run cost"
+    },
+    "diagram": {
+      "title": "Model architecture",
+      "meta": "{{blocks}} blocks · {{heads}} heads · d {{dModel}} · {{params}} params",
+      "architectureAria": "Architecture",
+      "viewAria": "View",
+      "view": {
+        "perspective": "3D",
+        "front": "Front",
+        "side": "Side"
+      },
+      "exploded": "Exploded",
+      "explodedTitle": "Spread each block's sub-layers apart",
+      "resetView": "Reset view",
+      "blockGroup": {
+        "title": "Transformer blocks × {{count}}",
+        "paramsEach": "{{params}} params each",
+        "norm": "norm",
+        "attention": "attention",
+        "feedForward": "feed-forward",
+        "residualStream": "residual stream"
+      }
+    },
+    "legend": {
+      "executedOn": "Executed on",
+      "ariaLabel": "Compute paradigm legend",
+      "tooltip": "{{paradigm}}: {{count}} components, {{share}}% of parameters. Click to isolate."
+    },
+    "detail": {
+      "title": "Component",
+      "titlePinned": "Component · pinned",
+      "clearSelection": "Clear selection",
+      "hint": "Hover a rectangle in the diagram to inspect it. Click to pin it and isolate its block.",
+      "decoding": "{{label}} decoding",
+      "executedOn": "executed on",
+      "tensor": "tensor",
+      "parameters": "parameters",
+      "parametersNone": "none",
+      "parametersTied": "{{value}} (tied)",
+      "stepShare": "block {{layer}} · step share",
+      "energyPerStep": "energy / step",
+      "gradientShare": "gradient share",
+      "updateRatio": "update ratio",
+      "ablationDelta": "ablation Δloss",
+      "meanHeadEntropy": "mean head entropy"
+    },
+    "substrate": {
+      "title": "Substrate",
+      "utilization": "utilization",
+      "utilizationAria": "Substrate utilization",
+      "throughput": "throughput",
+      "latency": "latency",
+      "errorRate": "error rate",
+      "thermal": "thermal",
+      "powerDraw": "power draw",
+      "memoryPeak": "memory peak",
+      "runEnergy": "run energy",
+      "runCost": "run cost",
+      "costPerMTokens": "cost / M tokens",
+      "energyPrice": "energy price"
+    },
+    "tokens": {
+      "titleDiffusion": "Token stream · parallel denoising",
+      "titleAr": "Token stream · autoregressive",
+      "ariaLabel": "Token stream",
+      "timestepAria": "Diffusion timestep",
+      "followLive": "Follow live timestep",
+      "live": "live",
+      "waiting": "Waiting for the first generation record."
+    },
+    "log": {
+      "title": "Event log"
+    },
+    "arch": {
+      "ar": {
+        "label": "Autoregressive",
+        "summary": "Left-to-right decoding. Each forward pass predicts one token; the sample is appended to the context and the pass repeats.",
+        "tokenizer": {
+          "label": "Tokenizer",
+          "shape": "text → [B, {{seq}}] token ids"
+        },
+        "embedding": {
+          "label": "Token embedding",
+          "shape": "[{{vocab}}, {{dModel}}] lookup"
+        },
+        "positional": {
+          "label": "Positional encoding",
+          "shape": "[{{seq}}, {{dModel}}] rotary"
+        },
+        "finalNorm": {
+          "label": "Final normalization",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "lmHead": {
+          "label": "Output projection (LM head)",
+          "shape": "[{{dModel}}, {{vocab}}] · tied to embedding"
+        },
+        "softmax": {
+          "label": "Softmax over vocabulary",
+          "shape": "[B, {{seq}}, {{vocab}}] probabilities"
+        },
+        "sampling": {
+          "label": "Sampling / decoding",
+          "shape": "top-p · temperature → next token id"
+        },
+        "loop": {
+          "label": "Next token appended to context",
+          "sublabel": "one token per pass · causal mask"
+        }
+      },
+      "diffusion": {
+        "label": "Diffusion",
+        "summary": "Parallel decoding. Every position is denoised at once; the model is conditioned on the timestep and iterates from noise to text.",
+        "tokenizer": {
+          "label": "Tokenizer",
+          "shape": "text → [B, {{seq}}] token ids"
+        },
+        "noise": {
+          "label": "Noise / masking  xₜ",
+          "shape": "[B, {{seq}}] corrupted at level t"
+        },
+        "embedding": {
+          "label": "Token embedding",
+          "shape": "[{{vocab}}, {{dModel}}] lookup"
+        },
+        "positional": {
+          "label": "Positional encoding",
+          "shape": "[{{seq}}, {{dModel}}] rotary"
+        },
+        "timestep": {
+          "label": "Timestep embedding",
+          "shape": "t → [{{dModel}}] sinusoidal + MLP"
+        },
+        "finalNorm": {
+          "label": "Final adaptive norm",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "denoiseHead": {
+          "label": "Denoising head  x̂₀ logits",
+          "shape": "[{{dModel}}, {{vocab}}] · tied to embedding"
+        },
+        "softmax": {
+          "label": "Categorical distribution",
+          "shape": "[B, {{seq}}, {{vocab}}] per position"
+        },
+        "denoiseStep": {
+          "label": "Denoising step  xₜ → xₜ₋₁",
+          "shape": "re-mask low-confidence positions"
+        },
+        "loop": {
+          "label": "T denoising iterations",
+          "sublabel": "all positions in parallel · no causal mask"
+        }
+      },
+      "sublayer": {
+        "attnCausal": "Causal self-attention · {{heads}} heads",
+        "attnBidirectional": "Bidirectional self-attention · {{heads}} heads",
+        "attnShape": "Q,K,V,O: [{{dModel}}, {{dModel}}] × 4 · head dim {{headDim}}",
+        "normPreNorm": "Pre-norm (RMSNorm)",
+        "normAdaptive": "Adaptive norm (t-conditioned)",
+        "normShape": "[B, {{seq}}, {{dModel}}]",
+        "ffnLabel": "Feed-forward network",
+        "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    }
   },
   "scene1": {
     "line": "The future of artificial intelligence does not belong to electricity alone."
@@ -49,11 +248,7 @@
   },
   "scene5": {
     "statement": "QPT — the first language model to combine the best of three types of computing to achieve greater efficiency and lower cost.",
-    "detail": "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic.",
-    "quantum": "Quantum",
-    "photonic": "Photonic",
-    "thermodynamic": "Thermodynamic",
-    "classical": "Classical"
+    "detail": "Each transformer component is assigned to the computing paradigm that best expresses its underlying mathematics — classical, quantum, photonic, or thermodynamic."
   },
   "scene6": {
     "eyebrow": "Model output",
@@ -181,10 +376,22 @@
     "goal": {
       "eyebrow": "04 · The Goal",
       "title": "Maximize <acc>efficiency</acc> — by swapping layers until we find the perfect paradigm combination.",
-      "cost": { "v": "↓ Cost", "k": "Compute economics" },
-      "quality": { "v": "↑ Quality", "k": "Model output" },
-      "time": { "v": "↓ Time", "k": "Training & inference speed" },
-      "energy": { "v": "↓ Energy", "k": "Watts per token" },
+      "cost": {
+        "v": "↓ Cost",
+        "k": "Compute economics"
+      },
+      "quality": {
+        "v": "↑ Quality",
+        "k": "Model output"
+      },
+      "time": {
+        "v": "↓ Time",
+        "k": "Training & inference speed"
+      },
+      "energy": {
+        "v": "↓ Energy",
+        "k": "Watts per token"
+      },
       "lead": "The objective is to maximize the efficiency of a language model along four axes — cost, quality, time, and energy consumption — by swapping out each layer to find the perfect paradigm combination."
     },
     "footer": {

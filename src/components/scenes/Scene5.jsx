@@ -1,34 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../../styles/Scene5.css";
+import { PARADIGM_META, hexToRgb } from "../../config/paradigms";
+import { LLM_PIPELINE } from "../../config/architecture";
 
-// ── Brand palette (matches rest of app) ──────────────────────────────────────
-const QUANTUM   = "#5bad1e";
-const PHOTONIC  = "#f0ab00";
-const THERMO    = "#e8690a";
-const CLASSICAL = "#8a8a8a";
+// ── Brand palette (shared with the rest of the app) ──────────────────────────
 
-const PARADIGM_META = {
-  quantum:       { color: QUANTUM,   label: "Quantum",       glyph: "Q" },
-  photonic:      { color: PHOTONIC,  label: "Photonic",      glyph: "P" },
-  thermodynamic: { color: THERMO,    label: "Thermodynamic", glyph: "T" },
-  classical:     { color: CLASSICAL, label: "Classical",     glyph: "C" },
-};
+const QUANTUM   = PARADIGM_META.quantum.color;
+const PHOTONIC  = PARADIGM_META.photonic.color;
+const THERMO    = PARADIGM_META.thermodynamic.color;
 
-// LLM pipeline with paradigm assignment
-const LAYERS = [
-  { id: 0,  label: "Tokenizer",              paradigm: "classical" },
-  { id: 1,  label: "Token Embeddings",       paradigm: "quantum" },
-  { id: 2,  label: "Positional Encoding",    paradigm: "photonic" },
-  { id: 3,  label: "Attention Mechanism",    paradigm: "photonic" },
-  { id: 4,  label: "Feed-Forward Network",   paradigm: "photonic" },
-  { id: 5,  label: "Normalization",          paradigm: "thermodynamic" },
-  { id: 6,  label: "Residual Connections",   paradigm: "classical" },
-  { id: 7,  label: "Transformer Blocks",     paradigm: "classical" },
-  { id: 8,  label: "Output Projection",      paradigm: "quantum" },
-  { id: 9,  label: "Softmax / Distribution", paradigm: "thermodynamic" },
-  { id: 10, label: "Sampling / Decoding",    paradigm: "thermodynamic" },
-];
+// LLM pipeline with paradigm assignment — shared with the Monitor diagram.
+const LAYERS = LLM_PIPELINE;
 
 // ── Sweep timeline (one full cycle) ──────────────────────────────────────────
 const INITIAL_DELAY_MS = 400;   // dark grace period before the first sweep
@@ -61,15 +44,6 @@ const PARTICLE_CONFIGS = {
 // ── Small utils ──────────────────────────────────────────────────────────────
 const clamp      = (v, min, max) => Math.max(min, Math.min(max, v));
 const smoothstep = (t) => t * t * (3 - 2 * t);
-
-function hexToRgb(hex) {
-  const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
-}
 
 const PARADIGM_RGB = Object.fromEntries(
   Object.entries(PARADIGM_META).map(([k, m]) => [k, hexToRgb(m.color)])
@@ -418,7 +392,7 @@ function StatusStrip({ phase, revealed }) {
             width: 4, height: 4, borderRadius: "50%",
             background: meta.color, boxShadow: `0 0 6px ${meta.color}80`,
           }} />
-          {t(`scene5.${current.paradigm}`, meta.label)}
+          {t(`paradigms.${current.paradigm}`, meta.label)}
         </span>
       ) : (
         <span style={{ flexShrink: 0, opacity: 0.7 }}>
@@ -530,7 +504,7 @@ function Legend() {
             color: meta.color,
             textTransform: "uppercase",
           }}>
-            {t(`scene5.${key}`, meta.label)}
+            {t(`paradigms.${key}`, meta.label)}
           </span>
         </div>
       ))}
@@ -659,7 +633,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW, compact, rowRef }) {
 // Small helper so paradigm tags translate too
 function ParadigmTag({ paradigm }) {
   const { t } = useTranslation();
-  return <>{t(`scene5.${paradigm}`, PARADIGM_META[paradigm].label)}</>;
+  return <>{t(`paradigms.${paradigm}`, PARADIGM_META[paradigm].label)}</>;
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
