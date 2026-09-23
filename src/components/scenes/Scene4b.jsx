@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
@@ -544,10 +544,10 @@ function FormulaCard() {
     </div>
   );
 }
-function Visual() {
+function Visual({ active }) {
   const { isDark } = useTheme();
   return (
-    <Canvas camera={{ position: [0, 3.1, 4.7], fov: 44 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
+    <Canvas frameloop={active ? "always" : "demand"} camera={{ position: [0, 3.1, 4.7], fov: 44 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
       <ambientLight intensity={isDark ? 0.45 : 0.85} />
       <pointLight position={[3, 3.5, 2.5]} intensity={0.7} color={THERMO} />
       <pointLight position={[-3, 2, -2.5]} intensity={0.25} color="#5fd8ff" />
@@ -558,23 +558,61 @@ function Visual() {
 
 
 // --- Thermal gradient background ---------------------------------------------
-// Whole-slide heat field. A small WebGL fragment shader draws domain-warped
-// noise as temperature and maps it through a cold -> hot colour ramp. Hot and
-// cold regions drift and slowly trade places. Under the cursor it adds a hot
-// core with a cold rim that stretches into a short comet while the pointer
-// moves, plus a little convection swirl.
+// Whole-slide heat field with a fixed hexagon grid, all drawn by one WebGL
+// canvas (no CSS blend layers, so the browser only composites one plain
+// opaque layer - cheap during slide transitions).
 //
-// It renders at ~1/3 resolution: the field is all soft gradients, so the
-// browser's upscale costs nothing visible. Colours and speed come from the
-// --s4-* variables in Scene4.css, so both themes are tuned there.
+//   pass 1  field    domain-warped noise -> temperature -> colour ramp, at
+//                    1/4 resolution into a texture (it is all soft gradients)
+//   pass 2  compose  upsample the field, draw the fixed hex grid tinted by
+//                    the heat under it, calm the text side, dither
+//
+// Hot and cold regions drift and slowly trade places. Under the cursor a hot
+// core with a cold rim follows the pointer, stretching into a short comet
+// while it moves. Colours, grid and veil come from the --s4-* variables in
+// Scene4.css, so both themes are tuned there.
+//
+// Performance: the canvas is created and the shaders compiled in idle time
+// (async compile where the browser supports it), drift renders at 30 fps and
+// only cursor activity runs at full rate, and nothing renders while the slide
+// is inactive.
 // This block is identical in Scene4a.jsx and Scene4b.jsx.
 
-const HEAT_RENDER_SCALE = 0.34; // canvas pixels per CSS pixel
-const HEAT_MAX_PIXELS = 480000; // cap for very large screens
+const HEAT_FIELD_SCALE = 0.25; // field pass: pixels per CSS px
+const HEAT_FIELD_MAX = 320000; // field pass pixel cap
+const HEAT_COMP_MAX_DPR = 1.5; // compose pass: max device-pixel ratio
+const HEAT_COMP_MAX = 3200000; // compose pass pixel cap
+const HEAT_IDLE_FPS = 30; // drift-only frame rate
 
-// Used only if the CSS variables are missing.
-const HEAT_DEFAULT_DARK = ["#3fa7c4", "#123543", "#0b0f14", "#e8690a", "#ffe6b0"];
-const HEAT_DEFAULT_LIGHT = ["#7fb6cc", "#d3e6ec", "#f6f1e8", "#f3a15a", "#d4500a"];
+// Used only when a CSS variable is missing (mirror of Scene4.css).
+const HEAT_DEFAULTS = {
+  dark: {
+    c: ["#050404", "#0d0706", "#2a0c05", "#e8690a", "#ffd2a6"],
+    gridLine: "#ffffff",
+    gridBase: "#2a1206",
+    gridOpacity: 0.4,
+    gridBlend: "overlay",
+    veilMode: "multiply",
+    veilTint: "#26120b",
+    veilColor: "#0a0a0b",
+    veilStrength: 1,
+    veilFrom: 0.3,
+    veilTo: 0.68,
+  },
+  light: {
+    c: ["#fffaf6", "#ffe6d2", "#ffc293", "#ff9147", "#e8690a"],
+    gridLine: "#e8690a",
+    gridBase: "#000000",
+    gridOpacity: 0.4,
+    gridBlend: "multiply",
+    veilMode: "fade",
+    veilTint: "#ffffff",
+    veilColor: "#f7f6f3",
+    veilStrength: 0.68,
+    veilFrom: 0.3,
+    veilTo: 0.68,
+  },
+};
 
 const HEAT_VERT = /* glsl */ `
   attribute vec2 aPos;
@@ -583,7 +621,7 @@ const HEAT_VERT = /* glsl */ `
   }
 `;
 
-const HEAT_FRAG = /* glsl */ `
+const HEAT_FIELD_FRAG = /* glsl */ `
   #ifdef GL_FRAGMENT_PRECISION_HIGH
   precision highp float;
   #else
@@ -597,7 +635,7 @@ const HEAT_FRAG = /* glsl */ `
   uniform float uHover;   // 0..1
   uniform vec3  uC0;      // coldest
   uniform vec3  uC1;
-  uniform vec3  uC2;      // neutral
+  uniform vec3  uC2;      // middle
   uniform vec3  uC3;
   uniform vec3  uC4;      // hottest
 
@@ -684,6 +722,10 @@ const HEAT_FRAG = /* glsl */ `
 
     float temp = 0.5 + f * 1.4 + tide * 0.2;
 
+    /* soft ceiling: the drifting field tops out at bright orange, so the
+       palest hot colour is reserved for the cursor */
+    if (temp > 0.72) temp = 0.72 + (temp - 0.72) * 0.3;
+
     /* cursor: hot core, cold rim, edges wobble with the field */
     float R = 0.13;
     float dd = d + fbm3(p * 4.0 + t * 0.3) * 0.06;
@@ -692,7 +734,64 @@ const HEAT_FRAG = /* glsl */ `
     float rim = exp(-x * x);
     temp += uHover * (0.85 * core - 0.38 * rim);
 
-    vec3 col = ramp(temp);
+    gl_FragColor = vec4(ramp(temp), 1.0);
+  }
+`;
+
+const HEAT_COMP_FRAG = /* glsl */ `
+  #ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp float;
+  #else
+  precision mediump float;
+  #endif
+
+  uniform sampler2D uField;
+  uniform vec2  uRes;          // canvas pixels
+  uniform float uScale;        // canvas pixels per CSS pixel
+  uniform float uHexSide;      // hexagon side, CSS px
+  uniform vec3  uGridLine;
+  uniform vec3  uGridBase;
+  uniform float uGridOpacity;
+  uniform float uGridMode;     // 0 overlay, 1 multiply
+  uniform vec3  uVeilTint;
+  uniform vec3  uVeilColor;
+  uniform float uVeilMode;     // 0 multiply by tint, 1 fade to colour
+  uniform float uVeilStrength;
+  uniform vec2  uVeilRange;    // fade from .. to, as a fraction of the width
+
+  /* distance (CSS px) to the nearest edge of a flat-top honeycomb */
+  float hexEdge(vec2 p) {
+    float k = 1.7320508 * uHexSide;
+    vec2 q = p.yx / k;
+    vec2 s = vec2(1.0, 1.7320508);
+    vec4 c = floor(vec4(q, q - vec2(0.5, 1.0)) / s.xyxy) + 0.5;
+    vec4 h = vec4(q - c.xy * s, q - (c.zw + 0.5) * s);
+    vec2 l = dot(h.xy, h.xy) < dot(h.zw, h.zw) ? h.xy : h.zw;
+    l = abs(l);
+    return (0.5 - max(dot(l, s * 0.5), l.x)) * k;
+  }
+
+  void main() {
+    vec2 uv = gl_FragCoord.xy / uRes;
+    vec3 col = texture2D(uField, uv).rgb;
+
+    /* fixed grid, anchored to the top-left corner, 1 CSS px lines */
+    vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y) / uScale;
+    float d = hexEdge(p) * uScale;
+    float w = 0.5 * uScale;
+    float line = 1.0 - smoothstep(w - 0.6, w + 0.6, d);
+    vec3 over = mix(2.0 * col * uGridLine,
+                    1.0 - 2.0 * (1.0 - col) * (1.0 - uGridLine),
+                    step(0.5, col));
+    vec3 tinted = mix(over, col * uGridLine, uGridMode);
+    col = mix(col, tinted, line * uGridOpacity) + uGridBase * line;
+
+    /* calm the text side: multiply along a warm curve (stays saturated,
+       never greys) or fade to a colour */
+    float vm = (1.0 - smoothstep(uVeilRange.x, uVeilRange.y, uv.x)) * uVeilStrength;
+    vec3 darkened = col * pow(max(uVeilTint, vec3(0.001)), vec3(vm));
+    vec3 faded = mix(col, uVeilColor, vm);
+    col = mix(darkened, faded, uVeilMode);
 
     /* dither against banding */
     col += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
@@ -707,6 +806,28 @@ function parseHexColor(value) {
   if (hex.length === 3) hex = hex.replace(/./g, (c) => c + c);
   const n = parseInt(hex, 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+}
+
+// Any CSS colour (hex, rgb(), named...) -> [r, g, b] in 0..1, or null.
+let heatColorCtx = null;
+function parseCssColor(value) {
+  const v = (value || "").trim();
+  if (!v) return null;
+  const hex = parseHexColor(v);
+  if (hex) return hex;
+  if (heatColorCtx === null) {
+    heatColorCtx = document.createElement("canvas").getContext("2d") || false;
+  }
+  if (!heatColorCtx) return null;
+  heatColorCtx.fillStyle = "#010203";
+  heatColorCtx.fillStyle = v;
+  const out = heatColorCtx.fillStyle;
+  if (out === "#010203") return null; // not a colour
+  if (out[0] === "#") return parseHexColor(out);
+  const m = /rgba?\(([^)]+)\)/.exec(out);
+  if (!m) return null;
+  const [r, g, b] = m[1].split(",").map(parseFloat);
+  return [r / 255, g / 255, b / 255];
 }
 
 function HeatBackground({ active, isDark }) {
@@ -725,28 +846,64 @@ function HeatBackground({ active, isDark }) {
       clientX: 0,
       clientY: 0,
       hasPointer: false,
+      lastInput: 0,
       px: 0.5, py: 0.5, // pointer
       mx: 0.5, my: 0.5, // cursor (fast follow)
       tx: 0.5, ty: 0.5, // trail (slow follow)
       hover: 0,
       time: 40,
       speed: 1,
-      palette: null,
-      paletteTarget: null,
+      hexSide: 26,
+      style: null, // flat list of numbers sent to the shaders (see readStyle)
+      styleTarget: null,
     };
 
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     let reduced = motionQuery.matches;
+
     let gl = null;
-    let prog = null;
+    let ext = null;
+    let progField = null;
+    let progComp = null;
+    let fieldShaders = [];
+    let compShaders = [];
     let buf = null;
-    let loc = {};
+    let tex = null;
+    let fbo = null;
+    let locF = {};
+    let locC = {};
+    let glState = "idle"; // idle | compiling | ready | failed | lost
+    let fw = 0;
+    let fh = 0;
+    let compScale = 1;
+
     let raf = 0;
-    let last = 0;
+    let lastDraw = 0;
+    let busy = true;
     let styleDirty = true;
     let ready = false;
+    let disposed = false;
+    let initHandle = null;
 
-    const setupGL = () => {
+    // --- WebGL setup (programs compile asynchronously where supported)
+    const buildProgram = (fragSrc, list) => {
+      const prog = gl.createProgram();
+      [
+        [gl.VERTEX_SHADER, HEAT_VERT],
+        [gl.FRAGMENT_SHADER, fragSrc],
+      ].forEach(([type, src]) => {
+        const sh = gl.createShader(type);
+        gl.shaderSource(sh, src);
+        gl.compileShader(sh);
+        gl.attachShader(prog, sh);
+        list.push(sh);
+      });
+      gl.bindAttribLocation(prog, 0, "aPos");
+      gl.linkProgram(prog);
+      return prog;
+    };
+
+    const beginGL = () => {
       const opts = {
         alpha: false,
         antialias: false,
@@ -757,75 +914,191 @@ function HeatBackground({ active, isDark }) {
       };
       gl = canvas.getContext("webgl", opts) || canvas.getContext("experimental-webgl", opts);
       if (!gl || gl.isContextLost()) return false;
+      ext = gl.getExtension("KHR_parallel_shader_compile");
+      fieldShaders = [];
+      compShaders = [];
+      progField = buildProgram(HEAT_FIELD_FRAG, fieldShaders);
+      progComp = buildProgram(HEAT_COMP_FRAG, compShaders);
 
-      const compile = (type, src) => {
-        const sh = gl.createShader(type);
-        gl.shaderSource(sh, src);
-        gl.compileShader(sh);
-        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-          console.warn("[Scene4] heat shader:", gl.getShaderInfoLog(sh));
-          gl.deleteShader(sh);
-          return null;
-        }
-        return sh;
-      };
-      const vs = compile(gl.VERTEX_SHADER, HEAT_VERT);
-      const fs = compile(gl.FRAGMENT_SHADER, HEAT_FRAG);
-      if (!vs || !fs) return false;
-
-      prog = gl.createProgram();
-      gl.attachShader(prog, vs);
-      gl.attachShader(prog, fs);
-      gl.linkProgram(prog);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        console.warn("[Scene4] heat program:", gl.getProgramInfoLog(prog));
-        gl.deleteProgram(prog);
-        prog = null;
-        return false;
-      }
-      gl.useProgram(prog);
-
-      // one triangle that covers the whole viewport
       buf = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buf);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      const aPos = gl.getAttribLocation(prog, "aPos");
-      gl.enableVertexAttribArray(aPos);
-      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
-      loc = {};
-      ["uRes", "uTime", "uMouse", "uTrail", "uHover", "uC0", "uC1", "uC2", "uC3", "uC4"].forEach(
-        (name) => {
-          loc[name] = gl.getUniformLocation(prog, name);
-        }
-      );
+      tex = gl.createTexture();
+      fbo = gl.createFramebuffer();
+      fw = 0;
+      fh = 0;
+      glState = "compiling";
       return true;
     };
 
+    const releaseGL = () => {
+      if (gl && !gl.isContextLost()) {
+        [progField, progComp].forEach((p) => p && gl.deleteProgram(p));
+        [...fieldShaders, ...compShaders].forEach((sh) => gl.deleteShader(sh));
+        if (buf) gl.deleteBuffer(buf);
+        if (tex) gl.deleteTexture(tex);
+        if (fbo) gl.deleteFramebuffer(fbo);
+      }
+      progField = progComp = buf = tex = fbo = null;
+      fieldShaders = [];
+      compShaders = [];
+    };
+
+    const failGL = () => {
+      releaseGL();
+      glState = "failed";
+      wrap.setAttribute("data-fallback", "");
+    };
+
+    // Returns true once both programs are linked and ready to draw.
+    const finishGL = () => {
+      if (ext) {
+        const done = (p) => gl.getProgramParameter(p, ext.COMPLETION_STATUS_KHR);
+        if (!done(progField) || !done(progComp)) return false; // still compiling, poll next frame
+      }
+      const linked = (p, list) => {
+        if (gl.getProgramParameter(p, gl.LINK_STATUS)) return true;
+        console.warn(
+          "[Scene4] heat shader:",
+          gl.getProgramInfoLog(p),
+          ...list.map((sh) => gl.getShaderInfoLog(sh))
+        );
+        return false;
+      };
+      if (!linked(progField, fieldShaders) || !linked(progComp, compShaders)) {
+        failGL();
+        return false;
+      }
+      [...fieldShaders, ...compShaders].forEach((sh) => gl.deleteShader(sh));
+      fieldShaders = [];
+      compShaders = [];
+
+      const where = (prog, names) =>
+        names.reduce((acc, n) => ({ ...acc, [n]: gl.getUniformLocation(prog, n) }), {});
+      locF = where(progField, [
+        "uRes", "uTime", "uMouse", "uTrail", "uHover", "uC0", "uC1", "uC2", "uC3", "uC4",
+      ]);
+      locC = where(progComp, [
+        "uField", "uRes", "uScale", "uHexSide", "uGridLine", "uGridBase", "uGridOpacity",
+        "uGridMode", "uVeilTint", "uVeilColor", "uVeilMode", "uVeilStrength", "uVeilRange",
+      ]);
+      gl.useProgram(progComp);
+      gl.uniform1i(locC.uField, 0);
+      glState = "ready";
+      return true;
+    };
+
+    // --- sizing: full-res compose canvas, quarter-res field texture
+    const size = () => {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      if (!w || !h) return;
+      let cs = Math.min(window.devicePixelRatio || 1, HEAT_COMP_MAX_DPR);
+      if (w * h * cs * cs > HEAT_COMP_MAX) cs = Math.sqrt(HEAT_COMP_MAX / (w * h));
+      const cw = Math.max(2, Math.round(w * cs));
+      const ch = Math.max(2, Math.round(h * cs));
+      if (canvas.width !== cw || canvas.height !== ch) {
+        canvas.width = cw;
+        canvas.height = ch;
+      }
+      compScale = cw / w;
+
+      if (!gl || !tex || gl.isContextLost()) return;
+      let fs = HEAT_FIELD_SCALE;
+      if (w * h * fs * fs > HEAT_FIELD_MAX) fs = Math.sqrt(HEAT_FIELD_MAX / (w * h));
+      const nfw = Math.max(2, Math.round(w * fs));
+      const nfh = Math.max(2, Math.round(h * fs));
+      if (nfw === fw && nfh === fh) return;
+      fw = nfw;
+      fh = nfh;
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fw, fh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+      const complete = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      if (!complete) failGL();
+    };
+
+    // --- style: CSS variables -> one flat list of numbers
+    //  0-14 ramp c0..c4 | 15-17 grid line | 18-20 grid base | 21 grid opacity
+    //  22 grid mode | 23-25 veil tint | 26-28 veil colour | 29 veil mode
+    //  30 veil strength | 31 veil from | 32 veil to
     const readStyle = () => {
       styleDirty = false;
       const cs = getComputedStyle(wrap);
-      const defaults = darkRef.current ? HEAT_DEFAULT_DARK : HEAT_DEFAULT_LIGHT;
-      s.paletteTarget = defaults.map(
-        (hex, i) => parseHexColor(cs.getPropertyValue(`--s4-c${i}`)) || parseHexColor(hex)
-      );
-      if (!s.palette) s.palette = s.paletteTarget.map((c) => c.slice());
-      const speed = parseFloat(cs.getPropertyValue("--s4-flow-speed"));
-      s.speed = Number.isFinite(speed) ? speed : 1;
+      const get = (name) => cs.getPropertyValue(name).trim();
+      const D = darkRef.current ? HEAT_DEFAULTS.dark : HEAT_DEFAULTS.light;
+      const col = (name, def) => parseCssColor(get(name)) || parseCssColor(def);
+      const num = (name, def) => {
+        const v = parseFloat(get(name));
+        return Number.isFinite(v) ? v : def;
+      };
+      const word = (name, def) => get(name) || def;
+      s.styleTarget = [
+        ...[0, 1, 2, 3, 4].flatMap((i) => col(`--s4-c${i}`, D.c[i])),
+        ...col("--s4-grid-line", D.gridLine),
+        ...col("--s4-grid-base", D.gridBase),
+        num("--s4-grid-opacity", D.gridOpacity),
+        word("--s4-grid-blend", D.gridBlend) === "multiply" ? 1 : 0,
+        ...col("--s4-veil-tint", D.veilTint),
+        ...col("--s4-veil-color", D.veilColor),
+        word("--s4-veil-mode", D.veilMode) === "fade" ? 1 : 0,
+        num("--s4-veil-strength", D.veilStrength),
+        num("--s4-veil-from", D.veilFrom),
+        num("--s4-veil-to", D.veilTo),
+      ];
+      if (!s.style) s.style = s.styleTarget.slice();
+      s.speed = num("--s4-flow-speed", 1);
+      s.hexSide = Math.max(6, num("--s4-grid-size", 26));
     };
 
     const draw = () => {
-      if (prog && gl && !gl.isContextLost()) {
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform2f(loc.uRes, canvas.width, canvas.height);
-        gl.uniform1f(loc.uTime, s.time);
-        gl.uniform2f(loc.uMouse, s.mx, s.my);
-        gl.uniform2f(loc.uTrail, s.tx, s.ty);
-        gl.uniform1f(loc.uHover, s.hover);
-        s.palette.forEach((c, i) => gl.uniform3fv(loc[`uC${i}`], c));
+      if (glState === "ready" && !gl.isContextLost()) {
+        const st = s.style;
+        // pass 1: field -> texture
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.viewport(0, 0, fw, fh);
+        gl.useProgram(progField);
+        gl.uniform2f(locF.uRes, fw, fh);
+        gl.uniform1f(locF.uTime, s.time);
+        gl.uniform2f(locF.uMouse, s.mx, s.my);
+        gl.uniform2f(locF.uTrail, s.tx, s.ty);
+        gl.uniform1f(locF.uHover, s.hover);
+        for (let i = 0; i < 5; i++) {
+          gl.uniform3f(locF[`uC${i}`], st[i * 3], st[i * 3 + 1], st[i * 3 + 2]);
+        }
         gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        // pass 2: compose -> canvas
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.useProgram(progComp);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.uniform2f(locC.uRes, canvas.width, canvas.height);
+        gl.uniform1f(locC.uScale, compScale);
+        gl.uniform1f(locC.uHexSide, s.hexSide);
+        gl.uniform3f(locC.uGridLine, st[15], st[16], st[17]);
+        gl.uniform3f(locC.uGridBase, st[18], st[19], st[20]);
+        gl.uniform1f(locC.uGridOpacity, st[21]);
+        gl.uniform1f(locC.uGridMode, st[22]);
+        gl.uniform3f(locC.uVeilTint, st[23], st[24], st[25]);
+        gl.uniform3f(locC.uVeilColor, st[26], st[27], st[28]);
+        gl.uniform1f(locC.uVeilMode, st[29]);
+        gl.uniform1f(locC.uVeilStrength, st[30]);
+        gl.uniform2f(locC.uVeilRange, st[31], st[32]);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
         if (!ready) {
           ready = true;
           wrap.setAttribute("data-ready", "");
@@ -840,8 +1113,24 @@ function HeatBackground({ active, isDark }) {
 
     const frame = (now) => {
       raf = 0;
-      const dt = last ? Math.min((now - last) / 1000, 0.1) : 1 / 60;
-      last = now;
+      if (disposed || glState === "idle") return;
+
+      if (glState === "compiling") {
+        finishGL();
+        if (glState === "compiling") {
+          raf = requestAnimationFrame(frame); // keep polling, never blocks
+          return;
+        }
+      }
+
+      // drift alone is slow: 30 fps is enough; cursor activity runs at full rate
+      const hot = busy || now - s.lastInput < 300;
+      if (!hot && lastDraw && now - lastDraw < 1000 / HEAT_IDLE_FPS - 2) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      const dt = lastDraw ? Math.min((now - lastDraw) / 1000, 0.1) : 1 / 60;
+      lastDraw = now;
       const ease = (rate) => 1 - Math.exp(-rate * dt);
 
       if (styleDirty) readStyle();
@@ -849,7 +1138,7 @@ function HeatBackground({ active, isDark }) {
       // pointer -> canvas uv (y up); rect is read once per frame
       let target = 0;
       if (s.hasPointer) {
-        const rect = wrap.getBoundingClientRect(); // canvas is display:none in fallback
+        const rect = wrap.getBoundingClientRect();
         if (rect.width > 0 && rect.height > 0) {
           const u = (s.clientX - rect.left) / rect.width;
           const v = 1 - (s.clientY - rect.top) / rect.height;
@@ -874,57 +1163,39 @@ function HeatBackground({ active, isDark }) {
       s.ty += (s.my - s.ty) * kt;
       s.hover += (target - s.hover) * ease(target > s.hover ? 3.2 : 1.3);
 
-      // theme switch: blend the ramp instead of snapping
-      let paletteMoving = false;
+      // theme switch: blend colours instead of snapping
+      let styleMoving = false;
       const kp = ease(5);
-      s.palette.forEach((c, i) => {
-        const goal = s.paletteTarget[i];
-        for (let k = 0; k < 3; k++) {
-          const diff = goal[k] - c[k];
-          if (Math.abs(diff) > 0.002) paletteMoving = true;
-          c[k] += diff * kp;
-        }
-      });
+      for (let i = 0; i < s.style.length; i++) {
+        const diff = s.styleTarget[i] - s.style[i];
+        if (Math.abs(diff) > 0.002) styleMoving = true;
+        s.style[i] += diff * kp;
+      }
 
       if (activeRef.current && !reduced) s.time += dt * s.speed;
 
       draw();
 
       const settling =
-        paletteMoving ||
+        styleMoving ||
         Math.abs(target - s.hover) > 0.003 ||
         Math.abs(s.px - s.tx) + Math.abs(s.py - s.ty) > 0.0005;
-      const flowing = !!prog && !reduced;
+      busy = settling;
+      const flowing = glState === "ready" && !reduced;
       if (activeRef.current && (flowing || settling)) raf = requestAnimationFrame(frame);
     };
 
     const kick = (restyle) => {
       if (restyle) styleDirty = true;
-      if (!raf) {
-        last = 0;
+      if (!raf && !disposed) {
+        lastDraw = 0;
         raf = requestAnimationFrame(frame);
       }
     };
     kickRef.current = kick;
 
-    if (!setupGL()) {
-      prog = null;
-      wrap.setAttribute("data-fallback", "");
-    }
-
-    // --- sizing
     const resize = () => {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      if (!w || !h) return;
-      let scale = HEAT_RENDER_SCALE;
-      if (w * h * scale * scale > HEAT_MAX_PIXELS) scale = Math.sqrt(HEAT_MAX_PIXELS / (w * h));
-      const cw = Math.max(2, Math.round(w * scale));
-      const ch = Math.max(2, Math.round(h * scale));
-      if (canvas.width !== cw || canvas.height !== ch) {
-        canvas.width = cw;
-        canvas.height = ch;
-      }
+      size();
       kick();
     };
     let ro = null;
@@ -934,13 +1205,13 @@ function HeatBackground({ active, isDark }) {
     } else {
       window.addEventListener("resize", resize);
     }
-    resize();
 
     // --- pointer (window-level, so text and the 3D pane count as hover too)
     const onMove = (e) => {
       s.clientX = e.clientX;
       s.clientY = e.clientY;
       s.hasPointer = true;
+      s.lastInput = performance.now();
       if (activeRef.current) kick();
     };
     const onRelease = (e) => {
@@ -975,22 +1246,46 @@ function HeatBackground({ active, isDark }) {
     // --- WebGL context loss: fall back to CSS, recover when restored
     const onLost = (e) => {
       e.preventDefault();
-      prog = null;
+      glState = "lost";
+      progField = progComp = buf = tex = fbo = null;
       ready = false;
       wrap.removeAttribute("data-ready");
       wrap.setAttribute("data-fallback", "");
     };
     const onRestored = () => {
-      if (setupGL()) wrap.removeAttribute("data-fallback");
-      else prog = null;
+      if (beginGL()) {
+        wrap.removeAttribute("data-fallback");
+        size();
+      } else {
+        glState = "failed";
+      }
       kick(true);
     };
     canvas.addEventListener("webglcontextlost", onLost);
     canvas.addEventListener("webglcontextrestored", onRestored);
 
-    kick(true);
+    // --- start in idle time so mounting never stalls a slide transition
+    const init = () => {
+      initHandle = null;
+      if (disposed) return;
+      if (!beginGL()) {
+        glState = "failed";
+        wrap.setAttribute("data-fallback", "");
+      }
+      size();
+      kick(true);
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(init, { timeout: 300 });
+      initHandle = () => window.cancelIdleCallback(id);
+    } else {
+      const id = setTimeout(init, 32);
+      initHandle = () => clearTimeout(id);
+    }
 
     return () => {
+      disposed = true;
+      if (initHandle) initHandle();
       if (raf) cancelAnimationFrame(raf);
       raf = 0;
       kickRef.current = () => {};
@@ -1005,13 +1300,18 @@ function HeatBackground({ active, isDark }) {
       motionQuery.removeEventListener("change", onMotion);
       canvas.removeEventListener("webglcontextlost", onLost);
       canvas.removeEventListener("webglcontextrestored", onRestored);
-      if (gl && !gl.isContextLost()) {
-        if (buf) gl.deleteBuffer(buf);
-        if (prog) gl.deleteProgram(prog);
-      }
-      prog = null;
+      releaseGL();
+      glState = "idle";
       wrap.removeAttribute("data-ready");
       wrap.removeAttribute("data-fallback");
+      // real unmount (canvas left the page): free the GPU context right away
+      // instead of waiting for garbage collection
+      const loser = gl && !gl.isContextLost() ? gl.getExtension("WEBGL_lose_context") : null;
+      if (loser) {
+        setTimeout(() => {
+          if (!canvas.isConnected) loser.loseContext();
+        }, 0);
+      }
     };
   }, []);
 
@@ -1039,10 +1339,35 @@ function HeatBackground({ active, isDark }) {
   );
 }
 
+// --- Keep the 3D visual warm ------------------------------------------------
+// The 3D canvas used to be created when the slide became active and destroyed
+// when it left, so every visit paid for a new WebGL context, shader compiles
+// and geometry. Now it mounts once (in idle time, even before the first
+// visit) and then only pauses: frameloop "always" while active, "demand"
+// (no rendering) while not.
+function useWarmMount(active) {
+  const [warm, setWarm] = useState(active);
+  useEffect(() => {
+    if (warm) return undefined;
+    if (active) {
+      setWarm(true);
+      return undefined;
+    }
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(() => setWarm(true), { timeout: 2500 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(() => setWarm(true), 1200);
+    return () => clearTimeout(id);
+  }, [active, warm]);
+  return warm || active;
+}
+
 
 export default function Scene4({ active }) {
   const { t } = useTranslation();
   const { isDark } = useTheme();
+  const warm = useWarmMount(active);
   return (
     <div className="scene-inner scene4-root">
       {/* whole-slide thermal background: drifts on its own, heats up under the cursor */}
@@ -1069,7 +1394,7 @@ export default function Scene4({ active }) {
           </div>
           <div className="visual-pane">
             <div className="instrument-frame" style={{ position: "relative" }}>
-              {active ? <Visual /> : null}
+              {warm ? <Visual active={active} /> : null}
               <FormulaCard />
             </div>
           </div>

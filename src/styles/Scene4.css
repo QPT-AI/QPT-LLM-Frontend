@@ -13,45 +13,62 @@
   align-items: center;
 }
 
-/* --- thermal gradient field --------------------------------------------
+/* --- thermal gradient field + fixed hexagon grid --------------------------
    Markup comes from <HeatBackground /> (same in Scene4a and Scene4b).
 
-   A WebGL shader paints the field into .scene4-heat-canvas: smooth colour
-   regions that drift and slowly trade hot for cold, with a hot core and a
-   cold rim that follow the cursor. The shader reads the ramp below, so
-   both themes are tuned here.
+   One WebGL canvas draws everything: the drifting heat field, the cursor
+   hot spot, the fixed hex grid and the calmer text side. Nothing here uses
+   CSS blend modes (except the no-WebGL fallback), so the slide composites
+   as a single plain layer and scene transitions stay light.
 
-   Neutral-first ramp (QPT system): the cold side carries no hue at all —
-   just Ternary-family grays that read as ash — so the Thermodynamic
-   accent (#E8690A) is the only colour in the field, confined to the hot
-   regions. Cold and hot are always separated by the neutral stops, so
-   the two paradigm colours never touch directly.
+   QPT rules: this is the Thermodynamic slide, so the ramp is built only
+   from the Thermodynamic paradigm colour (#E8690A) and its own shades and
+   tints. No other paradigm hues, no blue, no grey.
 
-     --s4-c0  coldest    ash — dimmed Ternary gray (hue-free)
-     --s4-c1  cool       deep neutral gray
-     --s4-c2  neutral    page background
-     --s4-c3  warm       Thermodynamic #E8690A (fixed in both themes)
-     --s4-c4  hottest    white-hot cream (dark) / deep ember (light)
-   (hex values only: #rgb or #rrggbb)
-
-     --s4-flow-speed   drift speed multiplier (1 = default)
+   Ramp (cold -> hot), any CSS colour:
+     --s4-c0 coldest  --s4-c1 cool  --s4-c2 middle  --s4-c3 warm  --s4-c4 hottest
+   Motion:
+     --s4-flow-speed    drift speed multiplier (1 = default)
+   Grid (fixed, 1 px lines):
+     --s4-grid-size     hexagon side in px
+     --s4-grid-line     line colour, mixed into the heat with --s4-grid-blend
+     --s4-grid-blend    overlay (lines glow with the heat) | multiply
+     --s4-grid-opacity  0-1
+     --s4-grid-base     extra line colour added everywhere (keeps the grid
+                        visible in the dark areas)
+   Text-side veil (fades out left -> right between --s4-veil-from/-to,
+   fractions of the width):
+     --s4-veil-mode     multiply (darken by --s4-veil-tint) | fade (to --s4-veil-color)
+     --s4-veil-strength 0-1
 
    Bleeds past the .scene padding so it reaches the viewport edges.
    ---------------------------------------------------------------------- */
 
 .scene4-heat {
-  /* Dilutes the whole field toward the page background so neutrals keep
-     dominating the screen; the accent stays a small, intentional share. */
-  --s4-heat-opacity: 0.88;
+  /* One knob for overall intensity of the field (0-1). */
+  --s4-heat-opacity: 1;
   --s4-flow-speed: 1;
 
-  /* dark ramp (default theme): ash-cold neutrals, ink middle,
-     ember -> white-hot. No blue anywhere on the cold side. */
-  --s4-c0: #3a3e42;
-  --s4-c1: #1a1e23;
-  --s4-c2: #0b0f14;
+  /* dark ramp (default theme): mostly near-black, #E8690A heat patches,
+     pale hot core under the cursor */
+  --s4-c0: #050404;
+  --s4-c1: #0d0706;
+  --s4-c2: #2a0c05;
   --s4-c3: #e8690a;
-  --s4-c4: #ffd9a3;
+  --s4-c4: #ffd2a6;
+
+  --s4-grid-size: 26;
+  --s4-grid-line: #ffffff;
+  --s4-grid-blend: overlay;
+  --s4-grid-opacity: 0.4;
+  --s4-grid-base: #2a1206;
+
+  --s4-veil-mode: multiply;
+  --s4-veil-tint: #26120b;
+  --s4-veil-color: var(--bg, #0a0a0b);
+  --s4-veil-strength: 1;
+  --s4-veil-from: 0.3;
+  --s4-veil-to: 0.68;
 
   /* cursor position for the CSS fallback (set from JS) */
   --s4-mx: 50%;
@@ -64,12 +81,11 @@
   pointer-events: none;
   overflow: hidden;
   opacity: var(--s4-heat-opacity);
-  background: var(--s4-c2);
+  background: var(--s4-c1);
 }
 
-/* Static base under the canvas: shows for the first frame, and animates
-   on its own if WebGL is unavailable. Neutral ground with muted ember
-   bands — the accent is deliberately diluted so ink/gray dominates. */
+/* Static base under the canvas: shows for the first moment while the shader
+   compiles, and animates on its own if WebGL is unavailable. */
 .scene4-heat::before {
   content: "";
   position: absolute;
@@ -77,12 +93,11 @@
   background: linear-gradient(
     118deg,
     var(--s4-c1) 0%,
-    var(--s4-c2) 22%,
-    color-mix(in srgb, var(--s4-c3) 48%, var(--s4-c2)) 42%,
-    var(--s4-c2) 58%,
-    var(--s4-c1) 74%,
-    color-mix(in srgb, var(--s4-c3) 38%, var(--s4-c2)) 90%,
-    var(--s4-c2) 100%
+    var(--s4-c1) 40%,
+    var(--s4-c2) 56%,
+    var(--s4-c3) 76%,
+    var(--s4-c2) 90%,
+    var(--s4-c1) 100%
   );
   background-size: 240% 240%;
   background-position: 35% 45%;
@@ -95,22 +110,40 @@
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 0.9s ease;
+  transition: opacity 0.35s ease;
 }
 
 .scene4-heat[data-ready] .scene4-heat-canvas {
   opacity: 1;
 }
 
+/* The veil element is only used by the fallback; the shader does it otherwise. */
+.scene4-heat-veil {
+  display: none;
+}
+
 /* --- fallback (no WebGL) --------------------------------------------------
-   The base gradient drifts, and an ember core with a neutral ash rim
-   follows the cursor. */
+   The base gradient drifts under a CSS hex grid, a hot spot with a cold ring
+   follows the cursor, and a plain veil calms the text side. */
 
 .scene4-heat[data-fallback] .scene4-heat-canvas {
   display: none;
 }
 
 .scene4-heat[data-fallback]::before {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='78' height='45.033'%3E%3Cpath d='M-13 -11.26L-26 11.26L-52 11.26L-65 -11.26L-52 -33.77L-26 -33.77ZM-13 33.77L-26 56.29L-52 56.29L-65 33.77L-52 11.26L-26 11.26ZM-13 78.81L-26 101.32L-52 101.32L-65 78.81L-52 56.29L-26 56.29ZM26 -33.77L13 -11.26L-13 -11.26L-26 -33.77L-13 -56.29L13 -56.29ZM26 11.26L13 33.77L-13 33.77L-26 11.26L-13 -11.26L13 -11.26ZM26 56.29L13 78.81L-13 78.81L-26 56.29L-13 33.77L13 33.77ZM65 -11.26L52 11.26L26 11.26L13 -11.26L26 -33.77L52 -33.77ZM65 33.77L52 56.29L26 56.29L13 33.77L26 11.26L52 11.26ZM65 78.81L52 101.32L26 101.32L13 78.81L26 56.29L52 56.29ZM104 -33.77L91 -11.26L65 -11.26L52 -33.77L65 -56.29L91 -56.29ZM104 11.26L91 33.77L65 33.77L52 11.26L65 -11.26L91 -11.26ZM104 56.29L91 78.81L65 78.81L52 56.29L65 33.77L91 33.77ZM143 -11.26L130 11.26L104 11.26L91 -11.26L104 -33.77L130 -33.77ZM143 33.77L130 56.29L104 56.29L91 33.77L104 11.26L130 11.26ZM143 78.81L130 101.32L104 101.32L91 78.81L104 56.29L130 56.29Z' fill='none' stroke='rgba(232,105,10,0.35)' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(
+      118deg,
+      var(--s4-c1) 0%,
+      var(--s4-c1) 40%,
+      var(--s4-c2) 56%,
+      var(--s4-c3) 76%,
+      var(--s4-c2) 90%,
+      var(--s4-c1) 100%
+    );
+  background-size: 78px 45.033px, 240% 240%;
+  background-position: 0 0, 35% 45%;
   animation: scene4HeatDrift 36s ease-in-out infinite alternate;
 }
 
@@ -134,58 +167,55 @@
     );
 }
 
+.scene4-heat[data-fallback] + .scene4-heat-veil {
+  display: block;
+  position: absolute;
+  inset: -12vw;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--bg, #0a0a0b);
+  opacity: 0.8;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 68%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 68%);
+}
+
 .scene4-heat[data-fallback].is-paused::before {
   animation-play-state: paused;
 }
 
 @keyframes scene4HeatDrift {
   from {
-    background-position: 0% 30%;
+    background-position: 0 0, 0% 30%;
   }
   to {
-    background-position: 100% 70%;
+    background-position: 0 0, 100% 70%;
   }
-}
-
-/* --- veil ----------------------------------------------------------------
-   Settles the field back toward the page background on the text side so
-   the type stays the calmest part of the slide. A plain left-to-right
-   fade, no shapes. This is what keeps body text off the gradient,
-   per the gradient rules.
-   ---------------------------------------------------------------------- */
-
-.scene4-heat-veil {
-  position: absolute;
-  inset: -12vw;
-  z-index: 1;
-  pointer-events: none;
-  background: var(--bg);
-  opacity: 0.74;
-  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 66%);
-  mask-image: linear-gradient(90deg, #000 0%, #000 34%, transparent 66%);
 }
 
 /* --- light theme -------------------------------------------------------
-   Same field, neutral-first ramp: cool Ternary gray cold side, paper
-   neutral middle, Thermodynamic warm side. The accent appears only as a
-   large graphic fill (its correct light-mode role) and never sits under
-   text — the veil keeps the type side on paper.
+   Same field, inverted ground: warm white cold end, peach -> apricot ->
+   #E8690A hot, orange grid lines. Paradigm colour stays fixed across modes.
    ---------------------------------------------------------------------- */
 
 [data-theme="light"] .scene4-heat {
-  --s4-heat-opacity: 0.86;
+  --s4-c0: #fffaf6;
+  --s4-c1: #ffe6d2;
+  --s4-c2: #ffc293;
+  --s4-c3: #ff9147;
+  --s4-c4: #e8690a;
 
-  --s4-c0: #8a8a8a;
-  --s4-c1: #e2e5e7;
-  --s4-c2: #f6f1e8;
-  --s4-c3: #e8690a;
-  --s4-c4: #a84a06;
+  --s4-grid-line: #e8690a;
+  --s4-grid-blend: multiply;
+  --s4-grid-opacity: 0.4;
+  --s4-grid-base: #000000;
+
+  --s4-veil-mode: fade;
+  --s4-veil-color: var(--bg, #f7f6f3);
+  --s4-veil-strength: 0.68;
 }
 
-[data-theme="light"] .scene4-heat-veil {
-  /* slightly stronger veil so dark body text stays comfortable
-     over the ember field */
-  opacity: 0.72;
+[data-theme="light"] .scene4-heat[data-fallback] + .scene4-heat-veil {
+  opacity: 0.68;
 }
 
 /* --- reduced motion: hold the field still ------------------------------
