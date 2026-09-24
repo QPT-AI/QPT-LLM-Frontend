@@ -1,0 +1,346 @@
+/* ============================================================
+    Monitor — training dashboard
+    Dark, full viewport, card grid. Every design value is a token.
+    ============================================================ */
+
+.mon-root {
+  --mon-bg: #0b0d0e;
+  --mon-panel: #12151a;
+  --mon-panel-raise: #171b21;
+  --mon-border: rgba(255, 255, 255, 0.09);
+  --mon-border-strong: rgba(255, 255, 255, 0.18);
+  --mon-text: #e8edf2;
+  --mon-text-dim: rgba(232, 237, 242, 0.62);
+  --mon-text-faint: rgba(232, 237, 242, 0.38);
+  --mon-accent: #e8edf2;
+  --mon-warn: #f0ab00;
+  --mon-error: #ff6b6b;
+  --mon-ok: #5bad1e;
+  --mon-font-display: var(--font-display);
+  --mon-font-mono: var(--font-mono);
+  --mon-font-body: var(--font-body);
+  --mon-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --mon-radius: 8px;
+  --mon-left-w: clamp(560px, 44vw, 780px);
+  --mon-gap: 10px;
+
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--mon-gap);
+  padding: var(--mon-gap);
+  overflow: hidden;
+  background: var(--mon-bg);
+  color: var(--mon-text);
+  font-family: var(--mon-font-body);
+  font-size: 12px;
+  color-scheme: dark;
+}
+
+/* ── App bar ─────────────────────────────────────────────────────────────── */
+.mon-appbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 46px;
+  padding: 0 12px 0 10px;
+  background: var(--mon-panel);
+  border: 1px solid var(--mon-border);
+  border-radius: var(--mon-radius);
+}
+.mon-appbar__brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: inherit; }
+.mon-appbar__logo { width: 22px; height: 22px; object-fit: contain; }
+.mon-appbar__product { font-family: var(--mon-font-display); font-size: 14px; font-weight: 600; letter-spacing: 0.01em; }
+.mon-appbar__product span { font-weight: 400; color: var(--mon-text-dim); margin-left: 4px; }
+.mon-appbar__sep { width: 1px; height: 22px; background: var(--mon-border); }
+.mon-appbar__run { display: flex; flex-direction: column; gap: 1px; line-height: 1.2; }
+.mon-appbar__runname { font-family: var(--mon-font-mono); font-size: 12px; color: var(--mon-text); }
+.mon-appbar__meta { font-family: var(--mon-font-mono); font-variant-numeric: tabular-nums; font-size: 10.5px; color: var(--mon-text-dim); }
+.mon-appbar__meta b { color: var(--mon-text); font-weight: 500; }
+.mon-appbar__meta i { font-style: normal; margin: 0 6px; color: var(--mon-text-faint); }
+.mon-appbar__spacer { flex: 1; }
+
+/* ── KPI strip ───────────────────────────────────────────────────────────── */
+.mon-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--mon-gap);
+}
+.mon-kpi {
+  min-width: 0;
+  padding: 7px 11px 5px;
+  background: var(--mon-panel);
+  border: 1px solid var(--mon-border);
+  border-radius: var(--mon-radius);
+}
+.mon-kpi__label { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--mon-text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mon-kpi__value {
+  margin-top: 3px;
+  font-family: var(--mon-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 18px;
+  line-height: 1.15;
+  color: var(--mon-text);
+  white-space: nowrap;
+}
+.mon-kpi__unit { margin-left: 4px; font-size: 10.5px; color: var(--mon-text-dim); }
+.mon-kpi .mon-delta { font-size: 10.5px; }
+.mon-kpi .mon-spark { margin: 3px 0 0; }
+.mon-kpi.is-warn .mon-kpi__value { color: var(--mon-warn); }
+
+/* ── Split: metrics left, diagram right, a draggable divider between them ─── */
+.mon-split {
+  display: grid;
+  grid-template-columns: var(--mon-left-w) 6px minmax(0, 1fr);
+  gap: var(--mon-gap);
+  min-height: 0;
+}
+.mon-splitter {
+  position: relative;
+  align-self: stretch;
+  justify-self: center;
+  width: 100%;
+  border-radius: 3px;
+  background: var(--mon-border);
+  cursor: col-resize;
+  touch-action: none;
+  transition: background-color 140ms;
+}
+.mon-splitter::before {
+  content: "";
+  position: absolute;
+  inset: 0 -7px;
+}
+.mon-splitter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 32px;
+  border-radius: 2px;
+  background: var(--mon-text-faint);
+  transform: translate(-50%, -50%);
+  transition: background-color 140ms;
+}
+.mon-splitter:hover, .mon-splitter:focus-visible, .mon-splitter.is-dragging { background: var(--mon-border-strong); }
+.mon-splitter:hover::after, .mon-splitter:focus-visible::after, .mon-splitter.is-dragging::after { background: var(--mon-text-dim); }
+.mon-splitter:focus-visible { outline: 1px solid var(--mon-text); outline-offset: 2px; }
+.mon-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mon-gap);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mon-border-strong) transparent;
+}
+.mon-left > .mon-panel, .mon-left > div { flex: 0 0 auto; }
+.mon-right { display: flex; min-height: 0; }
+.mon-right > .mon-panel { flex: 1; }
+.mon-left__pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--mon-gap);
+  align-items: stretch;
+}
+.mon-left__pair > .mon-panel { min-height: 0; }
+.mon-left__pair--tall { min-height: 176px; }
+.mon-left__pair--tall > .mon-panel { height: 176px; }
+
+.mon-diagram { min-height: 0; }
+.mon-diagram__head { flex-wrap: wrap; }
+.mon-diagram__title { display: flex; align-items: baseline; gap: 10px; }
+.mon-diagram__meta { font-family: var(--mon-font-mono); font-size: 10.5px; font-weight: 400; color: var(--mon-text-dim); }
+.mon-diagram__stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  border-radius: 0 0 var(--mon-radius) var(--mon-radius);
+  overflow: hidden;
+}
+/* The canvas owns its own stacking context so the 3D labels never rise above the overlays. */
+.mon-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  isolation: isolate;
+}
+
+/* ── Legend bar under the diagram header ─────────────────────────────────── */
+.mon-diagram__legend {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--mon-border);
+  background: rgba(255, 255, 255, 0.015);
+}
+.mon-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mon-chips__label { margin-right: 2px; font-size: 10.5px; color: var(--mon-text-faint); }
+.mon-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 6px;
+  background: transparent;
+  border: 1px solid var(--mon-border);
+  border-radius: 999px;
+  color: var(--mon-text);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition: opacity 180ms, border-color 140ms, background-color 140ms;
+}
+.mon-chip-btn:hover { border-color: var(--mon-border-strong); }
+.mon-chip-btn.is-active { border-color: var(--c); background: rgba(255, 255, 255, 0.06); }
+.mon-chips.has-active .mon-chip-btn:not(.is-active) { opacity: 0.45; }
+.mon-chip-btn__swatch { width: 14px; height: 14px; border-radius: 3px; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12); }
+/* miniature of each paradigm's procedural surface */
+.mon-swatch--quantum { background: linear-gradient(135deg, transparent 42%, #2fd4c4 44%, transparent 46%, transparent 70%, #8a5cf6aa 72%, transparent 74%), #3f7a15; }
+.mon-swatch--photonic { background: conic-gradient(from 20deg, #ff5d5d, #ffd23f, #5df28a, #4fc3ff, #b46bff, #ff5d5d); background-blend-mode: soft-light; background-color: #f0ab00; box-shadow: inset 0 0 0 4px #f0ab00b3, inset 0 0 0 1px rgba(255, 255, 255, 0.2); }
+.mon-swatch--thermodynamic { background: radial-gradient(circle at 50% 50%, #ffffff 0, #ff3b30 18%, #e8690a 40%, #f0ab00 58%, #1aab7c 76%, #1b4fd8 100%); }
+.mon-swatch--classical { background: #3b3e42; box-shadow: inset 0 0 0 1px #8a8a8a; }
+.mon-chip-btn .mon-glyph { margin: 0; }
+.mon-chip-btn__name { font-weight: 500; }
+.mon-chip-btn__meta { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-dim); }
+
+/* ── 3D diagram labels (rendered by drei <Html>) ─────────────────────────── */
+.mon-face,
+.mon-lbl {
+  font-family: var(--mon-font-body);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--mon-text);
+  white-space: nowrap;
+  transition: opacity 220ms var(--mon-ease);
+  text-shadow: 0 0 5px rgba(11, 13, 14, 0.95), 0 0 2px rgba(11, 13, 14, 1), 0 1px 2px rgba(11, 13, 14, 1);
+}
+.mon-face.is-dim, .mon-lbl.is-dim { opacity: 0.22; }
+
+/* printed on the front face of a rectangle */
+.mon-face {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 1px 7px;
+  border-radius: 4px;
+  background: rgba(11, 13, 14, 0.74);
+}
+/* sub-layer callout for the active block */
+.mon-callout {
+  transform: translate(0, -50%);
+  padding: 5px 9px;
+  background: rgba(18, 21, 26, 0.94);
+  border: 1px solid var(--mon-border-strong);
+  border-left: 2px solid var(--mon-text);
+  border-radius: 5px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--mon-text);
+  white-space: nowrap;
+}
+.mon-callout__row { display: flex; align-items: center; gap: 2px; }
+.mon-face__title { font-weight: 500; }
+.mon-face__meta { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-dim); }
+.mon-face--block { gap: 9px; font-family: var(--mon-font-mono); font-variant-numeric: tabular-nums; font-size: 10.5px; }
+.mon-face__id { color: var(--mon-text); font-weight: 600; }
+.mon-face__bar { position: relative; width: 44px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+.mon-face__bar span { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--mon-text); transition: width 600ms var(--mon-ease); }
+.mon-face__num { color: var(--mon-text); }
+.mon-face__num i { font-style: normal; margin-left: 3px; font-size: 9px; color: var(--mon-text-faint); }
+
+.mon-lbl--left { transform: translate(-100%, -50%); text-align: right; }
+.mon-lbl--sub  { transform: translate(0, -50%); font-size: 10.5px; }
+.mon-lbl--loop { transform: translate(-100%, 4px); text-align: right; }
+.mon-lbl__title { font-weight: 500; }
+.mon-lbl__sub { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-dim); }
+.mon-lbl__dim { color: var(--mon-text-faint); font-family: var(--mon-font-mono); font-size: 10px; }
+.mon-lbl__live { margin-top: 2px; font-family: var(--mon-font-mono); font-variant-numeric: tabular-nums; font-size: 10.5px; color: var(--mon-text); }
+.mon-lbl__sub .mon-glyph { width: 11px; height: 11px; font-size: 8px; margin: 0 3px 0 4px; }
+.mon-lbl__sub .mon-glyph:first-child { margin-left: 0; }
+
+.mon-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  margin-right: 5px;
+  border: 1px solid var(--c, currentColor);
+  border-radius: 3px;
+  color: var(--c, currentColor);
+  font-family: var(--mon-font-mono);
+  font-size: 8.5px;
+  font-weight: 600;
+  line-height: 1;
+  flex: none;
+}
+.mon-face .mon-glyph { margin: 0; }
+
+/* ── Responsive: stack diagram above metrics below 1100px ────────────────── */
+@media (max-width: 1100px) {
+  .mon-root { position: static; height: auto; min-height: 100vh; overflow: visible; }
+  .mon-split { grid-template-columns: minmax(0, 1fr); }
+  .mon-right { order: -2; height: var(--mon-right-h, 62vh); }
+  .mon-splitter { order: -1; width: auto; height: 6px; cursor: row-resize; }
+  .mon-splitter::before { inset: -7px 0; }
+  .mon-splitter::after { width: 32px; height: 3px; }
+  .mon-left { overflow: visible; }
+  .mon-appbar { flex-wrap: wrap; height: auto; padding: 8px 10px; }
+}
+@media (max-width: 640px) {
+  .mon-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mon-left__pair { grid-template-columns: minmax(0, 1fr); }
+  .mon-lbl--sub, .mon-face__meta, .mon-face__num:nth-child(n + 4) { display: none; }
+}
+
+/* ── Light theme ──────────────────────────────────────────────────────────
+   Mirrors the site's [data-theme="light"] tokens in global.css (--bg,
+   --bg-raise, --ink, --hairline) so the dashboard matches the rest of the
+   site in light mode. A few rules below aren't token-driven because they're
+   hardcoded against the dark palette — those get explicit overrides too. */
+[data-theme="light"] .mon-root {
+  --mon-bg: #f5f6f4;
+  --mon-panel: #ffffff;
+  --mon-panel-raise: #eef0ed;
+  --mon-border: rgba(0, 0, 0, 0.10);
+  --mon-border-strong: rgba(0, 0, 0, 0.22);
+  --mon-text: #14171a;
+  --mon-text-dim: rgba(0, 0, 0, 0.62);
+  --mon-text-faint: rgba(0, 0, 0, 0.38);
+  --mon-accent: #14171a;
+  --mon-warn: #b56b00;
+  --mon-error: #d13d3d;
+  --mon-ok: #3f7a15;
+  color-scheme: light;
+}
+
+[data-theme="light"] .mon-diagram__legend { background: rgba(0, 0, 0, 0.02); }
+[data-theme="light"] .mon-chip-btn.is-active { background: rgba(0, 0, 0, 0.05); }
+
+/* Label chips are drawn over the 3D canvas, so their translucent backgrounds
+   are matched to the scene background (theme.js COLORS.light.bg) rather than
+   to --mon-panel. */
+[data-theme="light"] .mon-face,
+[data-theme="light"] .mon-lbl {
+  text-shadow: 0 0 5px rgba(245, 246, 244, 0.95), 0 0 2px rgba(245, 246, 244, 1), 0 1px 2px rgba(245, 246, 244, 1);
+}
+[data-theme="light"] .mon-face { background: rgba(245, 246, 244, 0.82); }
+[data-theme="light"] .mon-callout { background: rgba(255, 255, 255, 0.94); }
+[data-theme="light"] .mon-face__bar { background: rgba(0, 0, 0, 0.12); }
+
+/* ── Reduced motion ───────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .mon-root *,
+  .mon-root *::before,
+  .mon-root *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

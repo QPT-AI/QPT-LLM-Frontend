@@ -1,110 +1,269 @@
+/* Scene2.css - Scene 2 (Quantum) background texture, QPT design-manual treatment.
+ *
+ * Rules followed:
+ *  - Neutral ink draws the structure; Quantum #5BAD1E is an accent only
+ *    (three node dots + one very faint bloom). Well under ~8-10% of screen.
+ *  - Paradigm colour is used as a fill/stroke, never as text (light-mode safe).
+ *  - No dashed or decorative patterns, no pops or bounces: motion is opacity
+ *    or a few pixels of translate, on 10s-120s cycles.
+ *  - Texture fades toward the text side so it never competes with copy.
+ *
+ * Colours are kept as space-separated RGB channels because rgb(var(--x) / a)
+ * cannot consume the hex tokens in global.css. --qtex-ink mirrors --ink
+ * (#ffffff dark / #000000 light) and --qtex-q mirrors --quantum (#5BAD1E).
+ */
 
-:root {
-  --entangle: #a855f7; /* violet accent, shared with Scene 2's 3D data-pulse */
-}
+.qtex {
+  --qtex-ink: 255 255 255;      /* Ink in dark mode */
+  --qtex-q: 91 173 30;          /* Quantum #5BAD1E - fixed in both themes */
 
-.scene2-texture {
-  position: absolute;
-  inset: -6%;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
+  --qtex-a-minor: 0.06;
+  --qtex-a-major: 0.12;
+  --qtex-a-mark: 0.26;
+  --qtex-a-contour: 0.16;
+  --qtex-a-contour-alt: 0.1;
+  --qtex-a-link: 0.13;
+  --qtex-a-ring: 0.22;
+  --qtex-a-node-ring: 0.3;
+  --qtex-a-node-dot: 0.7;
+  --qtex-a-wash: 0.05;
+  --qtex-a-bloom: 0.1;
 
-.scene2-texture-gradient {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 18% 22%, rgba(168, 85, 247, 0.14), transparent 40%),
-    radial-gradient(ellipse at 84% 74%, rgba(168, 85, 247, 0.10), transparent 44%),
-    radial-gradient(ellipse at 50% 48%, rgba(26, 171, 124, 0.22), transparent 62%),
-    linear-gradient(160deg, #071b12 0%, #0d3b30 46%, #0a2f2f 76%, #071b12 100%);
-  animation: scene2-drift 34s ease-in-out infinite;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
 }
 
-[data-theme="light"] .scene2-texture-gradient {
-  background:
-    radial-gradient(ellipse at 18% 22%, rgba(168, 85, 247, 0.10), transparent 40%),
-    radial-gradient(ellipse at 84% 74%, rgba(168, 85, 247, 0.08), transparent 44%),
-    radial-gradient(ellipse at 50% 48%, rgba(26, 171, 124, 0.14), transparent 62%),
-    linear-gradient(160deg, #e4ece7 0%, #d7ece5 46%, #dcecec 76%, #e9eae6 100%);
-  opacity: 0.7;
+.qtex.is-light {
+  --qtex-ink: 0 0 0;            /* Ink in light mode */
+  --qtex-a-minor: 0.065;
+  --qtex-a-major: 0.13;
+  --qtex-a-mark: 0.28;
+  --qtex-a-contour: 0.17;
+  --qtex-a-contour-alt: 0.105;
+  --qtex-a-link: 0.14;
+  --qtex-a-ring: 0.23;
+  --qtex-a-node-ring: 0.32;
+  --qtex-a-node-dot: 0.75;
+  --qtex-a-wash: 0.045;
+  --qtex-a-bloom: 0.085;
 }
 
-@keyframes scene2-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(-1.2%, 0.8%, 0) scale(1.025); }
+/* ---- Depth wash + quantum bloom (the only gradients; no text sits on them) */
+
+.qtex-wash,
+.qtex-bloom {
+  position: absolute;
+  inset: 0;
 }
 
-.scene2-texture-svg {
+.qtex-wash {
+  background: radial-gradient(
+    ellipse 80% 90% at 68% 48%,
+    rgb(var(--qtex-ink) / var(--qtex-a-wash)) 0%,
+    transparent 70%
+  );
+  animation: qtexWashDrift 40s ease-in-out infinite alternate;
+}
+
+.qtex-bloom {
+  background: radial-gradient(
+    ellipse 50% 62% at 70% 50%,
+    rgb(var(--qtex-q) / var(--qtex-a-bloom)) 0%,
+    transparent 100%
+  );
+  animation: qtexBloom 26s ease-in-out infinite,
+             qtexBloomDrift 30s ease-in-out infinite alternate;
+}
+
+/* ---- SVG layer, faded toward the text side --------------------------- */
+
+.qtex-svg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.5;
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 90% at 68% 50%,
+    #000 30%,
+    rgb(0 0 0 / 0.28) 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 80% 90% at 68% 50%,
+    #000 30%,
+    rgb(0 0 0 / 0.28) 100%
+  );
 }
 
-[data-theme="light"] .scene2-texture-svg {
-  opacity: 0.32;
-}
-
-.scene2-contour {
-  fill: none;
-  stroke: var(--bio);
-  stroke-opacity: 0.32;
+/* Hairlines stay 1px at every viewport size */
+.qtex-contour,
+.qtex-grid,
+.qtex-mark,
+.qtex-link,
+.qtex-ring,
+.qtex-node-ring,
+.qtex-ping {
+  vector-effect: non-scaling-stroke;
   stroke-width: 1;
-  animation: scene2-contour-flow 30s linear infinite;
-}
-
-.scene2-contour.alt {
-  stroke: var(--quantum);
-  stroke-opacity: 0.2;
-  animation-duration: 40s;
-  animation-direction: reverse;
-}
-
-@keyframes scene2-contour-flow {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -300; }
-}
-
-.scene2-circuit-line {
-  stroke: rgba(255, 255, 255, 0.07);
-  stroke-width: 1;
-}
-
-[data-theme="light"] .scene2-circuit-line {
-  stroke: rgba(0, 0, 0, 0.09);
-}
-
-.scene2-node {
-  fill: var(--quantum);
-  animation: scene2-node-pulse 7s ease-in-out infinite;
-}
-
-@keyframes scene2-node-pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.85; }
-}
-
-.scene2-ring {
   fill: none;
-  stroke: var(--entangle);
-  stroke-width: 0.8;
-  opacity: 0.22;
+}
+
+/* Contours - two periods, so they are split over two elements: the band group
+   drifts sideways, the path inside it bobs vertically. */
+.qtex-band {
+  animation: qtexDrift var(--dur, 40s) ease-in-out infinite alternate;
+  animation-delay: var(--d, 0s);
+}
+.qtex-band.alt {
+  animation-direction: alternate-reverse;
+}
+.qtex-contour {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-contour));
+  animation: qtexBob var(--dur-y, 30s) ease-in-out infinite alternate;
+}
+.qtex-band.alt .qtex-contour {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-contour-alt));
+  animation-direction: alternate-reverse;
+}
+
+/* Grid */
+.qtex-grid {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-minor));
+}
+.qtex-grid.major {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-major));
+}
+.qtex-mark {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-mark));
+}
+
+/* Entanglement */
+.qtex-link {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-link));
+}
+.qtex-ring {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-ring));
+  animation: qtexBreathe 12s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+
+/* Nodes */
+.qtex-node-ring {
+  stroke: rgb(var(--qtex-ink) / var(--qtex-a-node-ring));
+}
+.qtex-node-dot {
+  fill: rgb(var(--qtex-ink) / var(--qtex-a-node-dot));
+  stroke: none;
+  animation: qtexBlink 7s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+.qtex-node.is-accent .qtex-node-ring {
+  stroke: rgb(var(--qtex-q) / 0.55);
+}
+.qtex-node.is-accent .qtex-node-dot {
+  fill: rgb(var(--qtex-q) / 0.9);
+}
+
+/* Readout ping on the accent nodes. Scaled rather than growing `r` so the
+   stroke stays a 1px hairline the whole way out. */
+.qtex-ping {
+  fill: none;
+  stroke: rgb(var(--qtex-q) / 0.5);
+  stroke-width: 1;
   transform-box: fill-box;
   transform-origin: center;
-  animation: scene2-ring-pulse 10s ease-in-out infinite;
+  opacity: 0;                    /* the keyframes own visibility - see below */
+  animation: qtexPing 6s ease-out infinite;
+  animation-delay: var(--d, 0s);
 }
 
-@keyframes scene2-ring-pulse {
-  0%, 100% { opacity: 0.14; transform: scale(0.97); }
-  50% { opacity: 0.34; transform: scale(1.03); }
+/* Pulses travelling along the entanglement links. Base state is invisible and
+   the keyframes supply both position and opacity, so under reduced motion
+   (global.css zeroes every duration) a dot fades out instead of parking on a
+   node. The @supports guard keeps it off the SVG origin where Motion Path is
+   unavailable. */
+@supports (offset-path: path("M0,0 L1,1")) {
+  .qtex-flow {
+    fill: rgb(var(--qtex-ink) / 0.85);
+    stroke: none;
+    opacity: 0;
+    transform-box: view-box;
+    animation: qtexFlow 16s linear infinite;
+    animation-delay: var(--d, 0s);
+  }
 }
 
-.scene2-texture-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at 50% 50%, transparent 38%, var(--bg) 100%);
-  opacity: 0.6;
+/* ---- Motion: slow, low amplitude, opacity/translate only -------------- */
+
+@keyframes qtexDrift {
+  from { transform: translate3d(calc(var(--dx, 36px) * -1), 0, 0); }
+  to   { transform: translate3d(var(--dx, 36px), 0, 0); }
+}
+
+@keyframes qtexBob {
+  from { transform: translate3d(0, calc(var(--dy, 7px) * -1), 0); }
+  to   { transform: translate3d(0, var(--dy, 7px), 0); }
+}
+
+@keyframes qtexBreathe {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
+
+@keyframes qtexBlink {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 1; }
+}
+
+@keyframes qtexBloom {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
+}
+
+@keyframes qtexBloomDrift {
+  from { transform: translate3d(-2%, -1.5%, 0); }
+  to   { transform: translate3d(2%, 1.5%, 0); }
+}
+
+@keyframes qtexWashDrift {
+  from { transform: translate3d(-1%, 0, 0); }
+  to   { transform: translate3d(1%, 0, 0); }
+}
+
+/* Travel is compressed into the first half of the cycle; the tail is dead
+   time, so each link rests between pulses. */
+@keyframes qtexFlow {
+  0%   { offset-distance: 0%; opacity: 0; }
+  4%   { opacity: 0.9; }
+  46%  { opacity: 0.9; }
+  50%  { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes qtexPing {
+  0%   { transform: scale(1); opacity: 0.5; }
+  70%  { opacity: 0; }
+  100% { transform: scale(3.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qtex-band,
+  .qtex-contour,
+  .qtex-flow,
+  .qtex-ping,
+  .qtex-ring,
+  .qtex-node-dot,
+  .qtex-wash,
+  .qtex-bloom {
+    animation: none;
+  }
+}
+
+/* Keep the split layout (text + 3D pane) above the texture layer. */
+.scene-inner > .split {
+  position: relative;
+  z-index: 1;
 }

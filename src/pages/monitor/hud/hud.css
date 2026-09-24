@@ -1,0 +1,196 @@
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.mon-panel {
+  position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--mon-panel);
+  border: 1px solid var(--mon-border);
+  border-radius: var(--mon-radius);
+}
+.mon-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--mon-border);
+  font-family: var(--mon-font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  color: var(--mon-text);
+}
+.mon-panel__head > span:first-child { display: inline-flex; align-items: center; }
+.mon-panel__tools { display: flex; align-items: center; gap: 6px; }
+.mon-panel__body { padding: 8px 12px 10px; min-height: 0; overflow: auto; flex: 1 1 auto; }
+.mon-panel--fill { flex: 1; }
+.mon-panel--fill .mon-panel__body { flex: 1; }
+.mon-hint { color: var(--mon-text-faint); font-size: 11px; line-height: 1.45; }
+
+/* ── Values ──────────────────────────────────────────────────────────────── */
+.mon-stat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2.5px 0;
+}
+.mon-stat__label { font-size: 11px; color: var(--mon-text-dim); white-space: nowrap; }
+.mon-value {
+  font-family: var(--mon-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--mon-text);
+  white-space: nowrap;
+  text-align: right;
+}
+.mon-value--unit { font-size: 10px; color: var(--mon-text-dim); margin-left: 4px; }
+.mon-value--wrap { white-space: normal; text-align: right; max-width: 200px; word-break: break-word; font-size: 11px; }
+.mon-delta { font-size: 10px; color: var(--mon-text-dim); margin-left: 6px; }
+.mon-delta.is-down { color: var(--mon-ok); }
+.mon-delta.is-up   { color: var(--mon-warn); }
+.mon-badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--mon-warn);
+  border-radius: 3px;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  color: var(--mon-warn);
+  vertical-align: middle;
+}
+.mon-spark { display: block; width: 100%; margin: 2px 0 6px; }
+.mon-bar { position: relative; height: 4px; margin: 4px 0 8px; border-radius: 2px; background: var(--mon-border); overflow: hidden; }
+.mon-bar__fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--mon-text-dim); transition: width 600ms var(--mon-ease); }
+.mon-divider { height: 1px; margin: 6px 0; background: var(--mon-border); }
+
+/* ── Buttons & controls ──────────────────────────────────────────────────── */
+.mon-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--mon-text-dim);
+  font-family: var(--mon-font-body);
+  font-size: 11.5px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 140ms, border-color 140ms, background-color 140ms;
+}
+.mon-btn:hover { color: var(--mon-text); background: rgba(255, 255, 255, 0.06); }
+.mon-btn:focus-visible { outline: 1px solid var(--mon-text); outline-offset: 1px; }
+.mon-btn.is-active { color: var(--mon-text); background: rgba(255, 255, 255, 0.1); }
+.mon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.mon-btn--outline { border-color: var(--mon-border); color: var(--mon-text); }
+.mon-icon-btn { padding: 4px; }
+.mon-group { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--mon-border); border-radius: 7px; }
+
+.mon-seg { display: inline-flex; padding: 2px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--mon-border); border-radius: 7px; }
+.mon-seg__btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: var(--mon-text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: color 140ms, background-color 140ms;
+}
+.mon-seg__btn:hover { color: var(--mon-text); }
+.mon-seg__btn.is-active { color: var(--mon-bg); background: var(--mon-text); font-weight: 500; }
+.mon-seg__btn:focus-visible { outline: 1px solid var(--mon-text); outline-offset: 1px; }
+
+.mon-select {
+  padding: 3px 6px;
+  background: var(--mon-panel-raise);
+  border: 1px solid var(--mon-border);
+  border-radius: 5px;
+  color: var(--mon-text);
+  font: inherit;
+  font-size: 11px;
+}
+
+.mon-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--mon-border);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--mon-text-dim);
+  white-space: nowrap;
+}
+.mon-status__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mon-text-faint); }
+.mon-status.is-live .mon-status__dot { background: var(--mon-ok); }
+.mon-status.is-warn .mon-status__dot { background: var(--mon-warn); }
+.mon-status.is-error .mon-status__dot { background: var(--mon-error); }
+
+/* ── Component detail ────────────────────────────────────────────────────── */
+.mon-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 4px;
+  border: 1px solid var(--mon-border);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--mon-text);
+}
+.mon-chip .mon-glyph { margin: 0; }
+.mon-detail__title { font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+
+/* ── Substrate (two columns) ─────────────────────────────────────────────── */
+.mon-substrate { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-content: start; }
+.mon-substrate .mon-stat__label { font-size: 10.5px; }
+.mon-substrate .mon-value { font-size: 11.5px; }
+
+/* ── Event log ───────────────────────────────────────────────────────────── */
+.mon-log { margin: 0; padding: 0; list-style: none; font-family: var(--mon-font-mono); font-variant-numeric: tabular-nums; font-size: 10.5px; line-height: 1.6; }
+.mon-log li { display: grid; grid-template-columns: 56px 38px 1fr; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mon-log__step { color: var(--mon-text-faint); }
+.mon-log__msg { overflow: hidden; text-overflow: ellipsis; }
+.mon-log .is-info  .mon-log__lvl { color: var(--mon-text-dim); }
+.mon-log .is-warn  .mon-log__lvl, .mon-log .is-warn  .mon-log__msg { color: var(--mon-warn); }
+.mon-log .is-error .mon-log__lvl, .mon-log .is-error .mon-log__msg { color: var(--mon-error); }
+
+/* ── Token stream ────────────────────────────────────────────────────────── */
+.mon-tokens { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; height: 100%; min-height: 0; overflow: hidden; }
+.mon-token { padding: 3px 7px; border: 1px solid var(--mon-border); border-radius: 4px; font-family: var(--mon-font-mono); font-size: 11px; color: var(--mon-text); transition: opacity 300ms, border-color 300ms; }
+.mon-token.is-new { border-color: var(--mon-text-dim); }
+.mon-token--slot { min-width: 34px; text-align: center; }
+.mon-scrub { display: flex; align-items: center; gap: 6px; }
+.mon-scrub input[type="range"] { width: 120px; accent-color: var(--mon-text); height: 2px; }
+
+/* ── Hover tooltip ───────────────────────────────────────────────────────── */
+.mon-tip {
+  position: fixed;
+  z-index: 3;
+  transform: translate(14px, 14px);
+  padding: 6px 9px;
+  background: var(--mon-panel-raise);
+  border: 1px solid var(--mon-border-strong);
+  border-radius: 5px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--mon-text);
+  pointer-events: none;
+  max-width: 300px;
+}
+.mon-tip b { display: block; font-weight: 500; }
+.mon-tip__sub { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-dim); }
+
+/* ── Light theme ──────────────────────────────────────────────────────────
+   Hover/active tints below are hardcoded lighten-on-dark whites; light mode
+   needs a darken-on-white equivalent instead. */
+[data-theme="light"] .mon-btn:hover { background: rgba(0, 0, 0, 0.05); }
+[data-theme="light"] .mon-btn.is-active { background: rgba(0, 0, 0, 0.08); }
+[data-theme="light"] .mon-seg { background: rgba(0, 0, 0, 0.035); }

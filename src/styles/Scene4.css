@@ -1,215 +1,229 @@
-/* ============================================================
-   Scene 4 — ambient thermal field (SCOPED)
-   Every selector is prefixed .scene4-* and lives behind Scene 4
-   only. Nothing here affects any other scene or page.
-   ============================================================ */
-
 .scene4-root {
-  position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
 }
 
 /* Content sits above the field. */
 .scene4-content {
   position: relative;
   z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* --- the heat field ----------------------------------------------------
+/* --- thermal gradient field + fixed hexagon grid --------------------------
+   Markup comes from <HeatBackground /> (same in Scene4a and Scene4b).
+
+   One WebGL canvas draws everything: the drifting heat field, the cursor
+   hot spot, the fixed hex grid and the calmer text side. Nothing here uses
+   CSS blend modes (except the no-WebGL fallback), so the slide composites
+   as a single plain layer and scene transitions stay light.
+
+   QPT rules: this is the Thermodynamic slide, so the ramp is built only
+   from the Thermodynamic paradigm colour (#E8690A) and its own shades and
+   tints. No other paradigm hues, no blue, no grey.
+
+   Ramp (cold -> hot), any CSS colour:
+     --s4-c0 coldest  --s4-c1 cool  --s4-c2 middle  --s4-c3 warm  --s4-c4 hottest
+   Motion:
+     --s4-flow-speed    drift speed multiplier (1 = default)
+   Grid (fixed, 1 px lines):
+     --s4-grid-size     hexagon side in px
+     --s4-grid-line     line colour, mixed into the heat with --s4-grid-blend
+     --s4-grid-blend    overlay (lines glow with the heat) | multiply
+     --s4-grid-opacity  0-1
+     --s4-grid-base     extra line colour added everywhere (keeps the grid
+                        visible in the dark areas)
+   Text-side veil (fades out left -> right between --s4-veil-from/-to,
+   fractions of the width):
+     --s4-veil-mode     multiply (darken by --s4-veil-tint) | fade (to --s4-veil-color)
+     --s4-veil-strength 0-1
+
    Bleeds past the .scene padding so it reaches the viewport edges.
-   The parent .scene already has overflow: hidden, so the bleed is safe.
    ---------------------------------------------------------------------- */
 
 .scene4-heat {
+  /* One knob for overall intensity of the field (0-1). */
+  --s4-heat-opacity: 1;
+  --s4-flow-speed: 1;
+
+  /* dark ramp (default theme): mostly near-black, #E8690A heat patches,
+     pale hot core under the cursor */
+  --s4-c0: #050404;
+  --s4-c1: #0d0706;
+  --s4-c2: #2a0c05;
+  --s4-c3: #e8690a;
+  --s4-c4: #ffd2a6;
+
+  --s4-grid-size: 26;
+  --s4-grid-line: #ffffff;
+  --s4-grid-blend: overlay;
+  --s4-grid-opacity: 0.4;
+  --s4-grid-base: #2a1206;
+
+  --s4-veil-mode: multiply;
+  --s4-veil-tint: #26120b;
+  --s4-veil-color: var(--bg, #0a0a0b);
+  --s4-veil-strength: 1;
+  --s4-veil-from: 0.3;
+  --s4-veil-to: 0.68;
+
+  /* cursor position for the CSS fallback (set from JS) */
+  --s4-mx: 50%;
+  --s4-my: 50%;
+  --s4-hover: 0;
+
   position: absolute;
   inset: -12vw;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
+  opacity: var(--s4-heat-opacity);
+  background: var(--s4-c1);
 }
 
-.scene4-heat-layer {
+/* Static base under the canvas: shows for the first moment while the shader
+   compiles, and animates on its own if WebGL is unavailable. */
+.scene4-heat::before {
+  content: "";
   position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  will-change: transform;
-}
-
-/* Deep base warmth — the slowest, largest mass. */
-.scene4-heat-layer.is-base {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(107, 34, 6, 0.55) 0%,
-    rgba(61, 17, 3, 0.4) 42%,
-    transparent 72%
+  inset: 0;
+  background: linear-gradient(
+    118deg,
+    var(--s4-c1) 0%,
+    var(--s4-c1) 40%,
+    var(--s4-c2) 56%,
+    var(--s4-c3) 76%,
+    var(--s4-c2) 90%,
+    var(--s4-c1) 100%
   );
-  width: 120%;
-  height: 120%;
-  left: -14%;
-  top: -10%;
-  animation: scene4Drift1 68s ease-in-out infinite alternate;
+  background-size: 240% 240%;
+  background-position: 35% 45%;
 }
 
-/* Mid transition shade — amber/orange core. */
-.scene4-heat-layer.is-mid {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(192, 86, 15, 0.42) 0%,
-    rgba(150, 56, 10, 0.26) 46%,
-    transparent 74%
-  );
-  width: 80%;
-  height: 88%;
-  right: -8%;
-  top: 2%;
-  animation: scene4Drift2 54s ease-in-out infinite alternate;
+.scene4-heat-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.35s ease;
 }
 
-/* The one warm highlight. Kept faint on purpose. */
-.scene4-heat-layer.is-hot {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(237, 170, 74, 0.3) 0%,
-    rgba(217, 127, 31, 0.18) 44%,
-    transparent 70%
-  );
-  width: 52%;
-  height: 56%;
-  left: 22%;
-  bottom: 4%;
-  animation: scene4Drift3 61s ease-in-out infinite alternate;
+.scene4-heat[data-ready] .scene4-heat-canvas {
+  opacity: 1;
 }
 
-/* Cold sink — pulls one corner back down the spectrum so the field
-   reads as a gradient rather than a single warm wash. */
-.scene4-heat-layer.is-cold {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(8, 4, 2, 0.6) 0%,
-    rgba(12, 6, 3, 0.34) 48%,
-    transparent 76%
-  );
-  width: 74%;
-  height: 80%;
-  left: -6%;
-  bottom: -12%;
-  animation: scene4Drift4 76s ease-in-out infinite alternate;
-}
-
-/* Settles the field back toward the page background at the edges so it
-   never competes with the type. */
+/* The veil element is only used by the fallback; the shader does it otherwise. */
 .scene4-heat-veil {
+  display: none;
+}
+
+/* --- fallback (no WebGL) --------------------------------------------------
+   The base gradient drifts under a CSS hex grid, a hot spot with a cold ring
+   follows the cursor, and a plain veil calms the text side. */
+
+.scene4-heat[data-fallback] .scene4-heat-canvas {
+  display: none;
+}
+
+.scene4-heat[data-fallback]::before {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='78' height='45.033'%3E%3Cpath d='M-13 -11.26L-26 11.26L-52 11.26L-65 -11.26L-52 -33.77L-26 -33.77ZM-13 33.77L-26 56.29L-52 56.29L-65 33.77L-52 11.26L-26 11.26ZM-13 78.81L-26 101.32L-52 101.32L-65 78.81L-52 56.29L-26 56.29ZM26 -33.77L13 -11.26L-13 -11.26L-26 -33.77L-13 -56.29L13 -56.29ZM26 11.26L13 33.77L-13 33.77L-26 11.26L-13 -11.26L13 -11.26ZM26 56.29L13 78.81L-13 78.81L-26 56.29L-13 33.77L13 33.77ZM65 -11.26L52 11.26L26 11.26L13 -11.26L26 -33.77L52 -33.77ZM65 33.77L52 56.29L26 56.29L13 33.77L26 11.26L52 11.26ZM65 78.81L52 101.32L26 101.32L13 78.81L26 56.29L52 56.29ZM104 -33.77L91 -11.26L65 -11.26L52 -33.77L65 -56.29L91 -56.29ZM104 11.26L91 33.77L65 33.77L52 11.26L65 -11.26L91 -11.26ZM104 56.29L91 78.81L65 78.81L52 56.29L65 33.77L91 33.77ZM143 -11.26L130 11.26L104 11.26L91 -11.26L104 -33.77L130 -33.77ZM143 33.77L130 56.29L104 56.29L91 33.77L104 11.26L130 11.26ZM143 78.81L130 101.32L104 101.32L91 78.81L104 56.29L130 56.29Z' fill='none' stroke='rgba(232,105,10,0.35)' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(
+      118deg,
+      var(--s4-c1) 0%,
+      var(--s4-c1) 40%,
+      var(--s4-c2) 56%,
+      var(--s4-c3) 76%,
+      var(--s4-c2) 90%,
+      var(--s4-c1) 100%
+    );
+  background-size: 78px 45.033px, 240% 240%;
+  background-position: 0 0, 35% 45%;
+  animation: scene4HeatDrift 36s ease-in-out infinite alternate;
+}
+
+.scene4-heat[data-fallback]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: var(--s4-hover);
+  background:
+    radial-gradient(
+      circle 22vmax at var(--s4-mx) var(--s4-my),
+      var(--s4-c4) 0%,
+      var(--s4-c3) 26%,
+      transparent 58%
+    ),
+    radial-gradient(
+      circle 34vmax at var(--s4-mx) var(--s4-my),
+      transparent 44%,
+      var(--s4-c0) 60%,
+      transparent 84%
+    );
+}
+
+.scene4-heat[data-fallback] + .scene4-heat-veil {
+  display: block;
   position: absolute;
   inset: -12vw;
   z-index: 1;
   pointer-events: none;
-  background: radial-gradient(
-    ellipse 70% 70% at 50% 50%,
-    transparent 30%,
-    var(--bg) 100%
-  );
-  opacity: 0.72;
+  background: var(--bg, #0a0a0b);
+  opacity: 0.8;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 68%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 30%, transparent 68%);
 }
 
-/* Slow, low-amplitude drift. No scale pulsing, no opacity flicker. */
-
-@keyframes scene4Drift1 {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(6%, 4%, 0);
-  }
+.scene4-heat[data-fallback].is-paused::before {
+  animation-play-state: paused;
 }
 
-@keyframes scene4Drift2 {
-  0% {
-    transform: translate3d(0, 0, 0);
+@keyframes scene4HeatDrift {
+  from {
+    background-position: 0 0, 0% 30%;
   }
-  100% {
-    transform: translate3d(-7%, 6%, 0);
-  }
-}
-
-@keyframes scene4Drift3 {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(9%, -5%, 0);
-  }
-}
-
-@keyframes scene4Drift4 {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(5%, -6%, 0);
+  to {
+    background-position: 0 0, 100% 70%;
   }
 }
 
 /* --- light theme -------------------------------------------------------
-   Same spectrum, paper-white cold end, lower overall intensity so dark
-   body text stays comfortable to read on top of it.
+   Same field, inverted ground: warm white cold end, peach -> apricot ->
+   #E8690A hot, orange grid lines. Paradigm colour stays fixed across modes.
    ---------------------------------------------------------------------- */
 
-[data-theme="light"] .scene4-heat-layer.is-base {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(227, 179, 120, 0.44) 0%,
-    rgba(232, 211, 174, 0.32) 44%,
-    transparent 72%
-  );
+[data-theme="light"] .scene4-heat {
+  --s4-c0: #fffaf6;
+  --s4-c1: #ffe6d2;
+  --s4-c2: #ffc293;
+  --s4-c3: #ff9147;
+  --s4-c4: #e8690a;
+
+  --s4-grid-line: #e8690a;
+  --s4-grid-blend: multiply;
+  --s4-grid-opacity: 0.4;
+  --s4-grid-base: #000000;
+
+  --s4-veil-mode: fade;
+  --s4-veil-color: var(--bg, #f7f6f3);
+  --s4-veil-strength: 0.68;
 }
 
-[data-theme="light"] .scene4-heat-layer.is-mid {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(217, 141, 69, 0.34) 0%,
-    rgba(196, 100, 31, 0.2) 46%,
-    transparent 74%
-  );
+[data-theme="light"] .scene4-heat[data-fallback] + .scene4-heat-veil {
+  opacity: 0.68;
 }
 
-[data-theme="light"] .scene4-heat-layer.is-hot {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(194, 58, 16, 0.2) 0%,
-    rgba(163, 60, 12, 0.12) 44%,
-    transparent 70%
-  );
-}
-
-[data-theme="light"] .scene4-heat-layer.is-cold {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(231, 225, 214, 0.75) 0%,
-    rgba(231, 225, 214, 0.4) 48%,
-    transparent 76%
-  );
-}
-
-[data-theme="light"] .scene4-heat-veil {
-  opacity: 0.66;
-}
-
-/* The visual pane stays fully transparent so the field reads as one
-   continuous surface behind both columns. */
-.scene4-stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: transparent;
-}
-
-/* --- reduced motion: hold the field still ------------------------------ */
+/* --- reduced motion: hold the field still ------------------------------
+   The shader also stops drifting (checked in JS); the cursor spot still
+   responds because it is user-driven. */
 
 @media (prefers-reduced-motion: reduce) {
-  .scene4-heat-layer {
+  .scene4-heat[data-fallback]::before {
     animation: none;
   }
 }

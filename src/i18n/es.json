@@ -25,12 +25,211 @@
     "placeholderReply": "QPT aún no está conectado. La integración con el backend llegará pronto.",
     "send": "Enviar"
   },
+  "paradigms": {
+    "quantum": "Cuántica",
+    "photonic": "Fotónica",
+    "thermodynamic": "Termodinámica",
+    "classical": "Clásica"
+  },
   "monitor": {
     "title": "Monitor",
-    "cpu": "CPU",
-    "memory": "Memoria",
-    "gpu": "GPU",
-    "status": "Estado"
+    "back": "Volver al sitio",
+    "awaiting": "Esperando telemetría",
+    "aria": {
+      "trainingMetrics": "Métricas de entrenamiento",
+      "resizeSplitter": "Redimensionar los paneles de métricas y diagrama"
+    },
+    "appbar": {
+      "status": {
+        "sim": "Datos simulados",
+        "live": "Telemetría en vivo",
+        "connecting": "Conectando",
+        "error": "Error de conexión",
+        "idle": "Inactivo"
+      },
+      "playbackAria": "Reproducción",
+      "resume": "Reanudar",
+      "pause": "Pausar",
+      "slower": "Más lento",
+      "faster": "Más rápido"
+    },
+    "kpi": {
+      "ariaLabel": "Indicadores de entrenamiento",
+      "trainingLoss": "Pérdida de entrenamiento",
+      "validationLoss": "Pérdida de validación",
+      "perplexity": "Perplejidad",
+      "learningRate": "Tasa de aprendizaje",
+      "gradientNorm": "Norma del gradiente",
+      "gradientNormBadge": "recortado",
+      "throughput": "Rendimiento",
+      "compute": "Cómputo",
+      "energyPerToken": "Energía por token",
+      "runCost": "Costo de la ejecución"
+    },
+    "diagram": {
+      "title": "Arquitectura del modelo",
+      "meta": "{{blocks}} bloques · {{heads}} cabezas · d {{dModel}} · {{params}} parámetros",
+      "architectureAria": "Arquitectura",
+      "viewAria": "Vista",
+      "view": {
+        "perspective": "3D",
+        "front": "Frontal",
+        "side": "Lateral"
+      },
+      "exploded": "Explosionada",
+      "explodedTitle": "Separar las subcapas de cada bloque",
+      "resetView": "Restablecer vista",
+      "blockGroup": {
+        "title": "Bloques del transformer × {{count}}",
+        "paramsEach": "{{params}} parámetros cada uno",
+        "norm": "normalización",
+        "attention": "atención",
+        "feedForward": "feed-forward",
+        "residualStream": "flujo residual"
+      }
+    },
+    "legend": {
+      "executedOn": "Ejecutado en",
+      "ariaLabel": "Leyenda de paradigmas de cómputo",
+      "tooltip": "{{paradigm}}: {{count}} componentes, {{share}}% de los parámetros. Haz clic para aislarlo."
+    },
+    "detail": {
+      "title": "Componente",
+      "titlePinned": "Componente · fijado",
+      "clearSelection": "Quitar selección",
+      "hint": "Pasa el cursor sobre un rectángulo del diagrama para inspeccionarlo. Haz clic para fijarlo y aislar su bloque.",
+      "decoding": "Decodificación {{label}}",
+      "executedOn": "ejecutado en",
+      "tensor": "tensor",
+      "parameters": "parámetros",
+      "parametersNone": "ninguno",
+      "parametersTied": "{{value}} (compartido)",
+      "stepShare": "bloque {{layer}} · parte del paso",
+      "energyPerStep": "energía / paso",
+      "gradientShare": "parte del gradiente",
+      "updateRatio": "relación de actualización",
+      "ablationDelta": "Δpérdida por ablación",
+      "meanHeadEntropy": "entropía media de cabeza"
+    },
+    "substrate": {
+      "title": "Sustrato",
+      "utilization": "utilización",
+      "utilizationAria": "Utilización del sustrato",
+      "throughput": "rendimiento",
+      "latency": "latencia",
+      "errorRate": "tasa de error",
+      "thermal": "temperatura",
+      "powerDraw": "consumo de energía",
+      "memoryPeak": "pico de memoria",
+      "runEnergy": "energía de la ejecución",
+      "runCost": "costo de la ejecución",
+      "costPerMTokens": "costo / M tokens",
+      "energyPrice": "precio de la energía"
+    },
+    "tokens": {
+      "titleDiffusion": "Flujo de tokens · eliminación de ruido en paralelo",
+      "titleAr": "Flujo de tokens · autorregresivo",
+      "ariaLabel": "Flujo de tokens",
+      "timestepAria": "Paso temporal de difusión",
+      "followLive": "Seguir el paso temporal en vivo",
+      "live": "en vivo",
+      "waiting": "Esperando el primer registro de generación."
+    },
+    "log": {
+      "title": "Registro de eventos"
+    },
+    "arch": {
+      "ar": {
+        "label": "Autorregresivo",
+        "summary": "Decodificación de izquierda a derecha. Cada pasada predice un token; la muestra se añade al contexto y la pasada se repite.",
+        "tokenizer": {
+          "label": "Tokenizador",
+          "shape": "texto → [B, {{seq}}] ids de token"
+        },
+        "embedding": {
+          "label": "Embedding de tokens",
+          "shape": "[{{vocab}}, {{dModel}}] tabla"
+        },
+        "positional": {
+          "label": "Codificación posicional",
+          "shape": "[{{seq}}, {{dModel}}] rotatoria"
+        },
+        "finalNorm": {
+          "label": "Normalización final",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "lmHead": {
+          "label": "Proyección de salida (cabeza LM)",
+          "shape": "[{{dModel}}, {{vocab}}] · compartida con el embedding"
+        },
+        "softmax": {
+          "label": "Softmax sobre el vocabulario",
+          "shape": "[B, {{seq}}, {{vocab}}] probabilidades"
+        },
+        "sampling": {
+          "label": "Muestreo / decodificación",
+          "shape": "top-p · temperatura → siguiente id de token"
+        },
+        "loop": {
+          "label": "El siguiente token se añade al contexto",
+          "sublabel": "un token por pasada · máscara causal"
+        }
+      },
+      "diffusion": {
+        "label": "Difusión",
+        "summary": "Decodificación en paralelo. Todas las posiciones se eliminan de ruido a la vez; el modelo se condiciona en el paso temporal e itera desde el ruido hasta el texto.",
+        "tokenizer": {
+          "label": "Tokenizador",
+          "shape": "texto → [B, {{seq}}] ids de token"
+        },
+        "noise": {
+          "label": "Ruido / enmascarado  xₜ",
+          "shape": "[B, {{seq}}] corrompido al nivel t"
+        },
+        "embedding": {
+          "label": "Embedding de tokens",
+          "shape": "[{{vocab}}, {{dModel}}] tabla"
+        },
+        "positional": {
+          "label": "Codificación posicional",
+          "shape": "[{{seq}}, {{dModel}}] rotatoria"
+        },
+        "timestep": {
+          "label": "Embedding del paso temporal",
+          "shape": "t → [{{dModel}}] sinusoidal + MLP"
+        },
+        "finalNorm": {
+          "label": "Normalización adaptativa final",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "denoiseHead": {
+          "label": "Cabeza de eliminación de ruido  x̂₀",
+          "shape": "[{{dModel}}, {{vocab}}] · compartida con el embedding"
+        },
+        "softmax": {
+          "label": "Distribución categórica",
+          "shape": "[B, {{seq}}, {{vocab}}] por posición"
+        },
+        "denoiseStep": {
+          "label": "Paso de eliminación de ruido  xₜ → xₜ₋₁",
+          "shape": "re-enmascarar posiciones de baja confianza"
+        },
+        "loop": {
+          "label": "T iteraciones de eliminación de ruido",
+          "sublabel": "todas las posiciones en paralelo · sin máscara causal"
+        }
+      },
+      "sublayer": {
+        "attnCausal": "Autoatención causal · {{heads}} cabezas",
+        "attnBidirectional": "Autoatención bidireccional · {{heads}} cabezas",
+        "attnShape": "Q,K,V,O: [{{dModel}}, {{dModel}}] × 4 · dim. por cabeza {{headDim}}",
+        "normPreNorm": "Pre-norma (RMSNorm)",
+        "normAdaptive": "Norma adaptativa (condicionada por t)",
+        "normShape": "[B, {{seq}}, {{dModel}}]",
+        "ffnLabel": "Red feed-forward",
+        "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    }
   },
   "scene1": {
     "line": "El futuro de la inteligencia artificial no pertenece solo a la electricidad."
@@ -49,11 +248,7 @@
   },
   "scene5": {
     "statement": "QPT — el primer modelo de lenguaje que combina lo mejor de tres tipos de computación para lograr mayor eficiencia y menor costo.",
-    "detail": "Cada componente del transformer se asigna al paradigma de computación que mejor expresa su matemática subyacente: clásica, cuántica, fotónica o termodinámica.",
-    "quantum": "Cuántica",
-    "photonic": "Fotónica",
-    "thermodynamic": "Termodinámica",
-    "classical": "Clásica"
+    "detail": "Cada componente del transformer se asigna al paradigma de computación que mejor expresa su matemática subyacente: clásica, cuántica, fotónica o termodinámica."
   },
   "scene6": {
     "eyebrow": "Salida del modelo",
@@ -181,10 +376,22 @@
     "goal": {
       "eyebrow": "04 · El Objetivo",
       "title": "Maximizar la <acc>eficiencia</acc> — intercambiando capas hasta encontrar la combinación perfecta de paradigmas.",
-      "cost": { "v": "↓ Costo", "k": "Economía del cómputo" },
-      "quality": { "v": "↑ Calidad", "k": "Salida del modelo" },
-      "time": { "v": "↓ Tiempo", "k": "Velocidad de entrenamiento e inferencia" },
-      "energy": { "v": "↓ Energía", "k": "Vatios por token" },
+      "cost": {
+        "v": "↓ Costo",
+        "k": "Economía del cómputo"
+      },
+      "quality": {
+        "v": "↑ Calidad",
+        "k": "Salida del modelo"
+      },
+      "time": {
+        "v": "↓ Tiempo",
+        "k": "Velocidad de entrenamiento e inferencia"
+      },
+      "energy": {
+        "v": "↓ Energía",
+        "k": "Vatios por token"
+      },
       "lead": "El objetivo es maximizar la eficiencia de un modelo de lenguaje en cuatro ejes — costo, calidad, tiempo y consumo de energía — intercambiando cada capa para encontrar la combinación perfecta de paradigmas."
     },
     "footer": {
