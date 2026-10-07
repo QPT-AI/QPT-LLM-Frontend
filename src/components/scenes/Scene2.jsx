@@ -346,15 +346,16 @@ function EntangledPair() {
 }
 
 // ---- Scene-wide background texture -------------------------------------
-// Always-on backdrop (CSS/SVG rather than the 3D canvas, so it has no
-// dependency on `active`) sitting behind the whole split layout. Built to the
-// QPT design manual: neutral ink hairlines draw the structure, Quantum
-// #5BAD1E appears only as three accent nodes plus one faint bloom, nothing is
-// dashed or decorative, and every animation is slow opacity / a few pixels of
-// translate.
+// Always-on backdrop (CSS/SVG rather than the 3D canvas, so it renders
+// regardless of `active`; `active` only gates the cursor lens below) sitting
+// behind the whole split layout. Built to the QPT design manual: neutral ink
+// hairlines draw the structure, Quantum #5BAD1E appears only as three accent
+// nodes plus one faint bloom, nothing is dashed or decorative, and every
+// animation is slow opacity / a few pixels of translate.
 //
-// Layer order: depth wash -> quantum bloom -> instrument grid -> registration
-// marks -> probability contours -> entanglement links + rings -> qubit nodes.
+// Layer order: depth wash -> quantum bloom -> instrument grid (bends under the
+// cursor lens) -> registration marks (ride the lens with the grid) ->
+// probability contours -> entanglement links + rings -> qubit nodes.
 
 const TEX_W = 800;
 const TEX_H = 500;
@@ -415,16 +416,238 @@ const CONTOURS = [
   { baseY: 444, amp: 18, k: 1.8, phase: 5.0, dur: "48s", dx: "28px", durY: "37s", dy: "6px" },
 ];
 
-function SceneTexture() {
-  const { isDark } = useTheme();
+// ---- Cursor lens ---------------------------------------------------------
+// A loupe that follows the mouse and bulges the instrument grid outward under
+// it. Grid lines are drawn as sampled polylines so they can bend. Everything
+// runs imperatively (refs + one rAF loop that sleeps when idle), so moving the
+// mouse never re-renders React.
+const GRID_SAMPLE = 8; // spacing of polyline samples along each grid line (viewBox units)
+const LENS_RADIUS = 130; // reach of the lens (viewBox units)
+// Peak push. Positive bulges (magnifies), negative pinches. Keep it inside
+// (-1, 1.25): beyond that the warp stops being one-to-one and lines fold over.
+const LENS_STRENGTH = 0.6;
+const LENS_FOLLOW = 10; // how quickly the lens chases the cursor (per second)
+const LENS_FADE = 4; // how quickly the lens appears / dissolves (per second)
+const LENS_WAKE_MS = 1200; // keep tracking this long after a scene switch, so the lens follows transitions
+const LENS_R2 = LENS_RADIUS * LENS_RADIUS;
 
-  const grid = useMemo(() => {
-    const vertical = [];
-    for (let x = 0; x <= TEX_W; x += GRID_STEP) vertical.push(x);
-    const horizontal = [];
-    for (let y = 0; y <= TEX_H; y += GRID_STEP) horizontal.push(y);
-    return { vertical, horizontal };
+function sampleLine(x1, y1, x2, y2) {
+  const n = Math.max(1, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / GRID_SAMPLE));
+  const pts = new Float32Array((n + 1) * 2);
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    pts[i * 2] = x1 + (x2 - x1) * t;
+    pts[i * 2 + 1] = y1 + (y2 - y1) * t;
+  }
+  return pts;
+}
+
+// Radial bulge. The falloff (1 - r²/R²)² reaches zero with zero slope at the
+// rim, so the lens has no visible edge where it meets the flat grid.
+function lensOffset(x, y, lens, out) {
+  out.x = 0;
+  out.y = 0;
+  if (lens.s <= 0) return out;
+  const dx = x - lens.x;
+  const dy = y - lens.y;
+  const d2 = dx * dx + dy * dy;
+  if (d2 >= LENS_R2) return out;
+  const k = 1 - d2 / LENS_R2;
+  const f = k * k * LENS_STRENGTH * lens.s;
+  out.x = dx * f;
+  out.y = dy * f;
+  return out;
+}
+
+function warpPath(pts, lens, off) {
+  let d = "";
+  for (let i = 0; i < pts.length; i += 2) {
+    lensOffset(pts[i], pts[i + 1], lens, off);
+    d += `${i === 0 ? "M" : "L"}${(pts[i] + off.x).toFixed(1)},${(pts[i + 1] + off.y).toFixed(1)}`;
+  }
+  return d;
+}
+
+function useGridLens({ svgRef, gridLines, gridRefs, markRefs, active }) {
+  const activeRef = useRef(active);
+  const kickRef = useRef(() => {});
+
+  useEffect(() => {
+    activeRef.current = active;
+    kickRef.current(LENS_WAKE_MS);
+  }, [active]);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return undefined;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const pointer = { x: 0, y: 0, present: false }; // last cursor position, client px
+    const lens = { x: TEX_W / 2, y: TEX_H / 2, s: 0 }; // live lens, viewBox units; s = 0..1 strength
+    const target = { x: lens.x, y: lens.y };
+    const drawn = { x: NaN, y: NaN, s: 0 };
+    const warped = new Uint8Array(gridLines.length); // which lines currently hold a bent path
+    const off = { x: 0, y: 0 };
+    let raf = 0;
+    let last = 0;
+    let wakeUntil = 0;
+
+    // Map the cursor into viewBox space. getScreenCTM folds in the `slice`
+    // scaling and any CSS transforms on ancestors (scene transitions, etc.).
+    const locate = () => {
+      if (!pointer.present || !activeRef.current || reduceMotion.matches) return false;
+      const r = svg.getBoundingClientRect();
+      if (pointer.x < r.left || pointer.x > r.right || pointer.y < r.top || pointer.y > r.bottom) return false;
+      const m = svg.getScreenCTM();
+      if (!m) return false;
+      const p = new DOMPoint(pointer.x, pointer.y).matrixTransform(m.inverse());
+      target.x = p.x;
+      target.y = p.y;
+      return true;
+    };
+
+    const draw = () => {
+      for (let i = 0; i < gridLines.length; i++) {
+        const el = gridRefs.current[i];
+        if (!el) continue;
+        const line = gridLines[i];
+        // Only lines that pass through the lens get rebuilt; the rest keep
+        // their two-point resting path.
+        const near = lens.s > 0 && Math.abs(line.at - (line.vertical ? lens.x : lens.y)) < LENS_RADIUS;
+        if (near) {
+          el.setAttribute("d", warpPath(line.pts, lens, off));
+          warped[i] = 1;
+        } else if (warped[i]) {
+          el.setAttribute("d", line.d);
+          warped[i] = 0;
+        }
+      }
+      // Registration marks sit on grid intersections, so they ride the same
+      // displacement field to stay pinned to the bent lines.
+      for (let i = 0; i < MARK_POINTS.length; i++) {
+        const el = markRefs.current[i];
+        if (!el) continue;
+        lensOffset(MARK_POINTS[i].x, MARK_POINTS[i].y, lens, off);
+        if (off.x || off.y) el.setAttribute("transform", `translate(${off.x.toFixed(2)} ${off.y.toFixed(2)})`);
+        else el.removeAttribute("transform");
+      }
+    };
+
+    const frame = (now) => {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 1 / 60;
+      last = now;
+
+      const want = locate() ? 1 : 0;
+      // Appear directly under the cursor rather than sliding in from wherever
+      // the lens last dissolved.
+      if (want && lens.s < 0.01) {
+        lens.x = target.x;
+        lens.y = target.y;
+      }
+
+      const follow = 1 - Math.exp(-LENS_FOLLOW * dt);
+      lens.x += (target.x - lens.x) * follow;
+      lens.y += (target.y - lens.y) * follow;
+      lens.s += (want - lens.s) * (1 - Math.exp(-LENS_FADE * dt));
+
+      const moving = Math.abs(target.x - lens.x) + Math.abs(target.y - lens.y) > 0.05;
+      const fading = Math.abs(want - lens.s) > 0.002;
+      if (!fading) lens.s = want;
+
+      if (Math.abs(lens.x - drawn.x) > 0.01 || Math.abs(lens.y - drawn.y) > 0.01 || lens.s !== drawn.s) {
+        draw();
+        drawn.x = lens.x;
+        drawn.y = lens.y;
+        drawn.s = lens.s;
+      }
+
+      if (moving || fading || now < wakeUntil) {
+        raf = requestAnimationFrame(frame);
+      } else {
+        raf = 0;
+        last = 0;
+      }
+    };
+
+    const kick = (holdMs = 0) => {
+      if (holdMs) wakeUntil = Math.max(wakeUntil, performance.now() + holdMs);
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    const onMove = (e) => {
+      if (e.pointerType === "touch") return; // finger drags are scrolls, not hovering
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.present = true;
+      kick();
+    };
+    const onOut = (e) => {
+      if (!e.relatedTarget) {
+        pointer.present = false; // cursor left the window
+        kick();
+      }
+    };
+    const onBlur = () => {
+      pointer.present = false;
+      kick();
+    };
+    const onLayout = () => kick(); // page moved under a still cursor
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    window.addEventListener("pointerout", onOut);
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("scroll", onLayout, { passive: true, capture: true });
+    window.addEventListener("resize", onLayout);
+    reduceMotion.addEventListener("change", onLayout);
+    kickRef.current = kick;
+
+    return () => {
+      kickRef.current = () => {};
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerout", onOut);
+      window.removeEventListener("blur", onBlur);
+      window.removeEventListener("scroll", onLayout, { capture: true });
+      window.removeEventListener("resize", onLayout);
+      reduceMotion.removeEventListener("change", onLayout);
+    };
+  }, [svgRef, gridLines, gridRefs, markRefs]);
+}
+
+function SceneTexture({ active = true }) {
+  const { isDark } = useTheme();
+  const svgRef = useRef(null);
+  const gridRefs = useRef([]);
+  const markRefs = useRef([]);
+
+  // Grid as sampled polylines so the lens can bend them. `d` is the flat
+  // resting path; the lens swaps in a warped one only while it's nearby.
+  const gridLines = useMemo(() => {
+    const lines = [];
+    for (let x = 0, i = 0; x <= TEX_W; x += GRID_STEP, i++) {
+      lines.push({
+        key: `gv-${x}`,
+        vertical: true,
+        at: x,
+        major: i % 4 === 0,
+        pts: sampleLine(x, 0, x, TEX_H),
+        d: `M${x},0 L${x},${TEX_H}`,
+      });
+    }
+    for (let y = 0, i = 0; y <= TEX_H; y += GRID_STEP, i++) {
+      lines.push({
+        key: `gh-${y}`,
+        vertical: false,
+        at: y,
+        major: i % 4 === 0,
+        pts: sampleLine(0, y, TEX_W, y),
+        d: `M0,${y} L${TEX_W},${y}`,
+      });
+    }
+    return lines;
   }, []);
+
+  useGridLens({ svgRef, gridLines, gridRefs, markRefs, active });
 
   const contours = useMemo(
     () =>
@@ -461,30 +684,19 @@ function SceneTexture() {
       <div className="qtex-bloom" />
 
       <svg
+        ref={svgRef}
         className="qtex-svg"
         viewBox={`0 0 ${TEX_W} ${TEX_H}`}
         preserveAspectRatio="xMidYMid slice"
       >
-        {/* Layer 1 - instrument grid */}
-        <g>
-          {grid.vertical.map((x, i) => (
-            <line
-              key={`gv-${x}`}
-              className={`qtex-grid${i % 4 === 0 ? " major" : ""}`}
-              x1={x}
-              y1="0"
-              x2={x}
-              y2={TEX_H}
-            />
-          ))}
-          {grid.horizontal.map((y, i) => (
-            <line
-              key={`gh-${y}`}
-              className={`qtex-grid${i % 4 === 0 ? " major" : ""}`}
-              x1="0"
-              y1={y}
-              x2={TEX_W}
-              y2={y}
+        {/* Layer 1 - instrument grid (bends under the cursor lens) */}
+        <g fill="none">
+          {gridLines.map((l, i) => (
+            <path
+              key={l.key}
+              ref={(el) => (gridRefs.current[i] = el)}
+              className={`qtex-grid${l.major ? " major" : ""}`}
+              d={l.d}
             />
           ))}
         </g>
@@ -492,7 +704,7 @@ function SceneTexture() {
         {/* Layer 2 - registration marks */}
         <g>
           {MARK_POINTS.map((m, i) => (
-            <g key={`mark-${i}`}>
+            <g key={`mark-${i}`} ref={(el) => (markRefs.current[i] = el)}>
               <line
                 className="qtex-mark"
                 x1={m.x - MARK_LEN}
@@ -604,7 +816,7 @@ export default function Scene2({ active }) {
   const { t } = useTranslation();
   return (
     <div className="scene-inner">
-      <SceneTexture />
+      <SceneTexture active={active} />
       <div className="split">
         <div className="scene-text">
           <span className="eyebrow stroke-hair">
