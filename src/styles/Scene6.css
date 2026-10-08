@@ -2,6 +2,12 @@
     Scene 6 — terminal token generation
     ============================================================ */
 
+/* Keep the generated text above the ambient blobs */
+.scene6-text {
+  position: relative;
+  z-index: 1;
+}
+
 .terminal-window {
   width: 100%;
   max-width: 920px;
