@@ -3,6 +3,8 @@
     ============================================================ */
 
 .glitch-text {
+  position: relative; /* keep the text above the ambient blobs */
+  z-index: 1;
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: clamp(1.5rem, 5vw, 4rem);

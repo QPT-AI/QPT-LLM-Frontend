@@ -1,0 +1,52 @@
+This is at least a partial credits-file of people that have
+	contributed to the QPT project.  It is sorted by name and
+	formatted to allow easy grepping and beautification by
+	scripts.  The fields are: name (N), email (E), web-address
+	(W), PGP key ID and fingerprint (P), description (D), and
+	snail-mail address (S).
+	Thanks,
+
+			Daniel
+----------
+
+N: Daniel Arango Sohm
+E: jero98772@protonmail.com
+E: jero98772@gmail.com
+D: CEO, Original Inventor
+W: https://main.jero98772.page/
+S: Colombia
+
+N: Jerónimo Hoyos Botero
+E: jerohoyos1@gmail.com
+D: CTO LLM 
+S: Colombia
+
+N: Simón Escobar Díaz 
+E: sescobard1@eafit.edu.co
+D: CTO Computacional Paradigms
+S: Colombia
+
+N: Edison Valencia
+E: edison.valencia.eafit@gmail.com
+D: Photonic advisor
+S: Colombia
+
+N: Juan jose canon
+E: jjcanond@eafit.edu.co
+D: Difucion llm Contributor
+S: Colombia
+
+N: Juan jose Gomez
+E: Juanjogr07@gmail.com
+D: Difussion and thermodinamics llm Contributor 
+S: Colombia
+
+N: Carlos duran
+E: caduranpd@gmail.com
+D: Quantum advisor
+S: Colombia
+
+N: Maximiliano arango
+E: fellcrack@protonmail.com
+D: junior researcher in trits
+S: Colombia

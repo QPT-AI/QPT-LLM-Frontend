@@ -273,7 +273,8 @@
     "emailPlaceholder": "you@email.com",
     "emailError": "Что-то пошло не так — попробуйте снова",
     "submit": "Отправить",
-    "copyright": "©2026 Все права защищены"
+    "copyright": "©2026 Все права защищены",
+    "ourTeam": "Наша команда"
   },
   "onePager": {
     "hero": {
@@ -398,6 +399,21 @@
       "brand": "QPT — МУЛЬТИПАРАДИГМЕННЫЕ ВЫЧИСЛЕНИЯ",
       "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO",
       "copyright": "©2026 Все права защищены"
+    }
+  },
+  "ourTeam": {
+    "eyebrow": "Кто мы",
+    "title": "Люди, стоящие за QPT.",
+    "lead": "Команда инженеров и исследователей, объединяющая квантовые, фотонные и термодинамические вычисления в одной машине.",
+    "roles": {
+      "ceo_original_inventor": "CEO, автор идеи",
+      "cto_llm": "CTO, LLM",
+      "cto_computacional_paradigms": "CTO, вычислительные парадигмы",
+      "photonic_advisor": "Консультант по фотонике",
+      "difucion_llm_contributor": "Участник: диффузионные LLM",
+      "difussion_and_thermodinamics_llm_contributor": "Участник: диффузионные и термодинамические LLM",
+      "quantum_advisor": "Консультант по квантовым вычислениям",
+      "junior_researcher_in_trits": "Младший исследователь (триты)"
     }
   }
 }
