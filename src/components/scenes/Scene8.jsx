@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import EmailCapture from "../ui/EmailCapture";
 import "../../styles/Scene8.css";
 import { PARADIGM_META } from "../../config/paradigms";
@@ -35,6 +36,9 @@ export default function Scene8() {
           <span className="footer-thanks stroke-hair">{t("footer.thanks")}</span>
           <div className="footer-actions">
             <EmailCapture />
+            <Link to="/our-team" className="footer-btn ghost">
+              {t("footer.ourTeam")}
+            </Link>
             <button type="button" className="footer-btn primary">
               {t("footer.supportUs")}
             </button>

@@ -89,6 +89,9 @@
   padding: 11px 20px;
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
   transition: transform 180ms var(--ease-out), opacity 180ms var(--ease-out);
 }
 

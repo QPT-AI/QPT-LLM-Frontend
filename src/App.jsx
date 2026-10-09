@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import OnePager from "./pages/OnePager";
+import OurTeam from "./pages/OurTeam";
 import Chat from "./pages/Chat";
 import Monitor from "./pages/Monitor";
 
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/one-pager" element={<OnePager />} />
+            <Route path="/our-team" element={<OurTeam />} />
             <Route element={<Protected />}>
               <Route path="/chat" element={<Chat />} />
               <Route path="/monitor" element={<Monitor />} />

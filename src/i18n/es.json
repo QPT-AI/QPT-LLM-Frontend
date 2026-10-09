@@ -273,7 +273,8 @@
     "emailPlaceholder": "tucorreo@email.com",
     "emailError": "Algo salió mal — inténtalo de nuevo",
     "submit": "Enviar",
-    "copyright": "©2026 Todos los derechos reservados"
+    "copyright": "©2026 Todos los derechos reservados",
+    "ourTeam": "Nuestro equipo"
   },
   "onePager": {
     "hero": {
@@ -398,6 +399,21 @@
       "brand": "QPT — COMPUTACIÓN MULTI-PARADIGMA",
       "tags": "QUANTUM · PHOTONIC · THERMODYNAMIC · TERNARY · BIO",
       "copyright": "©2026 Todos los derechos reservados"
+    }
+  },
+  "ourTeam": {
+    "eyebrow": "Quiénes somos",
+    "title": "Las personas detrás de QPT.",
+    "lead": "Un equipo de ingenieros e investigadores que une la computación cuántica, fotónica y termodinámica en una sola máquina.",
+    "roles": {
+      "ceo_original_inventor": "CEO, inventor original",
+      "cto_llm": "CTO, LLM",
+      "cto_computacional_paradigms": "CTO, paradigmas computacionales",
+      "photonic_advisor": "Asesor en fotónica",
+      "difucion_llm_contributor": "Colaborador en LLM de difusión",
+      "difussion_and_thermodinamics_llm_contributor": "Colaborador en LLM de difusión y termodinámica",
+      "quantum_advisor": "Asesor en cuántica",
+      "junior_researcher_in_trits": "Investigador júnior en trits"
     }
   }
 }
