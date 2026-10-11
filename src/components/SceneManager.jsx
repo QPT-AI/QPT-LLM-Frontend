@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Component as ReactComponent, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ui/ThemeToggle";
@@ -15,6 +15,21 @@ const Scene5 = lazy(() => import("./scenes/Scene5"));
 const Scene6 = lazy(() => import("./scenes/Scene6"));
 const Scene7 = lazy(() => import("./scenes/Scene7"));
 const Scene8 = lazy(() => import("./scenes/Scene8"));
+
+// Keeps one failing scene (chunk load error, WebGL context failure on iOS)
+// from unmounting the whole page.
+class SceneErrorBoundary extends ReactComponent {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error) {
+    console.error("Scene failed to render:", error);
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
 
 const SCENES = [Scene1, Scene2, Scene3, null, Scene5, Scene6, Scene7, Scene8];
 const TOTAL = SCENES.length;
@@ -146,9 +161,11 @@ export default function SceneManager() {
             }}
             aria-hidden={!isActive}
           >
-            <Suspense fallback={null}>
-              {isNearby && Component ? <Component active={isActive} /> : null}
-            </Suspense>
+            <SceneErrorBoundary>
+              <Suspense fallback={null}>
+                {isNearby && Component ? <Component active={isActive} /> : null}
+              </Suspense>
+            </SceneErrorBoundary>
           </div>
         );
       }),

@@ -71,6 +71,11 @@ function cspPlugin() {
 export default defineConfig({
   plugins: [react(), creditsPlugin(), cspPlugin()],
 
+  // Lower newer syntax (e.g. class static blocks in three.js) for older iOS Safari
+  build: {
+    target: ['es2020', 'safari15', 'ios15', 'chrome100', 'firefox100', 'edge100'],
+  },
+
   server: {
     host: '0.0.0.0',
     allowedHosts: [
