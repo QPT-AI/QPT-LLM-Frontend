@@ -1,0 +1,419 @@
+{
+  "nav": {
+    "scrollHint": "Role para continuar",
+    "themeToLight": "Mudar para o modo claro",
+    "themeToDark": "Mudar para o modo escuro",
+    "languageLabel": "Idioma",
+    "progressLabel": "Cena {{current}} de {{total}}",
+    "sectionLabel": "Seções",
+    "home": "Início",
+    "chat": "Chat",
+    "monitor": "Monitor",
+    "continue": "Continuar"
+  },
+  "login": {
+    "title": "Entrar no QPT",
+    "subtitle": "Autentique-se para continuar rumo ao futuro da computação.",
+    "google": "Entrar com o Google",
+    "processing": "Entrando…",
+    "error": "Falha ao entrar. Tente novamente.",
+    "back": "Voltar ao início"
+  },
+  "chat": {
+    "empty": "Comece uma conversa com o QPT.",
+    "placeholder": "Digite sua mensagem…",
+    "placeholderReply": "O QPT ainda não está conectado. A integração com o backend chega em breve.",
+    "send": "Enviar"
+  },
+  "paradigms": {
+    "quantum": "Quântico",
+    "photonic": "Fotônico",
+    "thermodynamic": "Termodinâmico",
+    "classical": "Clássico"
+  },
+  "monitor": {
+    "title": "Monitor",
+    "back": "Voltar ao site",
+    "awaiting": "Aguardando telemetria",
+    "aria": {
+      "trainingMetrics": "Métricas de treinamento",
+      "resizeSplitter": "Redimensionar os painéis de métricas e diagrama"
+    },
+    "appbar": {
+      "status": {
+        "sim": "Dados simulados",
+        "live": "Telemetria ao vivo",
+        "connecting": "Conectando",
+        "error": "Erro de conexão",
+        "idle": "Ocioso"
+      },
+      "playbackAria": "Reprodução",
+      "resume": "Retomar",
+      "pause": "Pausar",
+      "slower": "Mais lento",
+      "faster": "Mais rápido"
+    },
+    "kpi": {
+      "ariaLabel": "Sinais vitais do treinamento",
+      "trainingLoss": "Perda de treinamento",
+      "validationLoss": "Perda de validação",
+      "perplexity": "Perplexidade",
+      "learningRate": "Taxa de aprendizado",
+      "gradientNorm": "Norma do gradiente",
+      "gradientNormBadge": "recortada",
+      "throughput": "Vazão",
+      "compute": "Computação",
+      "energyPerToken": "Energia por token",
+      "runCost": "Custo da execução"
+    },
+    "diagram": {
+      "title": "Arquitetura do modelo",
+      "meta": "{{blocks}} blocos · {{heads}} cabeças · d {{dModel}} · {{params}} parâmetros",
+      "architectureAria": "Arquitetura",
+      "viewAria": "Vista",
+      "view": {
+        "perspective": "3D",
+        "front": "Frente",
+        "side": "Lateral"
+      },
+      "exploded": "Explodida",
+      "explodedTitle": "Separar as subcamadas de cada bloco",
+      "resetView": "Redefinir vista",
+      "blockGroup": {
+        "title": "Blocos transformer × {{count}}",
+        "paramsEach": "{{params}} parâmetros cada",
+        "norm": "norm",
+        "attention": "atenção",
+        "feedForward": "feed-forward",
+        "residualStream": "fluxo residual"
+      }
+    },
+    "legend": {
+      "executedOn": "Executado em",
+      "ariaLabel": "Legenda dos paradigmas de computação",
+      "tooltip": "{{paradigm}}: {{count}} componentes, {{share}}% dos parâmetros. Clique para isolar."
+    },
+    "detail": {
+      "title": "Componente",
+      "titlePinned": "Componente · fixado",
+      "clearSelection": "Limpar seleção",
+      "hint": "Passe o mouse sobre um retângulo do diagrama para inspecioná-lo. Clique para fixá-lo e isolar seu bloco.",
+      "decoding": "Decodificação {{label}}",
+      "executedOn": "executado em",
+      "tensor": "tensor",
+      "parameters": "parâmetros",
+      "parametersNone": "nenhum",
+      "parametersTied": "{{value}} (compartilhados)",
+      "stepShare": "bloco {{layer}} · fração do passo",
+      "energyPerStep": "energia / passo",
+      "gradientShare": "fração do gradiente",
+      "updateRatio": "razão de atualização",
+      "ablationDelta": "Δperda por ablação",
+      "meanHeadEntropy": "entropia média das cabeças"
+    },
+    "substrate": {
+      "title": "Substrato",
+      "utilization": "utilização",
+      "utilizationAria": "Utilização do substrato",
+      "throughput": "vazão",
+      "latency": "latência",
+      "errorRate": "taxa de erro",
+      "thermal": "térmico",
+      "powerDraw": "consumo de energia",
+      "memoryPeak": "pico de memória",
+      "runEnergy": "energia da execução",
+      "runCost": "custo da execução",
+      "costPerMTokens": "custo / M tokens",
+      "energyPrice": "preço da energia"
+    },
+    "tokens": {
+      "titleDiffusion": "Fluxo de tokens · remoção de ruído paralela",
+      "titleAr": "Fluxo de tokens · autorregressivo",
+      "ariaLabel": "Fluxo de tokens",
+      "timestepAria": "Passo de tempo da difusão",
+      "followLive": "Seguir o passo de tempo ao vivo",
+      "live": "ao vivo",
+      "waiting": "Aguardando o primeiro registro de geração."
+    },
+    "log": {
+      "title": "Registro de eventos"
+    },
+    "arch": {
+      "ar": {
+        "label": "Autorregressivo",
+        "summary": "Decodificação da esquerda para a direita. Cada passagem direta prevê um token; a amostra é anexada ao contexto e a passagem se repete.",
+        "tokenizer": {
+          "label": "Tokenizador",
+          "shape": "texto → [B, {{seq}}] ids de tokens"
+        },
+        "embedding": {
+          "label": "Embedding de tokens",
+          "shape": "tabela [{{vocab}}, {{dModel}}]"
+        },
+        "positional": {
+          "label": "Codificação posicional",
+          "shape": "[{{seq}}, {{dModel}}] rotativa"
+        },
+        "finalNorm": {
+          "label": "Normalização final",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "lmHead": {
+          "label": "Projeção de saída (cabeça LM)",
+          "shape": "[{{dModel}}, {{vocab}}] · ligada ao embedding"
+        },
+        "softmax": {
+          "label": "Softmax sobre o vocabulário",
+          "shape": "[B, {{seq}}, {{vocab}}] probabilidades"
+        },
+        "sampling": {
+          "label": "Amostragem / decodificação",
+          "shape": "top-p · temperatura → id do próximo token"
+        },
+        "loop": {
+          "label": "Próximo token anexado ao contexto",
+          "sublabel": "um token por passagem · máscara causal"
+        }
+      },
+      "diffusion": {
+        "label": "Difusão",
+        "summary": "Decodificação paralela. Todas as posições têm o ruído removido ao mesmo tempo; o modelo é condicionado no passo de tempo e itera do ruído ao texto.",
+        "tokenizer": {
+          "label": "Tokenizador",
+          "shape": "texto → [B, {{seq}}] ids de tokens"
+        },
+        "noise": {
+          "label": "Ruído / mascaramento  xₜ",
+          "shape": "[B, {{seq}}] corrompido no nível t"
+        },
+        "embedding": {
+          "label": "Embedding de tokens",
+          "shape": "tabela [{{vocab}}, {{dModel}}]"
+        },
+        "positional": {
+          "label": "Codificação posicional",
+          "shape": "[{{seq}}, {{dModel}}] rotativa"
+        },
+        "timestep": {
+          "label": "Embedding do passo de tempo",
+          "shape": "t → [{{dModel}}] senoidal + MLP"
+        },
+        "finalNorm": {
+          "label": "Norma adaptativa final",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "denoiseHead": {
+          "label": "Cabeça de remoção de ruído  logits x̂₀",
+          "shape": "[{{dModel}}, {{vocab}}] · ligada ao embedding"
+        },
+        "softmax": {
+          "label": "Distribuição categórica",
+          "shape": "[B, {{seq}}, {{vocab}}] por posição"
+        },
+        "denoiseStep": {
+          "label": "Passo de remoção de ruído  xₜ → xₜ₋₁",
+          "shape": "remascarar posições de baixa confiança"
+        },
+        "loop": {
+          "label": "T iterações de remoção de ruído",
+          "sublabel": "todas as posições em paralelo · sem máscara causal"
+        }
+      },
+      "sublayer": {
+        "attnCausal": "Autoatenção causal · {{heads}} cabeças",
+        "attnBidirectional": "Autoatenção bidirecional · {{heads}} cabeças",
+        "attnShape": "Q,K,V,O: [{{dModel}}, {{dModel}}] × 4 · dim. da cabeça {{headDim}}",
+        "normPreNorm": "Pré-norm (RMSNorm)",
+        "normAdaptive": "Norma adaptativa (condicionada em t)",
+        "normShape": "[B, {{seq}}, {{dModel}}]",
+        "ffnLabel": "Rede feed-forward",
+        "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    }
+  },
+  "scene1": {
+    "line": "O futuro da inteligência artificial não pertence apenas à eletricidade."
+  },
+  "scene2": {
+    "eyebrow": "Computação quântica",
+    "description": "Estados quânticos exploram possibilidades complexas simultaneamente, abrindo novos caminhos para o aprendizado de máquina além da computação clássica."
+  },
+  "scene3": {
+    "eyebrow": "Computação fotônica",
+    "description": "Onde a luz computa, o aprendizado de máquina acelera."
+  },
+  "scene4": {
+    "eyebrow": "Computação termodinâmica",
+    "description": "Otimização natural termodinâmica que aproveita as flutuações térmicas para explorar soluções melhores."
+  },
+  "scene5": {
+    "statement": "QPT — o primeiro modelo de linguagem a combinar o melhor de três tipos de computação para alcançar maior eficiência e menor custo.",
+    "detail": "Cada componente do transformer é atribuído ao paradigma de computação que melhor expressa sua matemática subjacente — clássico, quântico, fotônico ou termodinâmico."
+  },
+  "scene6": {
+    "eyebrow": "Saída do modelo",
+    "generatedText": "Hoje você acha que isso é besteira; daqui a 15 anos vai perceber que essa ideia vai chegar ao mundo. Este é o momento de se preparar antes que o boom do hardware exploda — tornando a inteligência artificial mais eficiente com formas combinadas de computação."
+  },
+  "scene7": {
+    "eyebrow": "Sinal travado",
+    "final": "O QPT existe para responder a uma pergunta de pesquisa: quais partes de um modelo de linguagem realmente se beneficiam da computação não clássica, e em que medida?"
+  },
+  "scene8": {
+    "prefix": "No futuro, ",
+    "ternary": "a computação ternária",
+    "middle": " e ",
+    "bio": "a computação biológica",
+    "suffix": " também terão um papel importante nesse processo."
+  },
+  "footer": {
+    "thanks": "Obrigado por confiar em nós",
+    "stayInformed": "Fique por dentro",
+    "supportUs": "Apoie-nos",
+    "emailLabel": "Endereço de e-mail",
+    "emailPlaceholder": "voce@email.com",
+    "emailError": "Algo deu errado — tente novamente",
+    "submit": "Enviar",
+    "copyright": "©2026 Todos os direitos reservados",
+    "ourTeam": "Nossa equipe"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "Quântico · Fotônico · Termodinâmico — Um só computador",
+      "uvp": "Enquanto alguns apostam em construir o melhor <em>componente único</em> para seu computador, nós apostamos no <em>trabalho colaborativo</em> — nos unir para juntar todas essas peças e criar o melhor computador possível.",
+      "stats": {
+        "paradigmsProd": "paradigmas em produção",
+        "paradigmsRoadmap": "paradigmas no roadmap",
+        "phases": "fases até o domínio completo da stack"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · Análise de mercado",
+      "title": "Na interseção de todas as ondas de financiamento.",
+      "lead": "O QPT está na convergência de cinco das correntes de capital e de bolsas mais fortes da tecnologia hoje. Cada onda financia uma parte da stack; o QPT é a única posição que se qualifica para todas ao mesmo tempo.",
+      "legend": {
+        "quantum": "Quântico",
+        "ai": "IA",
+        "sustainable": "Sustentável",
+        "research": "Pesquisa",
+        "openSource": "Código aberto",
+        "quantumDesc": "bolsas e programas de computação quântica",
+        "aiDesc": "financiamento de modelos de fundação e LLMs",
+        "sustainableDesc": "iniciativas de eficiência energética",
+        "researchDesc": "programas de computação científica",
+        "openSourceDesc": "apoio a infraestrutura aberta"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · Diretores e equipe",
+      "title": "Feito por pessoas que abrangem todos os paradigmas.",
+      "ceo": {
+        "role": "Diretor executivo (CEO)",
+        "desc": "Palestrante internacional com mais de 10 palestras em três idiomas, três vezes vencedor do Melhor Projeto de Engenharia de Sistemas da EAFIT e vencedor do Claude Hackathon 2025."
+      },
+      "ctoMulti": {
+        "role": "CTO multiparadigma",
+        "desc": "Líder do Grupo de Pesquisa em Computação Quântica da EAFIT, representante do Ramo Estudantil IEEE na EAFIT e palestrante sobre a integração da computação quântica com IA."
+      },
+      "ctoAi": {
+        "role": "CTO de LLM e IA",
+        "desc": "Palestrante reconhecido por sua palestra sobre como construir um transformer do zero (apresentada mais de três vezes) e líder do Grupo de Pesquisa em IA Aperture na Universidad Nacional, Medellín."
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · Roadmap — Dez fases",
+      "title": "Da simulação ao hardware próprio.",
+      "p1": {
+        "title": "LM autorregressivo e de difusão semiprofissional",
+        "desc": "Construir nossos próprios modelos de linguagem de base — das famílias autorregressiva e de difusão — como o substrato sobre o qual todas as fases seguintes treinam."
+      },
+      "p2": {
+        "title": "LMs de outros paradigmas por simulação, ×3",
+        "desc": "Simular computação quântica, fotônica e termodinâmica e treinar LMs nativos de cada paradigma — antes de tocar em hardware real."
+      },
+      "p3": {
+        "title": "Mistura híbrida — um paradigma por camada",
+        "desc": "Misturar computação quântica, fotônica e termodinâmica dentro de cada camada do modelo — a tese central do QPT em código."
+      },
+      "p4": {
+        "title": "Melhorar o desempenho autorregressivo e de difusão",
+        "desc": "Levar tudo o que foi aprendido de volta aos modelos de base: LMs autorregressivos e de difusão mais rápidos, mais baratos e melhores."
+      },
+      "p5": {
+        "title": "Produzir nossos próprios algoritmos híbridos",
+        "desc": "Parar de emprestar e começar a inventar: algoritmos híbridos proprietários que exploram nativamente hardware multiparadigma."
+      },
+      "p6": {
+        "title": "Treinar com algoritmos híbridos + simulação",
+        "desc": "Primeiros treinamentos completos guiados inteiramente pelos nossos próprios algoritmos híbridos, validados em simulação em escala."
+      },
+      "p7": {
+        "title": "Treinar em hardware alugado",
+        "desc": "Passar da simulação para hardware quântico, fotônico e termodinâmico real e alugado em treinamentos ao vivo."
+      },
+      "p8": {
+        "title": "Comprar nosso próprio hardware e treinar",
+        "desc": "Ser dono do substrato: adquirir máquinas quânticas, fotônicas e termodinâmicas e treinar os modelos na nossa própria frota."
+      },
+      "p9": {
+        "title": "Expandir para novos horizontes",
+        "desc": "Ir além dos três paradigmas originais e continuar produzindo nossos próprios algoritmos híbridos para os substratos que vierem."
+      },
+      "p10": {
+        "title": "Ter computadores biológicos e ternários",
+        "desc": "Adquirir um computador biológico (redes neurais naturais) e o computador de trits (ternário) da Huawei — e treinar os modelos em ambos."
+      },
+      "spectrum": "Todos os paradigmas considerados em conjunto"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "Quântico",
+      "photonic": "Fotônico",
+      "thermic": "Térmico",
+      "hybrid": "Híbrido",
+      "simulation": "Simulação",
+      "bio": "Bio",
+      "ternary": "Ternário"
+    },
+    "goal": {
+      "eyebrow": "04 · O objetivo",
+      "title": "Maximizar a <acc>eficiência</acc> — trocando camadas até encontrar a combinação perfeita de paradigmas.",
+      "cost": {
+        "v": "↓ Custo",
+        "k": "Economia da computação"
+      },
+      "quality": {
+        "v": "↑ Qualidade",
+        "k": "Saída do modelo"
+      },
+      "time": {
+        "v": "↓ Tempo",
+        "k": "Velocidade de treinamento e inferência"
+      },
+      "energy": {
+        "v": "↓ Energia",
+        "k": "Watts por token"
+      },
+      "lead": "O objetivo é maximizar a eficiência de um modelo de linguagem em quatro eixos — custo, qualidade, tempo e consumo de energia — trocando cada camada para encontrar a combinação perfeita de paradigmas."
+    },
+    "footer": {
+      "brand": "QPT — COMPUTAÇÃO MULTIPARADIGMA",
+      "tags": "QUÂNTICO · FOTÔNICO · TERMODINÂMICO · TERNÁRIO · BIO",
+      "copyright": "©2026 Todos os direitos reservados"
+    }
+  },
+  "ourTeam": {
+    "eyebrow": "Quem somos",
+    "title": "As pessoas por trás do QPT.",
+    "lead": "Uma equipe de engenheiros e pesquisadores unindo computação quântica, fotônica e termodinâmica em uma única máquina.",
+    "roles": {
+      "ceo_original_inventor": "CEO, inventor original",
+      "cto_llm": "CTO, LLM",
+      "cto_computacional_paradigms": "CTO, paradigmas computacionais",
+      "photonic_advisor": "Consultor de fotônica",
+      "difucion_llm_contributor": "Colaborador de LLM de difusão",
+      "difussion_and_thermodinamics_llm_contributor": "Colaborador de LLM de difusão e termodinâmica",
+      "quantum_advisor": "Consultor quântico",
+      "junior_researcher_in_trits": "Pesquisador júnior, trits"
+    }
+  }
+}
