@@ -1,0 +1,419 @@
+{
+  "nav": {
+    "scrollHint": "滚动以继续",
+    "themeToLight": "切换到浅色模式",
+    "themeToDark": "切换到深色模式",
+    "languageLabel": "语言",
+    "progressLabel": "第 {{current}} 幕，共 {{total}} 幕",
+    "sectionLabel": "章节",
+    "home": "首页",
+    "chat": "对话",
+    "monitor": "监控",
+    "continue": "继续"
+  },
+  "login": {
+    "title": "登录 QPT",
+    "subtitle": "完成身份验证，继续迈向计算的未来。",
+    "google": "使用 Google 登录",
+    "processing": "正在登录…",
+    "error": "登录失败，请重试。",
+    "back": "返回首页"
+  },
+  "chat": {
+    "empty": "开始与 QPT 对话。",
+    "placeholder": "输入你的消息…",
+    "placeholderReply": "QPT 尚未接入，后端集成即将上线。",
+    "send": "发送"
+  },
+  "paradigms": {
+    "quantum": "量子",
+    "photonic": "光子",
+    "thermodynamic": "热力学",
+    "classical": "经典"
+  },
+  "monitor": {
+    "title": "监控",
+    "back": "返回网站",
+    "awaiting": "等待遥测数据",
+    "aria": {
+      "trainingMetrics": "训练指标",
+      "resizeSplitter": "调整指标与图表面板大小"
+    },
+    "appbar": {
+      "status": {
+        "sim": "模拟数据",
+        "live": "实时遥测",
+        "connecting": "连接中",
+        "error": "连接错误",
+        "idle": "空闲"
+      },
+      "playbackAria": "播放",
+      "resume": "继续",
+      "pause": "暂停",
+      "slower": "减速",
+      "faster": "加速"
+    },
+    "kpi": {
+      "ariaLabel": "训练关键指标",
+      "trainingLoss": "训练损失",
+      "validationLoss": "验证损失",
+      "perplexity": "困惑度",
+      "learningRate": "学习率",
+      "gradientNorm": "梯度范数",
+      "gradientNormBadge": "已裁剪",
+      "throughput": "吞吐量",
+      "compute": "算力",
+      "energyPerToken": "每 token 能耗",
+      "runCost": "运行成本"
+    },
+    "diagram": {
+      "title": "模型架构",
+      "meta": "{{blocks}} 个块 · {{heads}} 个头 · d {{dModel}} · {{params}} 参数",
+      "architectureAria": "架构",
+      "viewAria": "视图",
+      "view": {
+        "perspective": "3D",
+        "front": "正面",
+        "side": "侧面"
+      },
+      "exploded": "展开",
+      "explodedTitle": "将每个块的子层分开显示",
+      "resetView": "重置视图",
+      "blockGroup": {
+        "title": "Transformer 块 × {{count}}",
+        "paramsEach": "每个 {{params}} 参数",
+        "norm": "归一化",
+        "attention": "注意力",
+        "feedForward": "前馈",
+        "residualStream": "残差流"
+      }
+    },
+    "legend": {
+      "executedOn": "运行于",
+      "ariaLabel": "计算范式图例",
+      "tooltip": "{{paradigm}}：{{count}} 个组件，占参数的 {{share}}%。点击以单独显示。"
+    },
+    "detail": {
+      "title": "组件",
+      "titlePinned": "组件 · 已固定",
+      "clearSelection": "清除选择",
+      "hint": "将鼠标悬停在图中的矩形上以查看详情。点击可固定并单独显示其所在的块。",
+      "decoding": "{{label}}解码",
+      "executedOn": "运行于",
+      "tensor": "张量",
+      "parameters": "参数",
+      "parametersNone": "无",
+      "parametersTied": "{{value}}（共享）",
+      "stepShare": "块 {{layer}} · 步骤占比",
+      "energyPerStep": "能耗 / 步",
+      "gradientShare": "梯度占比",
+      "updateRatio": "更新比率",
+      "ablationDelta": "消融 Δ损失",
+      "meanHeadEntropy": "平均注意力头熵"
+    },
+    "substrate": {
+      "title": "计算基底",
+      "utilization": "利用率",
+      "utilizationAria": "基底利用率",
+      "throughput": "吞吐量",
+      "latency": "延迟",
+      "errorRate": "错误率",
+      "thermal": "温度",
+      "powerDraw": "功耗",
+      "memoryPeak": "内存峰值",
+      "runEnergy": "运行能耗",
+      "runCost": "运行成本",
+      "costPerMTokens": "成本 / 百万 token",
+      "energyPrice": "电价"
+    },
+    "tokens": {
+      "titleDiffusion": "Token 流 · 并行去噪",
+      "titleAr": "Token 流 · 自回归",
+      "ariaLabel": "Token 流",
+      "timestepAria": "扩散时间步",
+      "followLive": "跟随实时时间步",
+      "live": "实时",
+      "waiting": "等待第一条生成记录。"
+    },
+    "log": {
+      "title": "事件日志"
+    },
+    "arch": {
+      "ar": {
+        "label": "自回归",
+        "summary": "从左到右解码。每次前向传播预测一个 token；采样结果追加到上下文中，然后重复该过程。",
+        "tokenizer": {
+          "label": "分词器",
+          "shape": "文本 → [B, {{seq}}] token id"
+        },
+        "embedding": {
+          "label": "Token 嵌入",
+          "shape": "[{{vocab}}, {{dModel}}] 查找表"
+        },
+        "positional": {
+          "label": "位置编码",
+          "shape": "[{{seq}}, {{dModel}}] 旋转式"
+        },
+        "finalNorm": {
+          "label": "最终归一化",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "lmHead": {
+          "label": "输出投影（LM 头）",
+          "shape": "[{{dModel}}, {{vocab}}] · 与嵌入共享权重"
+        },
+        "softmax": {
+          "label": "词表上的 Softmax",
+          "shape": "[B, {{seq}}, {{vocab}}] 概率"
+        },
+        "sampling": {
+          "label": "采样 / 解码",
+          "shape": "top-p · 温度 → 下一个 token id"
+        },
+        "loop": {
+          "label": "下一个 token 追加到上下文",
+          "sublabel": "每次传播一个 token · 因果掩码"
+        }
+      },
+      "diffusion": {
+        "label": "扩散",
+        "summary": "并行解码。所有位置同时去噪；模型以时间步为条件，从噪声迭代生成文本。",
+        "tokenizer": {
+          "label": "分词器",
+          "shape": "文本 → [B, {{seq}}] token id"
+        },
+        "noise": {
+          "label": "加噪 / 掩码  xₜ",
+          "shape": "[B, {{seq}}] 在噪声级别 t 下损坏"
+        },
+        "embedding": {
+          "label": "Token 嵌入",
+          "shape": "[{{vocab}}, {{dModel}}] 查找表"
+        },
+        "positional": {
+          "label": "位置编码",
+          "shape": "[{{seq}}, {{dModel}}] 旋转式"
+        },
+        "timestep": {
+          "label": "时间步嵌入",
+          "shape": "t → [{{dModel}}] 正弦 + MLP"
+        },
+        "finalNorm": {
+          "label": "最终自适应归一化",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "denoiseHead": {
+          "label": "去噪头  x̂₀ logits",
+          "shape": "[{{dModel}}, {{vocab}}] · 与嵌入共享权重"
+        },
+        "softmax": {
+          "label": "类别分布",
+          "shape": "[B, {{seq}}, {{vocab}}] 逐位置"
+        },
+        "denoiseStep": {
+          "label": "去噪步骤  xₜ → xₜ₋₁",
+          "shape": "重新掩码低置信度位置"
+        },
+        "loop": {
+          "label": "T 次去噪迭代",
+          "sublabel": "所有位置并行 · 无因果掩码"
+        }
+      },
+      "sublayer": {
+        "attnCausal": "因果自注意力 · {{heads}} 个头",
+        "attnBidirectional": "双向自注意力 · {{heads}} 个头",
+        "attnShape": "Q,K,V,O：[{{dModel}}, {{dModel}}] × 4 · 头维度 {{headDim}}",
+        "normPreNorm": "前置归一化（RMSNorm）",
+        "normAdaptive": "自适应归一化（以 t 为条件）",
+        "normShape": "[B, {{seq}}, {{dModel}}]",
+        "ffnLabel": "前馈网络",
+        "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    }
+  },
+  "scene1": {
+    "line": "人工智能的未来不只属于电力。"
+  },
+  "scene2": {
+    "eyebrow": "量子计算",
+    "description": "量子态能同时探索复杂的可能性，为机器学习开辟超越经典计算的新路径。"
+  },
+  "scene3": {
+    "eyebrow": "光子计算",
+    "description": "光在计算之处，机器学习随之加速。"
+  },
+  "scene4": {
+    "eyebrow": "热力学计算",
+    "description": "热力学自然优化，利用热涨落探索更优的解。"
+  },
+  "scene5": {
+    "statement": "QPT —— 首个融合三种计算方式之长、以实现更高效率和更低成本的语言模型。",
+    "detail": "每个 Transformer 组件都被分配给最能表达其底层数学的计算范式 —— 经典、量子、光子或热力学。"
+  },
+  "scene6": {
+    "eyebrow": "模型输出",
+    "generatedText": "今天你觉得这是胡扯；15 年后你会意识到这个想法终将走向世界。现在正是在硬件热潮爆发之前做好准备的时刻 —— 通过融合多种计算形式，让人工智能更加高效。"
+  },
+  "scene7": {
+    "eyebrow": "信号锁定",
+    "final": "QPT 的存在是为了回答一个研究问题：语言模型的哪些部分真正受益于非经典计算，受益程度又有多大？"
+  },
+  "scene8": {
+    "prefix": "未来，",
+    "ternary": "三进制计算",
+    "middle": "和",
+    "bio": "生物计算",
+    "suffix": "也将在这一进程中发挥重要作用。"
+  },
+  "footer": {
+    "thanks": "感谢你的信任",
+    "stayInformed": "获取最新动态",
+    "supportUs": "支持我们",
+    "emailLabel": "电子邮箱",
+    "emailPlaceholder": "you@email.com",
+    "emailError": "出了点问题，请重试",
+    "submit": "提交",
+    "copyright": "©2026 版权所有",
+    "ourTeam": "我们的团队"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "量子 · 光子 · 热力学 —— 一台计算机",
+      "uvp": "当有些人押注为自己的计算机打造最好的<em>单一组件</em>时，我们押注<em>协作</em> —— 携手将所有这些部件结合起来，打造最好的计算机。",
+      "stats": {
+        "paradigmsProd": "已投产的范式",
+        "paradigmsRoadmap": "路线图中的范式",
+        "phases": "迈向全栈自主的阶段"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · 市场分析",
+      "title": "位于每一波融资浪潮的交汇点。",
+      "lead": "QPT 处于当今科技领域五股最强劲的资本与资助潮流的交汇处。每一股浪潮资助技术栈的一部分；QPT 是唯一能同时符合所有浪潮的定位。",
+      "legend": {
+        "quantum": "量子",
+        "ai": "AI",
+        "sustainable": "可持续",
+        "research": "科研",
+        "openSource": "开源",
+        "quantumDesc": "量子计算资助与项目",
+        "aiDesc": "基础模型与大语言模型融资",
+        "sustainableDesc": "能效提升计划",
+        "researchDesc": "科学计算项目",
+        "openSourceDesc": "开放基础设施支持"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · 核心高管与团队",
+      "title": "由横跨所有范式的人才打造。",
+      "ceo": {
+        "role": "首席执行官",
+        "desc": "国际演讲者，已用三种语言发表 10 余场演讲；三次获得 EAFIT 最佳系统工程项目奖，并获得 2025 年 Claude 黑客松冠军。"
+      },
+      "ctoMulti": {
+        "role": "多范式首席技术官",
+        "desc": "EAFIT 量子计算研究组负责人、EAFIT IEEE 学生分会代表，并就量子计算与 AI 的融合发表演讲。"
+      },
+      "ctoAi": {
+        "role": "大语言模型与 AI 首席技术官",
+        "desc": "知名演讲者，以“从零构建 Transformer”的演讲著称（已讲授三次以上），并领导麦德林国立大学（Universidad Nacional）的 AI 研究组 Aperture。"
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · 路线图 —— 十个阶段",
+      "title": "从模拟走向自有硬件。",
+      "p1": {
+        "title": "半专业级自回归与扩散语言模型",
+        "desc": "构建我们自己的基线语言模型（包括自回归和扩散两大类），作为之后每个阶段训练的基础。"
+      },
+      "p2": {
+        "title": "通过模拟构建其他范式的语言模型 ×3",
+        "desc": "在接触真实硬件之前，先模拟量子、光子和热力学计算，并在每种范式上训练原生语言模型。"
+      },
+      "p3": {
+        "title": "混合融合 —— 每层一种范式",
+        "desc": "在模型的每一层中混合量子、光子和热力学计算 —— 用代码实现 QPT 的核心理念。"
+      },
+      "p4": {
+        "title": "提升自回归与扩散模型性能",
+        "desc": "将所学的一切反馈到基线模型中：更快、更便宜、更好的自回归和扩散语言模型。"
+      },
+      "p5": {
+        "title": "研发我们自己的混合算法",
+        "desc": "不再借用，开始创造：原生利用多范式硬件的专有混合算法。"
+      },
+      "p6": {
+        "title": "使用混合算法 + 模拟进行训练",
+        "desc": "首次完全由我们自己的混合算法驱动的完整训练，并在大规模模拟中得到验证。"
+      },
+      "p7": {
+        "title": "在租用的范式硬件上训练",
+        "desc": "从模拟转向租用真实的量子、光子和热力学硬件进行实际训练。"
+      },
+      "p8": {
+        "title": "购买自有范式硬件并训练",
+        "desc": "掌握计算基底：购置量子、光子和热力学机器，在自己的设备集群上训练模型。"
+      },
+      "p9": {
+        "title": "拓展新的领域",
+        "desc": "超越最初的三种范式，持续为后续的计算基底研发我们自己的混合算法。"
+      },
+      "p10": {
+        "title": "拥有生物计算机与三进制计算机",
+        "desc": "购置一台生物计算机（天然神经网络）和华为的三进制（trit）计算机 —— 并在两者上训练模型。"
+      },
+      "spectrum": "综合考虑所有范式"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "量子",
+      "photonic": "光子",
+      "thermic": "热",
+      "hybrid": "混合",
+      "simulation": "模拟",
+      "bio": "生物",
+      "ternary": "三进制"
+    },
+    "goal": {
+      "eyebrow": "04 · 目标",
+      "title": "最大化<acc>效率</acc> —— 不断替换各层，直到找到完美的范式组合。",
+      "cost": {
+        "v": "↓ 成本",
+        "k": "计算经济性"
+      },
+      "quality": {
+        "v": "↑ 质量",
+        "k": "模型输出"
+      },
+      "time": {
+        "v": "↓ 时间",
+        "k": "训练与推理速度"
+      },
+      "energy": {
+        "v": "↓ 能耗",
+        "k": "每 token 瓦数"
+      },
+      "lead": "我们的目标是在成本、质量、时间和能耗四个维度上最大化语言模型的效率 —— 通过替换每一层，找到完美的范式组合。"
+    },
+    "footer": {
+      "brand": "QPT —— 多范式计算",
+      "tags": "量子 · 光子 · 热力学 · 三进制 · 生物",
+      "copyright": "©2026 版权所有"
+    }
+  },
+  "ourTeam": {
+    "eyebrow": "关于我们",
+    "title": "QPT 背后的团队。",
+    "lead": "一支由工程师和研究人员组成的团队，将量子、光子和热力学计算融合进同一台机器。",
+    "roles": {
+      "ceo_original_inventor": "CEO，原始发明人",
+      "cto_llm": "CTO，大语言模型",
+      "cto_computacional_paradigms": "CTO，计算范式",
+      "photonic_advisor": "光子顾问",
+      "difucion_llm_contributor": "扩散大语言模型贡献者",
+      "difussion_and_thermodinamics_llm_contributor": "扩散与热力学大语言模型贡献者",
+      "quantum_advisor": "量子顾问",
+      "junior_researcher_in_trits": "初级研究员，三进制"
+    }
+  }
+}

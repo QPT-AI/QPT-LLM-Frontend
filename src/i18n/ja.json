@@ -1,0 +1,419 @@
+{
+  "nav": {
+    "scrollHint": "スクロールして続ける",
+    "themeToLight": "ライトモードに切り替え",
+    "themeToDark": "ダークモードに切り替え",
+    "languageLabel": "言語",
+    "progressLabel": "シーン {{current}} / {{total}}",
+    "sectionLabel": "セクション",
+    "home": "ホーム",
+    "chat": "チャット",
+    "monitor": "モニター",
+    "continue": "続ける"
+  },
+  "login": {
+    "title": "QPT にサインイン",
+    "subtitle": "認証して、コンピューティングの未来へ進みましょう。",
+    "google": "Google でログイン",
+    "processing": "サインイン中…",
+    "error": "サインインに失敗しました。もう一度お試しください。",
+    "back": "ホームに戻る"
+  },
+  "chat": {
+    "empty": "QPT との会話を始めましょう。",
+    "placeholder": "メッセージを入力…",
+    "placeholderReply": "QPT はまだ接続されていません。バックエンド統合は近日公開予定です。",
+    "send": "送信"
+  },
+  "paradigms": {
+    "quantum": "量子",
+    "photonic": "フォトニック",
+    "thermodynamic": "熱力学",
+    "classical": "古典"
+  },
+  "monitor": {
+    "title": "モニター",
+    "back": "サイトに戻る",
+    "awaiting": "テレメトリを待機中",
+    "aria": {
+      "trainingMetrics": "学習メトリクス",
+      "resizeSplitter": "メトリクスと図のパネルのサイズを変更"
+    },
+    "appbar": {
+      "status": {
+        "sim": "シミュレーションデータ",
+        "live": "ライブテレメトリ",
+        "connecting": "接続中",
+        "error": "接続エラー",
+        "idle": "待機中"
+      },
+      "playbackAria": "再生",
+      "resume": "再開",
+      "pause": "一時停止",
+      "slower": "遅く",
+      "faster": "速く"
+    },
+    "kpi": {
+      "ariaLabel": "学習の主要指標",
+      "trainingLoss": "学習損失",
+      "validationLoss": "検証損失",
+      "perplexity": "パープレキシティ",
+      "learningRate": "学習率",
+      "gradientNorm": "勾配ノルム",
+      "gradientNormBadge": "クリップ済み",
+      "throughput": "スループット",
+      "compute": "計算量",
+      "energyPerToken": "トークンあたりのエネルギー",
+      "runCost": "実行コスト"
+    },
+    "diagram": {
+      "title": "モデルアーキテクチャ",
+      "meta": "{{blocks}} ブロック · {{heads}} ヘッド · d {{dModel}} · {{params}} パラメータ",
+      "architectureAria": "アーキテクチャ",
+      "viewAria": "表示",
+      "view": {
+        "perspective": "3D",
+        "front": "正面",
+        "side": "側面"
+      },
+      "exploded": "分解表示",
+      "explodedTitle": "各ブロックのサブレイヤーを離して表示",
+      "resetView": "表示をリセット",
+      "blockGroup": {
+        "title": "Transformer ブロック × {{count}}",
+        "paramsEach": "各 {{params}} パラメータ",
+        "norm": "正規化",
+        "attention": "アテンション",
+        "feedForward": "フィードフォワード",
+        "residualStream": "残差ストリーム"
+      }
+    },
+    "legend": {
+      "executedOn": "実行先",
+      "ariaLabel": "計算パラダイムの凡例",
+      "tooltip": "{{paradigm}}：{{count}} コンポーネント、パラメータの {{share}}%。クリックで単独表示。"
+    },
+    "detail": {
+      "title": "コンポーネント",
+      "titlePinned": "コンポーネント · 固定中",
+      "clearSelection": "選択を解除",
+      "hint": "図の長方形にカーソルを合わせると詳細を確認できます。クリックすると固定され、そのブロックが単独表示されます。",
+      "decoding": "{{label}}デコーディング",
+      "executedOn": "実行先",
+      "tensor": "テンソル",
+      "parameters": "パラメータ",
+      "parametersNone": "なし",
+      "parametersTied": "{{value}}（共有）",
+      "stepShare": "ブロック {{layer}} · ステップ占有率",
+      "energyPerStep": "エネルギー / ステップ",
+      "gradientShare": "勾配の割合",
+      "updateRatio": "更新比率",
+      "ablationDelta": "アブレーション Δ損失",
+      "meanHeadEntropy": "ヘッドの平均エントロピー"
+    },
+    "substrate": {
+      "title": "計算基盤",
+      "utilization": "使用率",
+      "utilizationAria": "計算基盤の使用率",
+      "throughput": "スループット",
+      "latency": "レイテンシ",
+      "errorRate": "エラー率",
+      "thermal": "温度",
+      "powerDraw": "消費電力",
+      "memoryPeak": "メモリピーク",
+      "runEnergy": "実行エネルギー",
+      "runCost": "実行コスト",
+      "costPerMTokens": "コスト / 100万トークン",
+      "energyPrice": "電力価格"
+    },
+    "tokens": {
+      "titleDiffusion": "トークンストリーム · 並列ノイズ除去",
+      "titleAr": "トークンストリーム · 自己回帰",
+      "ariaLabel": "トークンストリーム",
+      "timestepAria": "拡散タイムステップ",
+      "followLive": "ライブのタイムステップに追従",
+      "live": "ライブ",
+      "waiting": "最初の生成記録を待っています。"
+    },
+    "log": {
+      "title": "イベントログ"
+    },
+    "arch": {
+      "ar": {
+        "label": "自己回帰",
+        "summary": "左から右へのデコーディング。各フォワードパスが 1 トークンを予測し、サンプルをコンテキストに追加してパスを繰り返します。",
+        "tokenizer": {
+          "label": "トークナイザー",
+          "shape": "テキスト → [B, {{seq}}] トークン ID"
+        },
+        "embedding": {
+          "label": "トークン埋め込み",
+          "shape": "[{{vocab}}, {{dModel}}] ルックアップ"
+        },
+        "positional": {
+          "label": "位置エンコーディング",
+          "shape": "[{{seq}}, {{dModel}}] 回転"
+        },
+        "finalNorm": {
+          "label": "最終正規化",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "lmHead": {
+          "label": "出力射影（LM ヘッド）",
+          "shape": "[{{dModel}}, {{vocab}}] · 埋め込みと重み共有"
+        },
+        "softmax": {
+          "label": "語彙全体の Softmax",
+          "shape": "[B, {{seq}}, {{vocab}}] 確率"
+        },
+        "sampling": {
+          "label": "サンプリング / デコーディング",
+          "shape": "top-p · 温度 → 次のトークン ID"
+        },
+        "loop": {
+          "label": "次のトークンをコンテキストに追加",
+          "sublabel": "1 パスにつき 1 トークン · 因果マスク"
+        }
+      },
+      "diffusion": {
+        "label": "拡散",
+        "summary": "並列デコーディング。すべての位置を同時にノイズ除去し、モデルはタイムステップを条件としてノイズからテキストへと反復します。",
+        "tokenizer": {
+          "label": "トークナイザー",
+          "shape": "テキスト → [B, {{seq}}] トークン ID"
+        },
+        "noise": {
+          "label": "ノイズ / マスキング  xₜ",
+          "shape": "[B, {{seq}}] レベル t で劣化"
+        },
+        "embedding": {
+          "label": "トークン埋め込み",
+          "shape": "[{{vocab}}, {{dModel}}] ルックアップ"
+        },
+        "positional": {
+          "label": "位置エンコーディング",
+          "shape": "[{{seq}}, {{dModel}}] 回転"
+        },
+        "timestep": {
+          "label": "タイムステップ埋め込み",
+          "shape": "t → [{{dModel}}] 正弦波 + MLP"
+        },
+        "finalNorm": {
+          "label": "最終適応正規化",
+          "shape": "[B, {{seq}}, {{dModel}}]"
+        },
+        "denoiseHead": {
+          "label": "ノイズ除去ヘッド  x̂₀ ロジット",
+          "shape": "[{{dModel}}, {{vocab}}] · 埋め込みと重み共有"
+        },
+        "softmax": {
+          "label": "カテゴリ分布",
+          "shape": "[B, {{seq}}, {{vocab}}] 位置ごと"
+        },
+        "denoiseStep": {
+          "label": "ノイズ除去ステップ  xₜ → xₜ₋₁",
+          "shape": "低信頼度の位置を再マスク"
+        },
+        "loop": {
+          "label": "T 回のノイズ除去反復",
+          "sublabel": "全位置を並列処理 · 因果マスクなし"
+        }
+      },
+      "sublayer": {
+        "attnCausal": "因果セルフアテンション · {{heads}} ヘッド",
+        "attnBidirectional": "双方向セルフアテンション · {{heads}} ヘッド",
+        "attnShape": "Q,K,V,O：[{{dModel}}, {{dModel}}] × 4 · ヘッド次元 {{headDim}}",
+        "normPreNorm": "プレ正規化（RMSNorm）",
+        "normAdaptive": "適応正規化（t 条件付き）",
+        "normShape": "[B, {{seq}}, {{dModel}}]",
+        "ffnLabel": "フィードフォワードネットワーク",
+        "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    }
+  },
+  "scene1": {
+    "line": "人工知能の未来は、電気だけのものではない。"
+  },
+  "scene2": {
+    "eyebrow": "量子コンピューティング",
+    "description": "量子状態は複雑な可能性を同時に探索し、古典計算を超えた機械学習の新たな道を切り開きます。"
+  },
+  "scene3": {
+    "eyebrow": "フォトニックコンピューティング",
+    "description": "光が計算するところで、機械学習は加速する。"
+  },
+  "scene4": {
+    "eyebrow": "熱力学コンピューティング",
+    "description": "熱揺らぎを活用してより良い解を探索する、熱力学的な自然最適化。"
+  },
+  "scene5": {
+    "statement": "QPT —— 3 種類のコンピューティングの長所を組み合わせ、より高い効率と低いコストを実現する初の言語モデル。",
+    "detail": "Transformer の各コンポーネントは、その根底にある数学を最もよく表現できる計算パラダイム —— 古典、量子、フォトニック、熱力学 —— に割り当てられます。"
+  },
+  "scene6": {
+    "eyebrow": "モデル出力",
+    "generatedText": "今日、あなたはこれをくだらないと思うでしょう。15 年後、このアイデアが世界に届くことに気づくはずです。今こそ、ハードウェアブームが爆発する前に備える時です —— 複数のコンピューティングを組み合わせ、人工知能をより効率的にすることで。"
+  },
+  "scene7": {
+    "eyebrow": "シグナルロック",
+    "final": "QPT は、ある研究上の問いに答えるために存在します。言語モデルのどの部分が非古典的なコンピューティングから実際に恩恵を受け、それはどの程度なのか？"
+  },
+  "scene8": {
+    "prefix": "将来、",
+    "ternary": "三進コンピューティング",
+    "middle": "と",
+    "bio": "生物コンピューティング",
+    "suffix": "もこのプロセスで重要な役割を果たすでしょう。"
+  },
+  "footer": {
+    "thanks": "ご信頼いただきありがとうございます",
+    "stayInformed": "最新情報を受け取る",
+    "supportUs": "支援する",
+    "emailLabel": "メールアドレス",
+    "emailPlaceholder": "you@email.com",
+    "emailError": "問題が発生しました。もう一度お試しください",
+    "submit": "送信",
+    "copyright": "©2026 All rights reserved",
+    "ourTeam": "チーム"
+  },
+  "onePager": {
+    "hero": {
+      "eyebrow": "量子 · フォトニック · 熱力学 —— ひとつのコンピューター",
+      "uvp": "コンピューターのための最高の<em>単一コンポーネント</em>づくりに賭ける人がいる一方で、私たちは<em>協働</em>に賭けます —— 力を合わせてすべてのピースをひとつにし、最高のコンピューターをつくるのです。",
+      "stats": {
+        "paradigmsProd": "本番稼働中のパラダイム",
+        "paradigmsRoadmap": "ロードマップ上のパラダイム",
+        "phases": "フルスタック所有までのフェーズ"
+      }
+    },
+    "market": {
+      "eyebrow": "01 · 市場分析",
+      "title": "あらゆる資金調達の波が交差する場所に。",
+      "lead": "QPT は、現在のテクノロジー分野で最も強力な 5 つの資本・助成金の流れが合流する地点に位置しています。それぞれの波がスタックの一部に資金を提供し、そのすべてに同時に該当するのは QPT だけです。",
+      "legend": {
+        "quantum": "量子",
+        "ai": "AI",
+        "sustainable": "サステナブル",
+        "research": "研究",
+        "openSource": "オープンソース",
+        "quantumDesc": "量子コンピューティングの助成金とプログラム",
+        "aiDesc": "基盤モデルと LLM への資金提供",
+        "sustainableDesc": "エネルギー効率化の取り組み",
+        "researchDesc": "科学計算プログラム",
+        "openSourceDesc": "オープンインフラ支援"
+      }
+    },
+    "team": {
+      "eyebrow": "02 · 主要役員とチーム",
+      "title": "あらゆるパラダイムに精通した人々がつくる。",
+      "ceo": {
+        "role": "最高経営責任者",
+        "desc": "3 か国語で 10 回以上の講演を行った国際的スピーカー。EAFIT 最優秀システム工学プロジェクト賞を 3 度受賞し、Claude Hackathon 2025 で優勝。"
+      },
+      "ctoMulti": {
+        "role": "マルチパラダイム CTO",
+        "desc": "EAFIT 量子コンピューティング研究グループのリーダー、EAFIT の IEEE 学生支部代表であり、量子コンピューティングと AI の統合に関する講演者。"
+      },
+      "ctoAi": {
+        "role": "LLM・AI 担当 CTO",
+        "desc": "ゼロから Transformer を構築する講演（3 回以上実施）で知られるスピーカーで、メデジンの国立大学（Universidad Nacional）の AI 研究グループ Aperture のリーダー。"
+      }
+    },
+    "phases": {
+      "eyebrow": "03 · ロードマップ —— 10 のフェーズ",
+      "title": "シミュレーションから自社ハードウェアへ。",
+      "p1": {
+        "title": "セミプロ級の自己回帰・拡散言語モデル",
+        "desc": "自己回帰型と拡散型の両方のベースライン言語モデルを独自に構築し、以降のすべてのフェーズの学習基盤とします。"
+      },
+      "p2": {
+        "title": "シミュレーションによる他パラダイムの LM ×3",
+        "desc": "実機に触れる前に、量子・フォトニック・熱力学計算をシミュレーションし、それぞれのパラダイムでネイティブな LM を学習します。"
+      },
+      "p3": {
+        "title": "ハイブリッド融合 —— レイヤーごとのパラダイム",
+        "desc": "モデルの各レイヤー内で量子・フォトニック・熱力学計算を組み合わせる —— QPT の中核となる理論をコードで実現します。"
+      },
+      "p4": {
+        "title": "自己回帰・拡散モデルの性能向上",
+        "desc": "学んだすべてをベースラインモデルに還元し、より速く、より安く、より優れた自己回帰・拡散 LM を実現します。"
+      },
+      "p5": {
+        "title": "独自のハイブリッドアルゴリズムを開発",
+        "desc": "借りるのをやめ、発明を始める：マルチパラダイムハードウェアをネイティブに活用する独自のハイブリッドアルゴリズム。"
+      },
+      "p6": {
+        "title": "ハイブリッドアルゴリズム + シミュレーションで学習",
+        "desc": "独自のハイブリッドアルゴリズムのみで駆動する初のフル学習を行い、大規模シミュレーションで検証します。"
+      },
+      "p7": {
+        "title": "レンタルしたパラダイムハードウェアで学習",
+        "desc": "シミュレーションから、レンタルした実際の量子・フォトニック・熱力学ハードウェアでの本番学習へ移行します。"
+      },
+      "p8": {
+        "title": "自社のパラダイムハードウェアを購入して学習",
+        "desc": "計算基盤を自ら所有：量子・フォトニック・熱力学マシンを取得し、自社のマシン群でモデルを学習します。"
+      },
+      "p9": {
+        "title": "新たな領域へ拡大",
+        "desc": "当初の 3 つのパラダイムを超え、続く計算基盤のための独自ハイブリッドアルゴリズムを開発し続けます。"
+      },
+      "p10": {
+        "title": "生物コンピューターと三進コンピューターを所有",
+        "desc": "生物コンピューター（天然のニューラルネットワーク）と Huawei のトリット（三進）コンピューターを取得し、その両方でモデルを学習します。"
+      },
+      "spectrum": "すべてのパラダイムを総合的に検討"
+    },
+    "tags": {
+      "llm": "LLM",
+      "quantum": "量子",
+      "photonic": "フォトニック",
+      "thermic": "熱",
+      "hybrid": "ハイブリッド",
+      "simulation": "シミュレーション",
+      "bio": "バイオ",
+      "ternary": "三進"
+    },
+    "goal": {
+      "eyebrow": "04 · 目標",
+      "title": "<acc>効率</acc>を最大化 —— 完璧なパラダイムの組み合わせが見つかるまでレイヤーを入れ替える。",
+      "cost": {
+        "v": "↓ コスト",
+        "k": "計算の経済性"
+      },
+      "quality": {
+        "v": "↑ 品質",
+        "k": "モデル出力"
+      },
+      "time": {
+        "v": "↓ 時間",
+        "k": "学習・推論の速度"
+      },
+      "energy": {
+        "v": "↓ エネルギー",
+        "k": "トークンあたりのワット数"
+      },
+      "lead": "目標は、コスト・品質・時間・エネルギー消費の 4 つの軸で言語モデルの効率を最大化することです —— 各レイヤーを入れ替えて、完璧なパラダイムの組み合わせを見つけます。"
+    },
+    "footer": {
+      "brand": "QPT —— マルチパラダイム・コンピューティング",
+      "tags": "量子 · フォトニック · 熱力学 · 三進 · バイオ",
+      "copyright": "©2026 All rights reserved"
+    }
+  },
+  "ourTeam": {
+    "eyebrow": "私たちについて",
+    "title": "QPT を支える人々。",
+    "lead": "量子・フォトニック・熱力学コンピューティングをひとつのマシンに統合する、エンジニアと研究者のチーム。",
+    "roles": {
+      "ceo_original_inventor": "CEO、発案者",
+      "cto_llm": "CTO、LLM",
+      "cto_computacional_paradigms": "CTO、計算パラダイム",
+      "photonic_advisor": "フォトニクス顧問",
+      "difucion_llm_contributor": "拡散 LLM コントリビューター",
+      "difussion_and_thermodinamics_llm_contributor": "拡散・熱力学 LLM コントリビューター",
+      "quantum_advisor": "量子顧問",
+      "junior_researcher_in_trits": "ジュニア研究員、トリット"
+    }
+  }
+}
