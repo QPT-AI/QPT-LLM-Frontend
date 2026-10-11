@@ -8,10 +8,10 @@ import ru from "./ru.json";
 import de from "./de.json";
 
 export const SUPPORTED_LANGUAGES = [
-  { code: "en", label: "EN" },
-  { code: "es", label: "ES" },
-  { code: "ru", label: "RU" },
-  { code: "de", label: "DE" },
+  { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "ru", label: "RU", flag: "🇷🇺" },
+  { code: "de", label: "DE", flag: "🇩🇪" },
 ];
 
 i18n
