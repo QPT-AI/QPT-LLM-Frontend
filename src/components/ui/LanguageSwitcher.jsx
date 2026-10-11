@@ -17,8 +17,8 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  const activeCode =
-    SUPPORTED_LANGUAGES.find((l) => current.startsWith(l.code))?.code.toUpperCase() ?? "EN";
+  const active =
+    SUPPORTED_LANGUAGES.find((l) => current.startsWith(l.code)) ?? SUPPORTED_LANGUAGES[0];
 
   const others = SUPPORTED_LANGUAGES.filter((l) => !current.startsWith(l.code));
 
@@ -32,7 +32,8 @@ export default function LanguageSwitcher() {
         aria-label={t("nav.languageLabel")}
         onClick={() => setOpen((v) => !v)}
       >
-        {activeCode}
+        <span aria-hidden="true" style={{ marginRight: "5px" }}>{active.flag}</span>
+        {active.code.toUpperCase()}
         <svg
           width="9"
           height="5"
@@ -74,7 +75,7 @@ export default function LanguageSwitcher() {
             zIndex: 100,
           }}
         >
-          {others.map(({ code, label }) => (
+          {others.map(({ code, flag }) => (
             <li key={code} role="option" aria-selected={false}>
               <button
                 type="button"
@@ -84,6 +85,7 @@ export default function LanguageSwitcher() {
                   setOpen(false);
                 }}
               >
+                <span aria-hidden="true" style={{ marginRight: "5px" }}>{flag}</span>
                 {code.toUpperCase()}
               </button>
             </li>
