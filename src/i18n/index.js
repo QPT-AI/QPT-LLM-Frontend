@@ -14,7 +14,7 @@ import pt from "./pt.json";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "EN", flag: "🇺🇸" },
-  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "es", label: "ES", flag: "🇨🇴" },
   { code: "ru", label: "RU", flag: "🇷🇺" },
   { code: "de", label: "DE", flag: "🇩🇪" },
   { code: "zh", label: "ZH", flag: "🇨🇳" },
