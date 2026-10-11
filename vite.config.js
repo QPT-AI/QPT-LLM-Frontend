@@ -39,8 +39,37 @@ function creditsPlugin() {
   }
 }
 
+// Content-Security-Policy for the built site. Injected only at build time:
+// the dev server relies on an inline React Refresh preamble this would block.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' https://cloud.umami.is https://www.googletagmanager.com https://accounts.google.com/gsi/client",
+  "connect-src 'self' http://localhost:9600 ws://localhost:9600 https://cloud.umami.is https://api-gateway.umami.dev https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://accounts.google.com/gsi/",
+  "img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
+  "font-src 'self' https://fonts.gstatic.com",
+  "frame-src https://accounts.google.com/gsi/",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ')
+
+function cspPlugin() {
+  return {
+    name: 'qpt-csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return html.replace(
+        /<meta charset="UTF-8" \/>/,
+        (m) => `${m}\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`,
+      )
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), creditsPlugin()],
+  plugins: [react(), creditsPlugin(), cspPlugin()],
 
   server: {
     host: '0.0.0.0',
