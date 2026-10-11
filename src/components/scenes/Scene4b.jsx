@@ -284,7 +284,8 @@ function makeFormulaTexture(formula, color) {
   // Dark semi-transparent backing for readability
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
-  ctx.roundRect(8, 8, 496, 112, 16);
+  if (ctx.roundRect) ctx.roundRect(8, 8, 496, 112, 16);
+  else ctx.rect(8, 8, 496, 112); // Safari < 16
   ctx.fill();
 
   ctx.font = "italic 600 42px 'Times New Roman', Georgia, serif";
