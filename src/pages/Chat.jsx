@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Layout from "../components/Layout";
+import ModelSelector from "../components/ui/ModelSelector";
 
 export default function Chat() {
   const { t } = useTranslation();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
+  const [model, setModel] = useState(() => localStorage.getItem("qpt-chat-model") || "");
+
+  function handleModelChange(id) {
+    setModel(id);
+    localStorage.setItem("qpt-chat-model", id);
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -29,6 +36,9 @@ export default function Chat() {
               </div>
             ))
           )}
+        </div>
+        <div className="chat-toolbar">
+          <ModelSelector value={model} onChange={handleModelChange} />
         </div>
         <form className="chat-input-row" onSubmit={handleSubmit}>
           <input

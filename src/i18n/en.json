@@ -23,7 +23,10 @@
     "empty": "Start a conversation with QPT.",
     "placeholder": "Type your message…",
     "placeholderReply": "QPT is not wired up yet. Backend integration coming soon.",
-    "send": "Send"
+    "send": "Send",
+    "modelLabel": "Model",
+    "modelLoading": "Loading models…",
+    "modelError": "Models unavailable"
   },
   "paradigms": {
     "quantum": "Quantum",

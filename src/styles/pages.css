@@ -109,6 +109,12 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+.chat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .chat-input-row {
   display: flex;
   gap: 10px;

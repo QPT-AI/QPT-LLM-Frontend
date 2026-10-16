@@ -23,7 +23,10 @@
     "empty": "Inicia una conversación con QPT.",
     "placeholder": "Escribe tu mensaje…",
     "placeholderReply": "QPT aún no está conectado. La integración con el backend llegará pronto.",
-    "send": "Enviar"
+    "send": "Enviar",
+    "modelLabel": "Modelo",
+    "modelLoading": "Cargando modelos…",
+    "modelError": "Modelos no disponibles"
   },
   "paradigms": {
     "quantum": "Cuántica",
