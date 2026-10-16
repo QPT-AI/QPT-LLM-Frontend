@@ -43,9 +43,9 @@ function creditsPlugin() {
 // the dev server relies on an inline React Refresh preamble this would block.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' https://cloud.umami.is https://www.googletagmanager.com https://accounts.google.com/gsi/client",
-  "connect-src 'self' http://localhost:9600 ws://localhost:9600 https://cloud.umami.is https://api-gateway.umami.dev https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://accounts.google.com/gsi/",
-  "img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com",
+  "script-src 'self' https://cloud.umami.is https://www.googletagmanager.com https://cdn.matomo.cloud https://accounts.google.com/gsi/client",
+  "connect-src 'self' http://localhost:9600 ws://localhost:9600 https://api.qpt-ai.com https://cloud.umami.is https://gateway.umami.is https://api-gateway.umami.dev https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://qptai.matomo.cloud https://accounts.google.com/gsi/",
+  "img-src 'self' data: blob: https://*.google-analytics.com https://*.googletagmanager.com https://qptai.matomo.cloud",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style",
   "font-src 'self' https://fonts.gstatic.com",
   "frame-src https://accounts.google.com/gsi/",
