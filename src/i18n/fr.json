@@ -9,6 +9,9 @@
     "home": "Accueil",
     "chat": "Chat",
     "monitor": "Moniteur",
+    "panel": "Panneau",
+    "blog": "Blog",
+    "education": "Éducation",
     "continue": "Continuer"
   },
   "login": {

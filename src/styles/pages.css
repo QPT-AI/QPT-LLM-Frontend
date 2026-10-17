@@ -166,6 +166,37 @@
 }
 
 /* ============================================================
+    Panel page
+    ============================================================ */
+
+.panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+  margin: 10vh auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel-list a {
+  display: block;
+  padding: 16px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1rem;
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+
+.panel-list a:hover {
+  border-color: var(--frame);
+  background: var(--bg-raise);
+}
+
+/* ============================================================
     Login page
     ============================================================ */
 

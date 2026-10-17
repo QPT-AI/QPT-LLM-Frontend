@@ -16,7 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const buttonRef = useRef(null);
 
-  const from = location.state?.from?.pathname || "/chat";
+  const from = location.state?.from?.pathname || "/panel";
 
   const handleCredentialResponse = useCallback(
     async (response) => {

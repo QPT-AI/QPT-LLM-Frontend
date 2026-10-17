@@ -3,21 +3,27 @@ import { useTranslation } from "react-i18next";
 import ThemeToggle from "../components/ui/ThemeToggle";
 import LanguageSwitcher from "../components/ui/LanguageSwitcher";
 import LoginButton from "../components/ui/LoginButton";
+import { useAuth } from "../context/AuthContext";
 
 export default function Layout({ children, hideLoginButton = false, bare = false, minimal = false }) {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
+  const effectiveMinimal = minimal && !isAuthenticated;
 
   return (
     <div className="app-shell">
       {!bare && (
-        <header className={minimal ? "chrome chrome-top minimal" : "chrome chrome-top app-nav"}>
+        <header className={effectiveMinimal ? "chrome chrome-top minimal" : "chrome chrome-top app-nav"}>
           <Link to="/" className="brand-mark" aria-label="QPT home">
             <img src="/favicon.png" alt="QPT logo" className="brand-logo" />
           </Link>
-          {!minimal && (
+          {!effectiveMinimal && (
             <nav className="app-nav-links" aria-label={t("nav.sectionLabel")}>
               <Link to="/" className="app-nav-link">
                 {t("nav.home")}
+              </Link>
+              <Link to="/panel" className="app-nav-link">
+                {t("nav.panel", "Panel")}
               </Link>
               <Link to="/chat" className="app-nav-link">
                 {t("nav.chat")}

@@ -7,6 +7,9 @@ import OnePager from "./pages/OnePager";
 import OurTeam from "./pages/OurTeam";
 import Chat from "./pages/Chat";
 import Monitor from "./pages/Monitor";
+import Panel from "./pages/Panel";
+import Education from "./pages/Education";
+import Blog from "./pages/Blog";
 
 function Protected() {
   const { isAuthenticated } = useAuth();
@@ -29,9 +32,12 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/one-pager" element={<OnePager />} />
             <Route path="/our-team" element={<OurTeam />} />
+            <Route path="/blog" element={<Blog />} />
             <Route element={<Protected />}>
+              <Route path="/panel" element={<Panel />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/monitor" element={<Monitor />} />
+              <Route path="/education" element={<Education />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
