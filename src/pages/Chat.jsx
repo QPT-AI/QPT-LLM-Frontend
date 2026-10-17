@@ -37,10 +37,8 @@ export default function Chat() {
             ))
           )}
         </div>
-        <div className="chat-toolbar">
-          <ModelSelector value={model} onChange={handleModelChange} />
-        </div>
         <form className="chat-input-row" onSubmit={handleSubmit}>
+          <ModelSelector value={model} onChange={handleModelChange} />
           <input
             className="chat-input"
             type="text"
