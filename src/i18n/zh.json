@@ -283,7 +283,24 @@
     "emailError": "出了点问题，请重试",
     "submit": "提交",
     "copyright": "©2026 版权所有",
-    "ourTeam": "我们的团队"
+    "ourTeam": "我们的团队",
+    "support": {
+      "title": "支持 QPT",
+      "subtitle": "每一份支持都在帮助我们继续构建多范式计算。",
+      "tabCard": "银行卡 · 国际",
+      "tabCrypto": "Bitcoin ⚡",
+      "tabColombia": "哥伦比亚",
+      "cardText": "通过 Buy Me a Coffee（由 Stripe 处理），在世界任何地方都可以使用信用卡或借记卡捐款。",
+      "cardCta": "请我们喝杯咖啡",
+      "onchain": "比特币（链上）",
+      "lightning": "闪电网络",
+      "copy": "复制",
+      "copied": "已复制",
+      "openWallet": "在钱包中打开",
+      "colombiaNote": "仅限来自哥伦比亚的捐款 — 请使用您的银行应用扫描（Bre-B / Bancolombia）。",
+      "key": "密钥",
+      "close": "关闭"
+    }
   },
   "onePager": {
     "hero": {

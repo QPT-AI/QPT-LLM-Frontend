@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import EmailCapture from "../ui/EmailCapture";
+import SupportDialog from "../ui/SupportDialog";
 import "../../styles/Scene8.css";
 import { PARADIGM_META } from "../../config/paradigms";
 
@@ -11,6 +13,7 @@ const THERMO   = PARADIGM_META.thermodynamic.color;
 
 export default function Scene8() {
   const { t } = useTranslation();
+  const [supportOpen, setSupportOpen] = useState(false);
   return (
     <div className="scene-inner">
       {/* Ambient blobs */}
@@ -43,12 +46,13 @@ export default function Scene8() {
             <Link to="/our-team" className="footer-btn ghost">
               {t("footer.ourTeam")}
             </Link>
-            <button type="button" className="footer-btn primary">
+            <button type="button" className="footer-btn primary" onClick={() => setSupportOpen(true)}>
               {t("footer.supportUs")}
             </button>
           </div>
           <span className="footer-copyright">{t("footer.copyright")}</span>
         </footer>
+        <SupportDialog open={supportOpen} onClose={() => setSupportOpen(false)} />
       </div>
     </div>
   );

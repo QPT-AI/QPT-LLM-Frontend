@@ -283,7 +283,24 @@
     "emailError": "問題が発生しました。もう一度お試しください",
     "submit": "送信",
     "copyright": "©2026 All rights reserved",
-    "ourTeam": "チーム"
+    "ourTeam": "チーム",
+    "support": {
+      "title": "QPT を支援する",
+      "subtitle": "皆さまのご支援が、マルチパラダイム計算の開発を続ける力になります。",
+      "tabCard": "カード · 海外",
+      "tabCrypto": "Bitcoin ⚡",
+      "tabColombia": "コロンビア",
+      "cardText": "Buy Me a Coffee（Stripe で決済）を通じて、世界中どこからでもクレジットカードやデビットカードで寄付できます。",
+      "cardCta": "コーヒーをおごる",
+      "onchain": "Bitcoin（オンチェーン）",
+      "lightning": "Lightning",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "openWallet": "ウォレットで開く",
+      "colombiaNote": "コロンビアからの寄付専用です — 銀行アプリでスキャンしてください（Bre-B / Bancolombia）。",
+      "key": "キー",
+      "close": "閉じる"
+    }
   },
   "onePager": {
     "hero": {

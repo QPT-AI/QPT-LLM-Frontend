@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ui/ThemeToggle";
 import LanguageSwitcher from "./ui/LanguageSwitcher";
 import LoginButton from "./ui/LoginButton";
+import NavLinks from "./ui/NavLinks";
 import ProgressRail from "./ui/ProgressRail";
+import { useAuth } from "../context/AuthContext";
 
 const Scene1 = lazy(() => import("./scenes/Scene1"));
 const Scene2 = lazy(() => import("./scenes/Scene2"));
@@ -40,6 +42,7 @@ const SWIPE_THRESHOLD = 46;
 
 export default function SceneManager() {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [index, setIndex] = useState(0);
   const lockRef = useRef(false);
   const wheelAccumRef = useRef(0);
@@ -176,10 +179,11 @@ export default function SceneManager() {
     <div className="scene-viewport" style={{ position: "fixed", inset: 0, overflow: "hidden" }}>
       {items}
 
-      <header className="chrome chrome-top minimal">
+      <header className={isAuthenticated ? "chrome chrome-top app-nav" : "chrome chrome-top minimal"}>
         <Link to="/" className="brand-mark" aria-label="QPT home">
           <img src="/favicon.png" alt="QPT logo" className="brand-logo" />
         </Link>
+        {isAuthenticated && <NavLinks />}
         <div className="chrome-controls">
           <LanguageSwitcher />
           <ThemeToggle />

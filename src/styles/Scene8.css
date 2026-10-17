@@ -209,3 +209,199 @@
     padding: 10px 16px;
   }
 }
+
+/* -----------------------------------------------------------
+    Support dialog — card / Bitcoin / Colombia donations
+    ----------------------------------------------------------- */
+
+.support-dialog {
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+  color: var(--ink);
+  width: min(520px, 100vw - 32px);
+  max-height: 90vh;
+  border-radius: 16px;
+  padding: 0;
+  overflow: auto;
+}
+
+.support-dialog[open] {
+  animation: supportIn 0.22s var(--ease-out);
+}
+
+@keyframes supportIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.support-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.support-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: clamp(18px, 4vw, 28px);
+}
+
+.support-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.support-title {
+  margin: 0 0 6px;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.support-subtitle,
+.support-text {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.support-close {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.support-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.support-tabs .footer-btn {
+  padding: 9px 14px;
+}
+
+.support-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.support-cta {
+  align-self: flex-start;
+  gap: 8px;
+}
+
+.support-crypto {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.support-crypto-block,
+.support-colombia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.support-crypto-block {
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.support-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.support-qr {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  line-height: 0;
+}
+
+.support-qr svg {
+  width: 100%;
+  max-width: 168px;
+  height: auto;
+}
+
+.support-breb-img {
+  width: 100%;
+  max-height: 52vh;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.support-copy-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.support-value {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.support-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.support-wallet-link {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+
+@media (max-width: 480px) {
+  .support-crypto {
+    grid-template-columns: 1fr;
+  }
+}

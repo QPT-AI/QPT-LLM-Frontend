@@ -283,7 +283,24 @@
     "emailError": "Une erreur s’est produite — réessayez",
     "submit": "Envoyer",
     "copyright": "©2026 Tous droits réservés",
-    "ourTeam": "Notre équipe"
+    "ourTeam": "Notre équipe",
+    "support": {
+      "title": "Soutenir QPT",
+      "subtitle": "Chaque contribution nous aide à continuer de construire le calcul multi-paradigme.",
+      "tabCard": "Carte · International",
+      "tabCrypto": "Bitcoin ⚡",
+      "tabColombia": "Colombie",
+      "cardText": "Faites un don avec n'importe quelle carte de crédit ou de débit, depuis n'importe où dans le monde, via Buy Me a Coffee (traité par Stripe).",
+      "cardCta": "Offrez-nous un café",
+      "onchain": "Bitcoin (on-chain)",
+      "lightning": "Lightning",
+      "copy": "Copier",
+      "copied": "Copié",
+      "openWallet": "Ouvrir dans le portefeuille",
+      "colombiaNote": "Uniquement pour les dons depuis la Colombie — scannez avec l'application de votre banque (Bre-B / Bancolombia).",
+      "key": "Clé",
+      "close": "Fermer"
+    }
   },
   "onePager": {
     "hero": {
