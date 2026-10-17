@@ -25,7 +25,8 @@
   "chat": {
     "empty": "开始与 QPT 对话。",
     "placeholder": "输入你的消息…",
-    "placeholderReply": "QPT 尚未接入，后端集成即将上线。",
+    "error": "出错了，请重试。",
+    "thinking": "思考中…",
     "send": "发送",
     "modelLabel": "模型",
     "modelLoading": "正在加载模型…",

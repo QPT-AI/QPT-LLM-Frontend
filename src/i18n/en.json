@@ -25,7 +25,8 @@
   "chat": {
     "empty": "Start a conversation with QPT.",
     "placeholder": "Type your message…",
-    "placeholderReply": "QPT is not wired up yet. Backend integration coming soon.",
+    "error": "Something went wrong. Please try again.",
+    "thinking": "Thinking…",
     "send": "Send",
     "modelLabel": "Model",
     "modelLoading": "Loading models…",

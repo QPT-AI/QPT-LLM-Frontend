@@ -25,7 +25,8 @@
   "chat": {
     "empty": "Commencez une conversation avec QPT.",
     "placeholder": "Écrivez votre message…",
-    "placeholderReply": "QPT n’est pas encore connecté. L’intégration du backend arrive bientôt.",
+    "error": "Une erreur s’est produite. Veuillez réessayer.",
+    "thinking": "Réflexion…",
     "send": "Envoyer",
     "modelLabel": "Modèle",
     "modelLoading": "Chargement des modèles…",
