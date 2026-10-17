@@ -268,6 +268,8 @@
   "scene8": {
     "prefix": "未来，",
     "ternary": "三进制计算",
+    "sep": "、",
+    "neuromorphic": "神经形态计算",
     "middle": "和",
     "bio": "生物计算",
     "suffix": "也将在这一进程中发挥重要作用。"

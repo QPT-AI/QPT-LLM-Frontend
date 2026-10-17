@@ -268,6 +268,8 @@
   "scene8": {
     "prefix": "À l’avenir, ",
     "ternary": "le calcul ternaire",
+    "sep": ", ",
+    "neuromorphic": "le calcul neuromorphique",
     "middle": " et ",
     "bio": "le calcul biologique",
     "suffix": " joueront aussi un rôle important dans ce processus."

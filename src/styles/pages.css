@@ -64,11 +64,18 @@
 
 .chat-scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  justify-content: flex-end;
+  padding-right: 4px;
+}
+
+/* Bottom-anchor messages without justify-content: flex-end, which makes overflow unscrollable */
+.chat-scroll > :first-child {
+  margin-top: auto;
 }
 
 .chat-empty {

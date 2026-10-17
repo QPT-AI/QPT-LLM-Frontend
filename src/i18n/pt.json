@@ -268,6 +268,8 @@
   "scene8": {
     "prefix": "No futuro, ",
     "ternary": "a computação ternária",
+    "sep": ", ",
+    "neuromorphic": "a computação neuromórfica",
     "middle": " e ",
     "bio": "a computação biológica",
     "suffix": " também terão um papel importante nesse processo."

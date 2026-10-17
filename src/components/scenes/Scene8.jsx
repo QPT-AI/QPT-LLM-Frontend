@@ -26,6 +26,10 @@ export default function Scene8() {
           <span className="future-term" style={{ color: "var(--ternary)" }}>
             {t("scene8.ternary")}
           </span>
+          {t("scene8.sep")}
+          <span className="future-term" style={{ color: "var(--ternary)" }}>
+            {t("scene8.neuromorphic")}
+          </span>
           {t("scene8.middle")}
           <span className="future-term" style={{ color: "var(--bio)" }}>
             {t("scene8.bio")}
