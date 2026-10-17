@@ -58,7 +58,7 @@ export default function Chat() {
   }
 
   return (
-    <Layout minimal>
+    <Layout minimal fill>
       <section className="chat-page">
         <div className="chat-scroll" ref={scrollRef}>
           {messages.length === 0 ? (

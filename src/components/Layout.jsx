@@ -5,13 +5,13 @@ import LanguageSwitcher from "../components/ui/LanguageSwitcher";
 import LoginButton from "../components/ui/LoginButton";
 import { useAuth } from "../context/AuthContext";
 
-export default function Layout({ children, hideLoginButton = false, bare = false, minimal = false }) {
+export default function Layout({ children, hideLoginButton = false, bare = false, minimal = false, fill = false }) {
   const { t } = useTranslation();
   const { isAuthenticated } = useAuth();
   const effectiveMinimal = minimal && !isAuthenticated;
 
   return (
-    <div className="app-shell">
+    <div className={fill ? "app-shell app-shell-fill" : "app-shell"}>
       {!bare && (
         <header className={effectiveMinimal ? "chrome chrome-top minimal" : "chrome chrome-top app-nav"}>
           <Link to="/" className="brand-mark" aria-label="QPT home">
