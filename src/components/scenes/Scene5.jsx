@@ -405,7 +405,7 @@ function StatusStrip({ phase, revealed }) {
 
 // ── Particle canvas ──────────────────────────────────────────────────────────
 
-function ParticleField({ paradigm, width, height, seed }) {
+function ParticleField({ paradigm, width, height, seed, active }) {
   const canvasRef = useRef(null);
   const reduced = usePrefersReducedMotion();
   const cfg   = PARTICLE_CONFIGS[paradigm] || PARTICLE_CONFIGS.classical;
@@ -448,8 +448,8 @@ function ParticleField({ paradigm, width, height, seed }) {
       }
     };
 
-    // Reduced motion: one static frame, no loop.
-    if (reduced) {
+    // Reduced motion or off-screen: one static frame, no loop.
+    if (reduced || !active) {
       ctx.clearRect(0, 0, width, height);
       particles.forEach((p, i) => drawParticle(p, 0.2 + 0.08 * (i % 3)));
       ctx.globalAlpha = 1;
@@ -473,7 +473,7 @@ function ParticleField({ paradigm, width, height, seed }) {
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [paradigm, width, height, seed, cfg, color, reduced]);
+  }, [paradigm, width, height, seed, cfg, color, reduced, active]);
 
   return (
     <canvas
@@ -514,7 +514,7 @@ function Legend() {
 
 // ── Single pipeline row ───────────────────────────────────────────────────────
 
-function LayerRow({ layer, isRevealed, rowH, particleW, compact, rowRef }) {
+function LayerRow({ layer, isRevealed, rowH, particleW, compact, rowRef, active }) {
   const { color, glyph } = PARADIGM_META[layer.paradigm];
 
   return (
@@ -570,6 +570,7 @@ function LayerRow({ layer, isRevealed, rowH, particleW, compact, rowRef }) {
             width={particleW || 200}
             height={rowH}
             seed={layer.id + 1}
+            active={active}
           />
         )}
 
@@ -780,6 +781,7 @@ export default function Scene5({ active }) {
                   rowH={rowH}
                   particleW={particleW}
                   compact={compact}
+                  active={active}
                   rowRef={(el) => { rowRefs.current[i] = el; }}
                 />
               ))}

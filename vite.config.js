@@ -74,6 +74,24 @@ export default defineConfig({
   // Lower newer syntax (e.g. class static blocks in three.js) for older iOS Safari
   build: {
     target: ['es2020', 'safari15', 'ios15', 'chrome100', 'firefox100', 'edge100'],
+    // three.js alone is ~700 kB; it is only loaded by the 3D scenes and /monitor.
+    chunkSizeWarningLimit: 1000,
+    rolldownOptions: {
+      output: {
+        // Vendor groups keep stable hashes across deploys, so returning
+        // visitors only re-download app code. Groups pull in their deps, so
+        // react/i18n need a higher priority or they'd land in the three chunk.
+        advancedChunks: {
+          groups: [
+            // Only the core: drei / three-stdlib pieces split per use, so the
+            // Monitor's environment maps and loaders stay out of the scenes.
+            { name: 'three', priority: 1, test: /node_modules[\\/](three|@react-three[\\/]fiber|its-fine|suspend-react|react-use-measure|zustand)[\\/]/ },
+            { name: 'react', priority: 3, test: /node_modules[\\/](react|react-dom|react-router|react-router-dom|scheduler|use-sync-external-store)[\\/]/ },
+            { name: 'i18n', priority: 2, test: /node_modules[\\/](i18next|react-i18next|i18next-browser-languagedetector)[\\/]/ },
+          ],
+        },
+      },
+    },
   },
 
   server: {

@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Html, RoundedBox } from "@react-three/drei";
+import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
+import AdaptiveResolution from "./AdaptiveResolution";
+import PrecompileShaders from "./PrecompileShaders";
+import useWarmMount from "./useWarmMount";
 import "../../styles/Scene3.css";
 const PHOTONIC = "#f0ab00";
 
@@ -99,7 +102,6 @@ const PALETTE = {
     blending: THREE.NormalBlending, dark: 0,
   },
 };
-const MONO = "'Courier New', Courier, monospace";
 const TAU = Math.PI * 2;
 
 const smooth01 = (x) => {
@@ -454,42 +456,45 @@ const FIELD_FRAG = /* glsl */ `
   }
 `;
 
-/* ---------- scene pieces ---------- */
-function Tag({ position, color, size = 9.5, weight = 700, spacing = "0.16em", fontScale = 1, children }) {
+/* ---------- labels ----------
+   Plain DOM text over the canvas (sharp at any size, same fonts and glows
+   as the page). ModulatorScene projects each anchor once per frame and
+   writes only transform / opacity to elements on their own compositor
+   layer, so moving them never repaints the page. */
+const eCxL = (G.e[0] + G.e[1]) / 2;
+const bCxL = (G.b[0] + G.b[1]) / 2;
+const TAGS = [
+  { key: "laser",  at: [G.xLaser - 0.1, -0.33, 0.1],                       color: "text" },
+  { key: "dataIn", at: [G.tickerX0 + 0.42, G.tickerY + 0.24, 0.03],        color: "cyanCss" },
+  { key: "out",    at: [G.xChip + 0.36, 0.27, 0.06],                       color: "photonic" },
+  { key: "rf",     at: [eCxL, G.H + G.gap + G.padW + 0.1, 0.05],           color: "text", weight: 600, spacing: "0.04em", size: 10 },
+  { key: "bias",   at: [bCxL, -G.H - G.gap - G.padW - 0.1, 0.05],          color: "dim",  weight: 600, spacing: "0.04em", size: 10 },
+];
+const E_DIGITS = 6;   // electrical bits on the wire
+const O_DIGITS = 4;   // optical bits on the fiber
+
+function LabelOverlay({ labels, isDark, refs }) {
+  const pal = isDark ? PALETTE.dark : PALETTE.light;
+  const color = (c) => (c === "photonic" ? PHOTONIC : pal[c]);
+  const digit = (slots, i) => (
+    <span key={i} ref={(el) => { slots.current[i] = el; }} className="mzm-label mzm-digit" />
+  );
   return (
-    <Html position={position} center zIndexRange={[9, 0]} style={{ pointerEvents: "none" }}>
-      <div
-        style={{
-          fontFamily: MONO,
-          fontSize: size * fontScale,
-          fontWeight: weight,
-          letterSpacing: spacing,
-          color,
-          whiteSpace: "nowrap",
-          userSelect: "none",
-        }}
-      >
-        {children}
-      </div>
-    </Html>
+    <div className="mzm-labels" aria-hidden="true">
+      {TAGS.map((tag, i) => (
+        <div key={tag.key} ref={(el) => { refs.tags.current[i] = el; }} className="mzm-label"
+          data-size={tag.size ?? 9.5}
+          style={{ color: color(tag.color), fontWeight: tag.weight ?? 700, letterSpacing: tag.spacing ?? "0.16em" }}>
+          {labels[tag.key]}
+        </div>
+      ))}
+      {Array.from({ length: E_DIGITS }, (_, i) => digit(refs.eDigits, i))}
+      {Array.from({ length: O_DIGITS }, (_, i) => digit(refs.oDigits, i))}
+    </div>
   );
 }
 
-// A pool of "1"/"0" digits riding a stream; text is written straight to the DOM
-function DigitPool({ count, slots, fontScale = 1 }) {
-  return Array.from({ length: count }, (_, i) => (
-    <group key={i} ref={(el) => { slots.current[i] = { ...slots.current[i], group: el }; }}>
-      <Html center zIndexRange={[9, 0]} style={{ pointerEvents: "none" }}>
-        <span
-          ref={(el) => { slots.current[i] = { ...slots.current[i], span: el }; }}
-          style={{ fontFamily: MONO, fontSize: 11 * fontScale, fontWeight: 700, opacity: 0, userSelect: "none" }}
-        />
-      </Html>
-    </group>
-  ));
-}
-
-function ModulatorScene({ speed, isDark, labels }) {
+function ModulatorScene({ speed, isDark, labelRefs }) {
   const L = useMemo(buildLayout, []);
   const pal = isDark ? PALETTE.dark : PALETTE.light;
   const palRef = useRef(pal);
@@ -497,6 +502,7 @@ function ModulatorScene({ speed, isDark, labels }) {
   const viewport = useThree((s) => s.viewport);
   const size = useThree((s) => s.size);
   const gl = useThree((s) => s.gl);
+  const camera = useThree((s) => s.camera);
 
   // studio reflections for the gold, generated locally (no HDR download); handed to each
   // material so envMapIntensity is honoured on every three.js version
@@ -515,8 +521,9 @@ function ModulatorScene({ speed, isDark, labels }) {
   const combinerRef = useRef(null);
   const leakRefs = useRef([]);
   const pulseRefs = useRef([]);
-  const eSlots = useRef([]);   // electrical digits
-  const oSlots = useRef([]);   // optical digits
+  const tagAnchors = useRef([]);
+  const eAnchors = useRef([]);  // electrical digits
+  const oAnchors = useRef([]);  // optical digits
 
   const ribbonGeo = useMemo(() => buildRibbonGeometry(L), [L]);
   const fieldGeo = useMemo(buildFieldGeometry, []);
@@ -578,8 +585,8 @@ function ModulatorScene({ speed, isDark, labels }) {
     waveMat.blending = pal.blending;
     fieldMat.blending = pal.blending;
     // digits re-pick their colours on the next frame
-    [...eSlots.current, ...oSlots.current].forEach((sl) => { if (sl?.span) sl.span.__n = null; });
-  }, [pal, waveMat, fieldMat, rfMat]);
+    [...labelRefs.eDigits.current, ...labelRefs.oDigits.current].forEach((el) => { if (el) el.__n = null; });
+  }, [pal, waveMat, fieldMat, rfMat, labelRefs]);
 
   const reduceMotion = useMemo(
     () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches, []);
@@ -624,10 +631,11 @@ function ModulatorScene({ speed, isDark, labels }) {
         pulse.position.set(x, 0, 0.07);
         pulse.material.opacity = bitAt(n) ? 0.85 * vis : 0;
       }
-      const slot = oSlots.current[j];
-      if (slot?.group && slot.span) {
-        slot.group.position.set(x, -0.27, 0.06);
-        paintDigit(slot.span, n, vis, p.bitOn, p.bitGlow, p.dim);
+      const anchor = oAnchors.current[j];
+      const el = labelRefs.oDigits.current[j];
+      if (anchor && el) {
+        anchor.position.set(x, -0.27, 0.06);
+        paintDigit(el, n, vis, p.bitOn, p.bitGlow, p.dim);
       }
     }
     // electrical bits still on the wire: centre reaches the feed at t = (n + ½)·T
@@ -636,14 +644,29 @@ function ModulatorScene({ speed, isDark, labels }) {
       const n = nE + j;
       const d = VG * ((n + 0.5) * T - t);              // distance left to the feed
       const vis = smooth01(d / 0.1) * (1 - smooth01((d - (L.tickerLen - 0.4)) / 0.4));
-      const slot = eSlots.current[j];
-      if (slot?.group && slot.span) {
-        slot.group.position.set(L.tickerEnd - d, G.tickerY - 0.2, 0.03);
-        paintDigit(slot.span, n, vis, p.cyanCss, p.cyanGlow, p.dim);
+      const anchor = eAnchors.current[j];
+      const el = labelRefs.eDigits.current[j];
+      if (anchor && el) {
+        anchor.position.set(L.tickerEnd - d, G.tickerY - 0.2, 0.03);
+        paintDigit(el, n, vis, p.cyanCss, p.cyanGlow, p.dim);
       }
     }
 
     if (tiltRef.current && !reduceMotion) tiltRef.current.rotation.y = MZM.sway * Math.sin(clock * 0.3);
+
+    // pin the DOM labels to their anchors (compositor-only writes)
+    const { width, height } = state.size;
+    const place = (anchor, el) => {
+      if (!anchor || !el) return;
+      anchor.updateWorldMatrix(true, false);
+      LABEL_POS.setFromMatrixPosition(anchor.matrixWorld).project(camera);
+      const x = (LABEL_POS.x + 1) * 0.5 * width;
+      const y = (1 - LABEL_POS.y) * 0.5 * height;
+      el.style.transform = `translate3d(${x}px,${y}px,0) translate(-50%,-50%)`;
+    };
+    tagAnchors.current.forEach((a, i) => place(a, labelRefs.tags.current[i]));
+    eAnchors.current.forEach((a, i) => place(a, labelRefs.eDigits.current[i]));
+    oAnchors.current.forEach((a, i) => place(a, labelRefs.oDigits.current[i]));
   });
 
   // fit the chip (and its labels) to the frame, centred
@@ -654,9 +677,13 @@ function ModulatorScene({ speed, isDark, labels }) {
   const cy = (FIT.y0 + FIT.y1) / 2;
   // labels are DOM text: shrink them with the chip on small frames
   const fs = Math.min(1, Math.max(0.66, ((size.width / viewport.width) * scale) / 100));
+  useEffect(() => {
+    labelRefs.tags.current.forEach((el) => { if (el) el.style.fontSize = `${Number(el.dataset.size) * fs}px`; });
+    [...labelRefs.eDigits.current, ...labelRefs.oDigits.current].forEach((el) => { if (el) el.style.fontSize = `${11 * fs}px`; });
+  }, [fs, labelRefs]);
 
-  const eLen = G.e[1] - G.e[0], eCx = (G.e[0] + G.e[1]) / 2;
-  const bLen = G.b[1] - G.b[0], bCx = (G.b[0] + G.b[1]) / 2;
+  const eLen = G.e[1] - G.e[0], eCx = eCxL;
+  const bLen = G.b[1] - G.b[0], bCx = bCxL;
   const sigY = G.H + G.gap + G.padW / 2;
   const gndY = G.H - G.gap - G.padW / 2;
   const bTopY = -G.H + G.gap + G.padW / 2;
@@ -762,23 +789,23 @@ function ModulatorScene({ speed, isDark, labels }) {
             </sprite>
           ))}
 
-          {/* labels */}
-          <Tag fontScale={fs} position={[G.xLaser - 0.1, -0.33, 0.1]} color={pal.text}>{labels.laser}</Tag>
-          <Tag fontScale={fs} position={[G.tickerX0 + 0.42, G.tickerY + 0.24, 0.03]} color={pal.cyanCss}>{labels.dataIn}</Tag>
-          <Tag fontScale={fs} position={[G.xChip + 0.36, 0.27, 0.06]} color={PHOTONIC}>{labels.out}</Tag>
-          <Tag fontScale={fs} position={[eCx, G.H + G.gap + G.padW + 0.1, 0.05]} color={pal.text} weight={600} spacing="0.04em" size={10}>
-            {labels.rf}
-          </Tag>
-          <Tag fontScale={fs} position={[bCx, -G.H - G.gap - G.padW - 0.1, 0.05]} color={pal.dim} weight={600} spacing="0.04em" size={10}>
-            {labels.bias}
-          </Tag>
-          <DigitPool count={6} slots={eSlots} fontScale={fs} />
-          <DigitPool count={4} slots={oSlots} fontScale={fs} />
+          {/* label anchors — the text itself is DOM (LabelOverlay) */}
+          {TAGS.map((tag, i) => (
+            <object3D key={tag.key} position={tag.at} ref={(el) => { tagAnchors.current[i] = el; }} />
+          ))}
+          {Array.from({ length: E_DIGITS }, (_, i) => (
+            <object3D key={`e${i}`} ref={(el) => { eAnchors.current[i] = el; }} />
+          ))}
+          {Array.from({ length: O_DIGITS }, (_, i) => (
+            <object3D key={`o${i}`} ref={(el) => { oAnchors.current[i] = el; }} />
+          ))}
         </group>
       </group>
     </group>
   );
 }
+
+const LABEL_POS = new THREE.Vector3();
 
 function paintDigit(span, n, vis, on, glow, off) {
   if (span.__n !== n) {
@@ -1011,7 +1038,9 @@ function HoloBackground() {
       <div className="holo-reflect" />
       <div className="holo-beam">            {/* the ONE animated carrier */}
         <div className="holo-beam-shadow" /> {/* reflection: same parent → same tilt, same position, same clock */}
-        <div className="holo-beam-bar" />    {/* the shiny inclined bar, drawn over its reflection */}
+        <div className="holo-beam-bar">      {/* the shiny inclined bar, drawn over its reflection */}
+          <div className="holo-beam-glint" />
+        </div>
       </div>
       <div className="holo-grain" />
       <div className="holo-vignette" />
@@ -1020,7 +1049,7 @@ function HoloBackground() {
   );
 }
 
-function Visual({ speed = 1 }) {
+function Visual({ active, speed = 1 }) {
   const { isDark } = useTheme();
   const { t } = useTranslation();
   const labels = useMemo(() => ({
@@ -1030,25 +1059,34 @@ function Visual({ speed = 1 }) {
     rf: t("scene3.mzm.rf", "Δφ = π·V/Vπ"),
     bias: t("scene3.mzm.bias", "φ₀ = π  bias"),
   }), [t]);
+  const tags = useRef([]);
+  const eDigits = useRef([]);
+  const oDigits = useRef([]);
+  const labelRefs = useMemo(() => ({ tags, eDigits, oDigits }), []);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas
         flat
+        frameloop={active ? "always" : "never"}
         camera={{ position: [0, 0, 6.2], fov: 35 }}
         dpr={[1, 1.75]}
         gl={{ antialias: true, alpha: true }}
       >
+        <AdaptiveResolution max={1.75} />
+        <PrecompileShaders />
         <ambientLight intensity={isDark ? 0.35 : 0.8} />
         <directionalLight position={[-2, 3, 5]} intensity={isDark ? 0.9 : 1.2} />
-        <ModulatorScene speed={speed} isDark={isDark} labels={labels} />
+        <ModulatorScene speed={speed} isDark={isDark} labelRefs={labelRefs} />
       </Canvas>
+      <LabelOverlay labels={labels} isDark={isDark} refs={labelRefs} />
     </div>
   );
 }
 
 export default function Scene3({ active, speed = 1 }) {
   const { t } = useTranslation();
+  const warm = useWarmMount(active);
 
   return (
     <div className="scene-inner">
@@ -1056,7 +1094,7 @@ export default function Scene3({ active, speed = 1 }) {
       <div className="split">
         <div className="visual-pane">
           <div className="instrument-frame">
-            {active ? <Visual speed={speed} /> : null}
+            {warm ? <Visual active={active} speed={speed} /> : null}
           </div>
         </div>
         <div className="scene-text">

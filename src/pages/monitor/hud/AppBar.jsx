@@ -36,7 +36,7 @@ export default function AppBar() {
   return (
     <header className="mon-appbar" role="banner">
       <Link to="/" className="mon-appbar__brand" aria-label="QPT home">
-        <img src="/favicon.png" alt="" className="mon-appbar__logo" />
+        <img src="/logo-sm.webp" width="128" height="128" decoding="async" alt="" className="mon-appbar__logo" />
         <span className="mon-appbar__product">QPT <span>{t("monitor.title")}</span></span>
       </Link>
       <div className="mon-appbar__sep" aria-hidden="true" />

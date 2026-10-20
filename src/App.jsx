@@ -2,14 +2,17 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from "rea
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import OnePager from "./pages/OnePager";
-import OurTeam from "./pages/OurTeam";
-import Chat from "./pages/Chat";
-import Monitor from "./pages/Monitor";
-import Panel from "./pages/Panel";
-import Education from "./pages/Education";
-import Blog from "./pages/Blog";
+import { lazyWithReload } from "./utils/lazyWithReload";
+
+// Everything but the landing page loads on first visit.
+const Login = lazyWithReload(() => import("./pages/Login"));
+const OnePager = lazyWithReload(() => import("./pages/OnePager"));
+const OurTeam = lazyWithReload(() => import("./pages/OurTeam"));
+const Chat = lazyWithReload(() => import("./pages/Chat"));
+const Monitor = lazyWithReload(() => import("./pages/Monitor"));
+const Panel = lazyWithReload(() => import("./pages/Panel"));
+const Education = lazyWithReload(() => import("./pages/Education"));
+const Blog = lazyWithReload(() => import("./pages/Blog"));
 
 function Protected() {
   const { isAuthenticated } = useAuth();

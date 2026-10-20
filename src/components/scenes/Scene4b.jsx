@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
+import AdaptiveResolution from "./AdaptiveResolution";
+import PrecompileShaders from "./PrecompileShaders";
+import useWarmMount, { SLIDE_MS } from "./useWarmMount";
 import "../../styles/Scene4.css";
 
 const THERMO = "#e8690a";
@@ -548,7 +551,9 @@ function FormulaCard() {
 function Visual({ active }) {
   const { isDark } = useTheme();
   return (
-    <Canvas frameloop={active ? "always" : "demand"} camera={{ position: [0, 3.1, 4.7], fov: 44 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
+    <Canvas frameloop={active ? "always" : "never"} camera={{ position: [0, 3.1, 4.7], fov: 44 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
+      <AdaptiveResolution max={1.6} />
+      <PrecompileShaders />
       <ambientLight intensity={isDark ? 0.45 : 0.85} />
       <pointLight position={[3, 3.5, 2.5]} intensity={0.7} color={THERMO} />
       <pointLight position={[-3, 2, -2.5]} intensity={0.25} color="#5fd8ff" />
@@ -1265,7 +1270,10 @@ function HeatBackground({ active, isDark }) {
     canvas.addEventListener("webglcontextlost", onLost);
     canvas.addEventListener("webglcontextrestored", onRestored);
 
-    // --- start in idle time so mounting never stalls a slide transition
+    // --- start in idle time so mounting never stalls a slide transition.
+    // Mounted as an off-screen neighbour means a slide is just starting and
+    // the main thread only looks idle (the slide runs on the compositor), so
+    // wait it out first.
     const init = () => {
       initHandle = null;
       if (disposed) return;
@@ -1276,11 +1284,19 @@ function HeatBackground({ active, isDark }) {
       size();
       kick(true);
     };
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(init, { timeout: 300 });
-      initHandle = () => window.cancelIdleCallback(id);
+    const scheduleInit = () => {
+      if (typeof window.requestIdleCallback === "function") {
+        const id = window.requestIdleCallback(init, { timeout: 300 });
+        initHandle = () => window.cancelIdleCallback(id);
+      } else {
+        const id = setTimeout(init, 32);
+        initHandle = () => clearTimeout(id);
+      }
+    };
+    if (activeRef.current) {
+      scheduleInit();
     } else {
-      const id = setTimeout(init, 32);
+      const id = setTimeout(scheduleInit, SLIDE_MS);
       initHandle = () => clearTimeout(id);
     }
 
@@ -1339,31 +1355,6 @@ function HeatBackground({ active, isDark }) {
     </>
   );
 }
-
-// --- Keep the 3D visual warm ------------------------------------------------
-// The 3D canvas used to be created when the slide became active and destroyed
-// when it left, so every visit paid for a new WebGL context, shader compiles
-// and geometry. Now it mounts once (in idle time, even before the first
-// visit) and then only pauses: frameloop "always" while active, "demand"
-// (no rendering) while not.
-function useWarmMount(active) {
-  const [warm, setWarm] = useState(active);
-  useEffect(() => {
-    if (warm) return undefined;
-    if (active) {
-      setWarm(true);
-      return undefined;
-    }
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(() => setWarm(true), { timeout: 2500 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = setTimeout(() => setWarm(true), 1200);
-    return () => clearTimeout(id);
-  }, [active, warm]);
-  return warm || active;
-}
-
 
 export default function Scene4({ active }) {
   const { t } = useTranslation();

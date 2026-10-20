@@ -3,14 +3,19 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
 import en from "./en.json";
-import es from "./es.json";
-import ru from "./ru.json";
-import de from "./de.json";
-import zh from "./zh.json";
-import ja from "./ja.json";
-import uk from "./uk.json";
-import fr from "./fr.json";
-import pt from "./pt.json";
+
+// English ships with the bundle as the fallback; other languages are fetched
+// only when selected.
+const LOCALES = import.meta.glob(["./*.json", "!./en.json"], { import: "default" });
+
+const lazyLocales = {
+  type: "backend",
+  read(lng, _ns, callback) {
+    const load = LOCALES[`./${lng}.json`];
+    if (!load) return callback(null, {});
+    load().then((data) => callback(null, data), (err) => callback(err, null));
+  },
+};
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "EN", flag: "🇺🇸" },
@@ -25,20 +30,12 @@ export const SUPPORTED_LANGUAGES = [
 ];
 
 i18n
+  .use(lazyLocales)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      es: { translation: es },
-      ru: { translation: ru },
-      de: { translation: de },
-      zh: { translation: zh },
-      ja: { translation: ja },
-      uk: { translation: uk },
-      fr: { translation: fr },
-      pt: { translation: pt },
-    },
+    resources: { en: { translation: en } },
+    partialBundledLanguages: true,
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     interpolation: { escapeValue: false },

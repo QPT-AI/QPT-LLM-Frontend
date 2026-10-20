@@ -1,4 +1,4 @@
-import { Component as ReactComponent, Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Component as ReactComponent, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import ThemeToggle from "./ui/ThemeToggle";
@@ -7,21 +7,27 @@ import LoginButton from "./ui/LoginButton";
 import NavLinks from "./ui/NavLinks";
 import ProgressRail from "./ui/ProgressRail";
 import { useAuth } from "../context/AuthContext";
+import { lazyWithReload } from "../utils/lazyWithReload";
 
-const Scene1 = lazy(() => import("./scenes/Scene1"));
-const Scene2 = lazy(() => import("./scenes/Scene2"));
-const Scene3 = lazy(() => import("./scenes/Scene3"));
-const Scene4a = lazy(() => import("./scenes/Scene4a"));
-const Scene4b = lazy(() => import("./scenes/Scene4b"));
-const Scene5 = lazy(() => import("./scenes/Scene5"));
-const Scene6 = lazy(() => import("./scenes/Scene6"));
-const Scene7 = lazy(() => import("./scenes/Scene7"));
-const Scene8 = lazy(() => import("./scenes/Scene8"));
+const Scene1 = lazyWithReload(() => import("./scenes/Scene1"));
+const Scene2 = lazyWithReload(() => import("./scenes/Scene2"));
+const Scene3 = lazyWithReload(() => import("./scenes/Scene3"));
+const Scene4a = lazyWithReload(() => import("./scenes/Scene4a"));
+const Scene4b = lazyWithReload(() => import("./scenes/Scene4b"));
+const Scene5 = lazyWithReload(() => import("./scenes/Scene5"));
+const Scene6 = lazyWithReload(() => import("./scenes/Scene6"));
+const Scene7 = lazyWithReload(() => import("./scenes/Scene7"));
+const Scene8 = lazyWithReload(() => import("./scenes/Scene8"));
 
 // Keeps one failing scene (chunk load error, WebGL context failure on iOS)
 // from unmounting the whole page.
 class SceneErrorBoundary extends ReactComponent {
-  state = { failed: false };
+  // Set in the constructor, not as a class field: the field helper would be
+  // shared with drei and drag the three.js chunk into the landing page.
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
   static getDerivedStateFromError() {
     return { failed: true };
   }
@@ -47,7 +53,9 @@ export default function SceneManager() {
   const lockRef = useRef(false);
   const wheelAccumRef = useRef(0);
   const touchStartY = useRef(null);
-  const scene4Visits = useRef(0);
+  const [scene4Visits, setScene4Visits] = useState(0);
+  const prevIndexRef = useRef(0);
+  const visitTimerRef = useRef(0);
 
   const goTo = useCallback((next) => {
     const clamped = Math.max(0, Math.min(TOTAL - 1, next));
@@ -57,11 +65,6 @@ export default function SceneManager() {
       window.setTimeout(() => {
         lockRef.current = false;
       }, WHEEL_COOLDOWN_MS);
-
-      // Every time we ENTER scene 4 (index 3), count the visit
-      if (clamped === 3 && cur !== 3) {
-        scene4Visits.current += 1;
-      }
 
       return clamped;
     });
@@ -136,6 +139,33 @@ export default function SceneManager() {
     };
   }, [step, goTo]);
 
+  // Count a scene 4 visit once we've LEFT it and its slide-out has finished.
+  // Counting on entry swapped the variant warm-mounted as the neighbour for a
+  // cold one right as it came into view.
+  useEffect(() => {
+    const prev = prevIndexRef.current;
+    prevIndexRef.current = index;
+    if (prev !== 3 || index === 3) return;
+    window.clearTimeout(visitTimerRef.current);
+    visitTimerRef.current = window.setTimeout(() => {
+      // Came back to scene 4 before the timer fired: keep showing it as is.
+      if (prevIndexRef.current !== 3) setScene4Visits((v) => v + 1);
+    }, TRANSITION_MS);
+  }, [index]);
+  useEffect(() => () => window.clearTimeout(visitTimerRef.current), []);
+
+  // Warm the chunk two scenes ahead so it's cached before it mounts.
+  useEffect(() => {
+    const ahead = index + 2 === 3 ? [scene4Visits % 2 === 0 ? Scene4a : Scene4b] : [SCENES[index + 2]];
+    const warm = () => ahead.forEach((S) => S?.preload());
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm, { timeout: 2000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(warm, 300);
+    return () => window.clearTimeout(id);
+  }, [index, scene4Visits]);
+
   const items = useMemo(
     () =>
       SCENES.map((SceneComponent, i) => {
@@ -143,10 +173,10 @@ export default function SceneManager() {
         const isActive = offset === 0;
         const isNearby = Math.abs(offset) <= 1;
 
-        // Pick Scene4a on odd visits, Scene4b on even visits
+        // Alternate Scene4a / Scene4b on each visit, starting with 4a
         const Component =
           i === 3
-            ? scene4Visits.current % 2 === 1
+            ? scene4Visits % 2 === 0
               ? Scene4a
               : Scene4b
             : SceneComponent;
@@ -172,7 +202,7 @@ export default function SceneManager() {
           </div>
         );
       }),
-    [index]
+    [index, scene4Visits]
   );
 
   return (
@@ -181,7 +211,7 @@ export default function SceneManager() {
 
       <header className={isAuthenticated ? "chrome chrome-top app-nav" : "chrome chrome-top minimal"}>
         <Link to="/" className="brand-mark" aria-label="QPT home">
-          <img src="/favicon.png" alt="QPT logo" className="brand-logo" />
+          <img src="/logo-sm.webp" width="128" height="128" decoding="async" alt="QPT logo" className="brand-logo" />
         </Link>
         {isAuthenticated && <NavLinks />}
         <div className="chrome-controls">

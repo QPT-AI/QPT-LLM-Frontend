@@ -103,7 +103,7 @@ export default function Login() {
       <div className="login-page">
         <div className="login-card">
           <span className="login-brand">
-            <img src="/favicon.png" alt="" className="brand-logo" />
+            <img src="/logo-sm.webp" width="128" height="128" decoding="async" alt="" className="brand-logo" />
           </span>
           <h1 className="login-title stroke-hair">{t("login.title")}</h1>
           <p className="login-subtitle">{t("login.subtitle")}</p>

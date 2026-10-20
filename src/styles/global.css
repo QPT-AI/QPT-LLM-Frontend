@@ -127,6 +127,13 @@ a {
   overflow: hidden;
 }
 
+/* Neighbour scenes stay mounted off-screen; freeze their CSS loops until shown. */
+.scene[aria-hidden="true"] *,
+.scene[aria-hidden="true"] *::before,
+.scene[aria-hidden="true"] *::after {
+  animation-play-state: paused !important;
+}
+
 .scene-inner {
   width: 100%;
   max-width: 1400px;

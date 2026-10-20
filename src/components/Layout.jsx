@@ -16,7 +16,7 @@ export default function Layout({ children, hideLoginButton = false, bare = false
       {!bare && (
         <header className={effectiveMinimal ? "chrome chrome-top minimal" : "chrome chrome-top app-nav"}>
           <Link to="/" className="brand-mark" aria-label="QPT home">
-            <img src="/favicon.png" alt="QPT logo" className="brand-logo" />
+            <img src="/logo-sm.webp" width="128" height="128" decoding="async" alt="QPT logo" className="brand-logo" />
           </Link>
           {!effectiveMinimal && <NavLinks />}
           <div className="chrome-controls">

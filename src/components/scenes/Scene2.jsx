@@ -3,6 +3,9 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../context/ThemeContext";
+import AdaptiveResolution from "./AdaptiveResolution";
+import PrecompileShaders from "./PrecompileShaders";
+import useWarmMount from "./useWarmMount";
 import "../../styles/Scene2.css";
 
 const QUANTUM = "#5bad1e";
@@ -798,11 +801,13 @@ function SceneTexture({ active = true }) {
   );
 }
 
-function Visual() {
+function Visual({ active }) {
   const { isDark } = useTheme();
   return (
-    <Canvas camera={{ position: [0, 0, 4.4], fov: 42 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
+    <Canvas frameloop={active ? "always" : "never"} camera={{ position: [0, 0, 4.4], fov: 42 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: true }}>
       <ambientLight intensity={isDark ? 0.32 : 0.75} />
+      <AdaptiveResolution max={1.6} />
+      <PrecompileShaders />
       <pointLight position={[3, 3, 3]} intensity={1.4} color={QUANTUM} />
       <pointLight position={[-3, -2, -2]} intensity={0.4} color={QUANTUM} />
       <Suspense fallback={null}>
@@ -814,6 +819,7 @@ function Visual() {
 
 export default function Scene2({ active }) {
   const { t } = useTranslation();
+  const warm = useWarmMount(active);
   return (
     <div className="scene-inner">
       <SceneTexture active={active} />
@@ -835,7 +841,7 @@ export default function Scene2({ active }) {
           </p>
         </div>
         <div className="visual-pane">
-          <div className="instrument-frame">{active ? <Visual /> : null}</div>
+          <div className="instrument-frame">{warm ? <Visual active={active} /> : null}</div>
         </div>
       </div>
     </div>
