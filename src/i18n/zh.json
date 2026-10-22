@@ -52,7 +52,10 @@
         "live": "实时遥测",
         "connecting": "连接中",
         "error": "连接错误",
-        "idle": "空闲"
+        "idle": "空闲",
+        "succeeded": "运行成功",
+        "failed": "运行失败",
+        "cancelled": "运行已取消"
       },
       "playbackAria": "播放",
       "resume": "继续",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "前馈网络",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "运行",
+      "dataModeAria": "数据来源",
+      "mode": {
+        "sim": "模拟",
+        "real": "真实数据"
+      },
+      "trainer": "训练器",
+      "loading": "正在加载训练器…",
+      "loadError": "无法加载训练器：{{msg}}",
+      "noTrainers": "没有可用的训练器。",
+      "start": "开始运行",
+      "starting": "正在启动…",
+      "cancel": "取消运行",
+      "clear": "新运行",
+      "step": "步数",
+      "elapsed": "已用时间",
+      "stepsPerS": "步 / 秒",
+      "idle": "选择训练器并开始运行以查看实时遥测。",
+      "errNumber": "请输入数字",
+      "errInteger": "请输入整数",
+      "range": "必须在 {{min}} 到 {{max}} 之间",
+      "min": "不能小于 {{min}}",
+      "max": "不能大于 {{max}}",
+      "status": {
+        "running": "运行中",
+        "succeeded": "成功",
+        "failed": "失败",
+        "cancelled": "已取消"
       }
     }
   },

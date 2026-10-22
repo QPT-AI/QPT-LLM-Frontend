@@ -8,6 +8,22 @@ import { N_BLOCKS } from "../pages/monitor/telemetry/schema";
 import { createRingBuffer as RB } from "./ringBuffer";
 import { ingestRecord, makeLog } from "./ingest";
 import { frame, resetFrame } from "./frameState";
+import { createTelemetrySource } from "../pages/monitor/telemetry/createTelemetrySource";
+import { cancelRun, startRun, TERMINAL_STATUSES } from "../services/runs";
+
+// Data mode and the attached run live in the URL (?data=real&run=<id>&trainer=<name>) so reloads reattach.
+function readUrl() {
+  const q = new URLSearchParams(window.location.search);
+  return { dataMode: q.get("data") === "real" ? "real" : "sim", runId: q.get("run"), trainer: q.get("trainer") };
+}
+function writeUrl({ dataMode, liveRun }) {
+  const url = new URL(window.location.href);
+  const q = url.searchParams;
+  if (dataMode === "real") q.set("data", "real"); else q.delete("data");
+  if (liveRun.id) { q.set("run", liveRun.id); q.set("trainer", liveRun.trainer ?? ""); } else { q.delete("run"); q.delete("trainer"); }
+  window.history.replaceState(window.history.state, "", url);
+}
+const noRun = { id: null, trainer: null, status: null };
 
 const emptyLayer = () => ({
   time_ms: null, pct_of_step: null, energy_j: null, cost_usd: null, gradContrib: null,
@@ -26,6 +42,8 @@ const initialUi = {
   selected: null, hovered: null, // diagram components
   diffusionScrub: null,
   connection: "idle", sourceKind: "sim",
+  dataMode: "sim",              // "sim" = client-side simulator, "real" = backend run over SSE
+  liveRun: noRun,               // backend run attached in real mode
 };
 
 const initialData = () => ({
@@ -55,10 +73,15 @@ export const useMonitorStore = create((set, get) => ({
     get().disconnect();
     resetFrame();
     const unsub = source.subscribe((r) => ingestRecord(r, set, get));
-    source.onStatus?.((status) => set((s) => ({
-      ui: { ...s.ui, connection: status },
-      logs: log(s, status === "error" ? "error" : "info", `telemetry link: ${status}`),
-    })));
+    source.onStatus?.((status) => set((s) => {
+      const terminal = TERMINAL_STATUSES.has(status);
+      const runStatus = terminal ? status : status === "live" ? "running" : s.ui.liveRun.status;
+      return {
+        ui: { ...s.ui, connection: status, liveRun: s.ui.liveRun.id ? { ...s.ui.liveRun, status: runStatus } : s.ui.liveRun },
+        // Terminal run statuses are logged by the run source itself.
+        logs: terminal ? s.logs : log(s, status === "error" ? "error" : "info", `telemetry link: ${status}`),
+      };
+    }));
     const { ui } = get();
     source.setParadigm(ui.paradigm);
     source.setArchitecture(ui.architecture);
@@ -68,9 +91,65 @@ export const useMonitorStore = create((set, get) => ({
       ...initialData(),
       _source: source, _unsub: unsub,
       ui: { ...s.ui, sourceKind: source.kind, connection: live ? "connecting" : "sim" },
-      logs: log(s, "info", live ? "telemetry source: websocket adapter" : "telemetry source: simulator (synthetic data)"),
+      logs: log(s, "info", live ? `telemetry source: live run ${source.runId ?? ""}`.trim() : "telemetry source: simulator (synthetic data)"),
     }));
     if (!ui.paused) source.start();
+  },
+  /** Real mode with no run attached: clear the dashboard and wait for one to be started. */
+  detach() {
+    get().disconnect();
+    resetFrame();
+    set((s) => ({
+      ...initialData(),
+      run: { ...initialData().run, runId: "—", name: "no run" },
+      ui: { ...s.ui, sourceKind: "live", connection: "awaiting" },
+      logs: log(s, "info", "real data: start a run to stream live telemetry"),
+    }));
+  },
+  /** Attach whatever ui.dataMode / ui.liveRun describe. */
+  attach() {
+    const { ui, connect, detach } = get();
+    writeUrl(ui);
+    const source = createTelemetrySource({ dataMode: ui.dataMode, runId: ui.liveRun.id });
+    if (!source) { detach(); return; }
+    connect(source);
+    if (ui.liveRun.id && ui.dataMode === "real") {
+      set((s) => ({ run: { ...s.run, runId: ui.liveRun.id.slice(0, 8), name: ui.liveRun.trainer || "run" } }));
+    }
+  },
+  /** Mount entry point: restore mode + run from the URL, then attach. */
+  init() {
+    const { dataMode, runId, trainer } = readUrl();
+    set((s) => ({ ui: { ...s.ui, dataMode, liveRun: runId ? { id: runId, trainer, status: null } : noRun } }));
+    get().attach();
+  },
+  setDataMode(dataMode) {
+    if (get().ui.dataMode === dataMode) return;
+    set((s) => ({ ui: { ...s.ui, dataMode, selected: null, hovered: null } }));
+    get().attach();
+  },
+
+  // ── backend runs (real mode) ──────────────────────────────────────────────
+  /** Throws with the server's message (404 unknown trainer, 422 bad params) for the form to show. */
+  async startLiveRun(trainer, params) {
+    const { run_id, status } = await startRun(trainer, params);
+    set((s) => ({ ui: { ...s.ui, dataMode: "real", liveRun: { id: run_id, trainer, status } } }));
+    get().attach();
+  },
+  async cancelLiveRun() {
+    const { id } = get().ui.liveRun;
+    if (!id) return;
+    try {
+      await cancelRun(id);
+    } catch (e) {
+      if (e.status !== 409) { get().pushLog("error", `cancel failed: ${e.message}`); throw e; }
+      get().pushLog("info", e.message); // 409: already finished
+    }
+  },
+  /** Forget the attached run (it keeps running server-side if still active). */
+  clearLiveRun() {
+    set((s) => ({ ui: { ...s.ui, liveRun: noRun } }));
+    get().attach();
   },
   disconnect() {
     const { _source, _unsub } = get();

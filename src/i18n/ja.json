@@ -52,7 +52,10 @@
         "live": "ライブテレメトリ",
         "connecting": "接続中",
         "error": "接続エラー",
-        "idle": "待機中"
+        "idle": "待機中",
+        "succeeded": "実行成功",
+        "failed": "実行失敗",
+        "cancelled": "実行キャンセル"
       },
       "playbackAria": "再生",
       "resume": "再開",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "フィードフォワードネットワーク",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "実行",
+      "dataModeAria": "データソース",
+      "mode": {
+        "sim": "シミュレーション",
+        "real": "実データ"
+      },
+      "trainer": "トレーナー",
+      "loading": "トレーナーを読み込み中…",
+      "loadError": "トレーナーを読み込めませんでした: {{msg}}",
+      "noTrainers": "利用可能なトレーナーがありません。",
+      "start": "実行開始",
+      "starting": "開始中…",
+      "cancel": "実行をキャンセル",
+      "clear": "新しい実行",
+      "step": "ステップ",
+      "elapsed": "経過時間",
+      "stepsPerS": "ステップ / 秒",
+      "idle": "トレーナーを選んで実行を開始すると、ライブテレメトリが表示されます。",
+      "errNumber": "数値を入力してください",
+      "errInteger": "整数を入力してください",
+      "range": "{{min}}〜{{max}}の範囲で入力してください",
+      "min": "{{min}}以上で入力してください",
+      "max": "{{max}}以下で入力してください",
+      "status": {
+        "running": "実行中",
+        "succeeded": "成功",
+        "failed": "失敗",
+        "cancelled": "キャンセル"
       }
     }
   },

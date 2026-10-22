@@ -52,7 +52,10 @@
         "live": "Telemetria ao vivo",
         "connecting": "Conectando",
         "error": "Erro de conexão",
-        "idle": "Ocioso"
+        "idle": "Ocioso",
+        "succeeded": "Execução concluída",
+        "failed": "Execução falhou",
+        "cancelled": "Execução cancelada"
       },
       "playbackAria": "Reprodução",
       "resume": "Retomar",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "Rede feed-forward",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "Execução",
+      "dataModeAria": "Fonte de dados",
+      "mode": {
+        "sim": "Simulado",
+        "real": "Dados reais"
+      },
+      "trainer": "Treinador",
+      "loading": "Carregando treinadores…",
+      "loadError": "Não foi possível carregar os treinadores: {{msg}}",
+      "noTrainers": "Nenhum treinador disponível.",
+      "start": "Iniciar execução",
+      "starting": "Iniciando…",
+      "cancel": "Cancelar execução",
+      "clear": "Nova execução",
+      "step": "Passo",
+      "elapsed": "Decorrido",
+      "stepsPerS": "Passos / s",
+      "idle": "Escolha um treinador e inicie uma execução para ver a telemetria ao vivo.",
+      "errNumber": "Digite um número",
+      "errInteger": "Digite um número inteiro",
+      "range": "Deve estar entre {{min}} e {{max}}",
+      "min": "Deve ser no mínimo {{min}}",
+      "max": "Deve ser no máximo {{max}}",
+      "status": {
+        "running": "em execução",
+        "succeeded": "concluída",
+        "failed": "falhou",
+        "cancelled": "cancelada"
       }
     }
   },

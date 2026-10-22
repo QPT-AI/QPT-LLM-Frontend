@@ -102,7 +102,7 @@ export function isTelemetryRecord(x) {
  * Swapping sources is a one-line change in telemetry/createTelemetrySource.js.
  *
  * @typedef {Object} TelemetrySource
- * @property {"sim"|"socket"} kind
+ * @property {"sim"|"socket"|"live"} kind
  * @property {(cb:(record:object)=>void)=>()=>void} subscribe   returns unsubscribe
  * @property {()=>void} start
  * @property {()=>void} pause

@@ -188,9 +188,84 @@
 .mon-tip b { display: block; font-weight: 500; }
 .mon-tip__sub { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-dim); }
 
+/* ── Data-mode slider (Simulated ⇄ Real) ─────────────────────────────────── */
+.mon-mode {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--mon-border);
+  border-radius: 7px;
+}
+.mon-mode__thumb {
+  position: absolute;
+  top: 2px; bottom: 2px; left: 2px;
+  width: calc(50% - 2px);
+  border-radius: 5px;
+  background: var(--mon-text);
+  transition: transform 220ms var(--mon-ease);
+}
+.mon-mode[data-mode="real"] .mon-mode__thumb { transform: translateX(100%); }
+.mon-mode__opt {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  color: var(--mon-text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 160ms;
+}
+.mon-mode__opt:hover { color: var(--mon-text); }
+.mon-mode__opt.is-active { color: var(--mon-bg); font-weight: 500; }
+.mon-mode__opt:focus-visible { outline: 1px solid var(--mon-text); outline-offset: 1px; }
+.mon-mode__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.7; }
+.mon-mode__opt--real .mon-mode__dot { background: var(--mon-ok); opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .mon-mode__thumb { transition: none; } }
+
+/* ── Run control (real data) ─────────────────────────────────────────────── */
+.mon-run__grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; }
+.mon-run__form { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mon-run__field { display: grid; gap: 3px; }
+.mon-run__field .mon-select, .mon-input { width: 100%; box-sizing: border-box; }
+.mon-input {
+  padding: 4px 7px;
+  background: var(--mon-panel-raise);
+  border: 1px solid var(--mon-border);
+  border-radius: 5px;
+  color: var(--mon-text);
+  font-family: var(--mon-font-mono);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.mon-input:focus-visible, .mon-select:focus-visible { outline: 1px solid var(--mon-text); outline-offset: 1px; }
+.mon-input[aria-invalid="true"] { border-color: var(--mon-error); }
+.mon-input:disabled, .mon-select:disabled { opacity: 0.55; }
+.mon-run__type { font-family: var(--mon-font-mono); font-size: 10px; color: var(--mon-text-faint); margin-left: 4px; }
+.mon-run__err { color: var(--mon-error); margin: 0; }
+.mon-run__actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.mon-run__metrics { min-width: 0; padding-left: 14px; border-left: 1px solid var(--mon-border); }
+.mon-run__metrics .mon-hint { margin: 6px 0 0; }
+.mon-run__status { padding: 2px 8px; font-family: var(--mon-font-mono); font-size: 10.5px; }
+@media (max-width: 640px) {
+  .mon-run__grid { grid-template-columns: 1fr; }
+  .mon-run__metrics { padding-left: 0; border-left: 0; border-top: 1px solid var(--mon-border); padding-top: 8px; }
+}
+
 /* ── Light theme ──────────────────────────────────────────────────────────
    Hover/active tints below are hardcoded lighten-on-dark whites; light mode
    needs a darken-on-white equivalent instead. */
 [data-theme="light"] .mon-btn:hover { background: rgba(0, 0, 0, 0.05); }
 [data-theme="light"] .mon-btn.is-active { background: rgba(0, 0, 0, 0.08); }
 [data-theme="light"] .mon-seg { background: rgba(0, 0, 0, 0.035); }
+[data-theme="light"] .mon-mode { background: rgba(0, 0, 0, 0.035); }

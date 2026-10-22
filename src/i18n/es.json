@@ -52,7 +52,10 @@
         "live": "Telemetría en vivo",
         "connecting": "Conectando",
         "error": "Error de conexión",
-        "idle": "Inactivo"
+        "idle": "Inactivo",
+        "succeeded": "Ejecución completada",
+        "failed": "Ejecución fallida",
+        "cancelled": "Ejecución cancelada"
       },
       "playbackAria": "Reproducción",
       "resume": "Reanudar",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "Red feed-forward",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "Ejecución",
+      "dataModeAria": "Fuente de datos",
+      "mode": {
+        "sim": "Simulado",
+        "real": "Datos reales"
+      },
+      "trainer": "Entrenador",
+      "loading": "Cargando entrenadores…",
+      "loadError": "No se pudieron cargar los entrenadores: {{msg}}",
+      "noTrainers": "No hay entrenadores disponibles.",
+      "start": "Iniciar ejecución",
+      "starting": "Iniciando…",
+      "cancel": "Cancelar ejecución",
+      "clear": "Nueva ejecución",
+      "step": "Paso",
+      "elapsed": "Transcurrido",
+      "stepsPerS": "Pasos / s",
+      "idle": "Elige un entrenador e inicia una ejecución para ver telemetría en vivo.",
+      "errNumber": "Introduce un número",
+      "errInteger": "Introduce un número entero",
+      "range": "Debe estar entre {{min}} y {{max}}",
+      "min": "Debe ser al menos {{min}}",
+      "max": "Debe ser como máximo {{max}}",
+      "status": {
+        "running": "en curso",
+        "succeeded": "completada",
+        "failed": "fallida",
+        "cancelled": "cancelada"
       }
     }
   },

@@ -6,6 +6,9 @@ import { frame } from "./frameState";
 
 let logId = 0;
 
+// Live trainers may send sparse records (e.g. only step + value); never push NaN into a series.
+const pushIf = (buf, v) => { if (Number.isFinite(v)) buf.push(v); };
+
 export function makeLog(level, msg, step = 0) {
   return { id: ++logId, ts: Date.now(), step, level, msg };
 }
@@ -27,16 +30,16 @@ export function ingestRecord(r, set, get) {
     case "train": return ingestTrain(r, set, get);
     case "val": return set((s) => {
       const fresh = s.derived.lastValStep !== r.step;
-      if (fresh) s.series.valLoss.push(r.val_loss);
+      if (fresh) pushIf(s.series.valLoss, r.val_loss);
       const prev = s.latest.val;
       return {
         latest: { ...s.latest, val: r },
         seriesVersion: s.seriesVersion + 1,
-        derived: { ...s.derived, lastValStep: r.step, valDelta: prev ? r.val_loss - prev.val_loss : 0 },
+        derived: { ...s.derived, lastValStep: r.step, valDelta: Number.isFinite(prev?.val_loss) && Number.isFinite(r.val_loss) ? r.val_loss - prev.val_loss : 0 },
       };
     });
     case "profile": return set((s) => {
-      s.series.power.push(r.avg_power_w);
+      pushIf(s.series.power, r.avg_power_w);
       return { latest: { ...s.latest, profile: r }, seriesVersion: s.seriesVersion + 1 };
     });
     case "layer_energy_cost": {
@@ -102,12 +105,12 @@ function ingestTrain(r, set, get) {
   const s = get();
   const prev = s.latest.train;
   const { series } = s;
-  series.loss.push(r.loss);
-  series.lr.push(r.learning_rate);
-  series.gradNorm.push(r.gradient_norm);
-  series.stepsPerS.push(r.steps_per_s);
-  series.vram.push(r.vram_gb);
-  series.cost.push(r.cumulative_cost_usd);
+  pushIf(series.loss, r.loss);
+  pushIf(series.lr, r.learning_rate);
+  pushIf(series.gradNorm, r.gradient_norm);
+  pushIf(series.stepsPerS, r.steps_per_s);
+  pushIf(series.vram, r.vram_gb);
+  pushIf(series.cost, r.cumulative_cost_usd);
   const ept = r.hardware_energy_joules_per_token ?? series.energyPerToken.last();
   if (Number.isFinite(ept)) series.energyPerToken.push(ept);
 
@@ -115,29 +118,29 @@ function ingestTrain(r, set, get) {
   if (prev && r.step > prev.step && r.tokens_processed > prev.tokens_processed) {
     tokensPerStep = (r.tokens_processed - prev.tokens_processed) / (r.step - prev.step);
   }
-  series.tokensPerS.push(r.steps_per_s * tokensPerStep);
+  if (Number.isFinite(r.tokens_processed)) pushIf(series.tokensPerS, r.steps_per_s * tokensPerStep);
 
   let lastValStep = s.derived.lastValStep;
-  if (r.val_loss != null && r.val_step != null && r.val_step !== lastValStep) {
+  if (Number.isFinite(r.val_loss) && r.val_step != null && r.val_step !== lastValStep) {
     series.valLoss.push(r.val_loss);
     lastValStep = r.val_step;
   }
 
   frame.stepAt = frame.time;
   frame.stepTick++;
-  frame.gradNorm = r.gradient_norm;
-  frame.lossNorm = Math.min(1, r.loss / 11);
+  if (Number.isFinite(r.gradient_norm)) frame.gradNorm = r.gradient_norm;
+  if (Number.isFinite(r.loss)) frame.lossNorm = Math.min(1, r.loss / 11);
 
   set({
     latest: { ...s.latest, train: r },
     seriesVersion: s.seriesVersion + 1,
     run: {
-      ...s.run, step: r.step, epoch: r.epoch, modelType: r.model_type,
-      startedAt: s.run.startedAt || Date.now() - r.elapsed_s * 1000,
+      ...s.run, step: r.step, epoch: r.epoch, modelType: r.model_type ?? s.run.modelType,
+      startedAt: s.run.startedAt || Date.now() - (r.elapsed_s ?? 0) * 1000,
     },
     derived: {
       ...s.derived,
-      lossDelta: prev ? r.loss - prev.loss : 0,
+      lossDelta: Number.isFinite(prev?.loss) && Number.isFinite(r.loss) ? r.loss - prev.loss : 0,
       clipping: r.gradient_norm > 1.0,
       tokensPerStep,
       lastValStep,

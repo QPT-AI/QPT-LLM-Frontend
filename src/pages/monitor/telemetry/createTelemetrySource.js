@@ -1,7 +1,10 @@
-// THE swap point between fake and live telemetry. Change one line, nothing else.
+// THE swap point between fake and live telemetry.
+//   sim  → client-side simulator (synthetic data)
+//   real → backend run streamed over SSE (GET /runs/{id}/events); null until a run is attached
 import { createSimulatorSource } from "../sim/TrainingSimulator";
-// import { createSocketSource } from "./socketAdapter";
+import { createRunSource } from "./runSource";
 
-export const createTelemetrySource = () => createSimulatorSource();
-// export const createTelemetrySource = () =>
-//   createSocketSource({ url: import.meta.env.VITE_TELEMETRY_WS ?? "ws://localhost:9600/ws/telemetry" });
+export function createTelemetrySource({ dataMode = "sim", runId = null } = {}) {
+  if (dataMode !== "real") return createSimulatorSource();
+  return runId ? createRunSource({ runId }) : null;
+}

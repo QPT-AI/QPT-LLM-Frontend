@@ -52,7 +52,10 @@
         "live": "Live telemetry",
         "connecting": "Connecting",
         "error": "Connection error",
-        "idle": "Idle"
+        "idle": "Idle",
+        "succeeded": "Run succeeded",
+        "failed": "Run failed",
+        "cancelled": "Run cancelled"
       },
       "playbackAria": "Playback",
       "resume": "Resume",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "Feed-forward network",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "Run",
+      "dataModeAria": "Data source",
+      "mode": {
+        "sim": "Simulated",
+        "real": "Real data"
+      },
+      "trainer": "Trainer",
+      "loading": "Loading trainers…",
+      "loadError": "Could not load trainers: {{msg}}",
+      "noTrainers": "No trainers available.",
+      "start": "Start run",
+      "starting": "Starting…",
+      "cancel": "Cancel run",
+      "clear": "New run",
+      "step": "Step",
+      "elapsed": "Elapsed",
+      "stepsPerS": "Steps / s",
+      "idle": "Pick a trainer and start a run to stream live telemetry.",
+      "errNumber": "Enter a number",
+      "errInteger": "Enter a whole number",
+      "range": "Must be between {{min}} and {{max}}",
+      "min": "Must be at least {{min}}",
+      "max": "Must be at most {{max}}",
+      "status": {
+        "running": "running",
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "cancelled": "cancelled"
       }
     }
   },

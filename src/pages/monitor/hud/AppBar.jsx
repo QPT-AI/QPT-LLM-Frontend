@@ -15,15 +15,54 @@ const STATUS_KEY = {
   awaiting: "monitor.awaiting",
   error: "monitor.appbar.status.error",
   idle: "monitor.appbar.status.idle",
+  succeeded: "monitor.appbar.status.succeeded",
+  failed: "monitor.appbar.status.failed",
+  cancelled: "monitor.appbar.status.cancelled",
 };
-const STATUS_CLS = { sim: "is-sim", live: "is-live", connecting: "is-warn", awaiting: "is-warn", error: "is-error", idle: "is-warn" };
+const STATUS_CLS = {
+  sim: "is-sim", live: "is-live", connecting: "is-warn", awaiting: "is-warn", error: "is-error", idle: "is-warn",
+  succeeded: "is-sim", failed: "is-error", cancelled: "is-warn",
+};
+const DATA_MODES = ["sim", "real"];
+
+/** Slide toggle between the client-side simulator and a real backend run. */
+function DataModeSlider({ mode, onChange }) {
+  const { t } = useTranslation();
+  const onKeyDown = (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const next = e.key === "ArrowLeft" || e.key === "Home" ? "sim" : "real";
+    onChange(next);
+    e.currentTarget.querySelector(`[data-value="${next}"]`)?.focus();
+  };
+  return (
+    <div className="mon-mode" data-mode={mode} role="radiogroup" aria-label={t("monitor.run.dataModeAria")} onKeyDown={onKeyDown}>
+      <span className="mon-mode__thumb" aria-hidden="true" />
+      {DATA_MODES.map((m) => (
+        <button
+          key={m}
+          type="button"
+          role="radio"
+          data-value={m}
+          aria-checked={mode === m}
+          tabIndex={mode === m ? 0 : -1}
+          className={`mon-mode__opt mon-mode__opt--${m} ${mode === m ? "is-active" : ""}`}
+          onClick={() => onChange(m)}
+        >
+          {m === "real" && <span className="mon-mode__dot" aria-hidden="true" />}
+          {t(`monitor.run.mode.${m}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export default function AppBar() {
   const { t } = useTranslation();
   const ui = useMonitorStore((s) => s.ui);
   const run = useMonitorStore((s) => s.run);
   const elapsed = useMonitorStore((s) => s.latest.train?.elapsed_s);
-  const { togglePaused, setTimeScale } = useMonitorStore.getState();
+  const { togglePaused, setTimeScale, setDataMode } = useMonitorStore.getState();
   const live = ui.sourceKind !== "sim";
   const statusKey = STATUS_KEY[ui.connection] ?? STATUS_KEY.idle;
   const statusCls = STATUS_CLS[ui.connection] ?? STATUS_CLS.idle;
@@ -58,6 +97,8 @@ export default function AppBar() {
         <span className="mon-value" style={{ minWidth: 36, textAlign: "center" }} aria-live="polite">{ui.timeScale}×</span>
         <button type="button" className="mon-btn mon-icon-btn" aria-label={t("monitor.appbar.faster")} disabled={ui.timeScale >= SCALES.at(-1) || live} onClick={() => stepScale(1)}><Plus size={12} /></button>
       </div>
+
+      <DataModeSlider mode={ui.dataMode} onChange={setDataMode} />
 
       <span className={`mon-status ${statusCls}`} role="status">
         <span className="mon-status__dot" aria-hidden="true" />

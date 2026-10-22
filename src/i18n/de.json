@@ -52,7 +52,10 @@
         "live": "Live-Telemetrie",
         "connecting": "Verbindung wird hergestellt",
         "error": "Verbindungsfehler",
-        "idle": "Inaktiv"
+        "idle": "Inaktiv",
+        "succeeded": "Lauf erfolgreich",
+        "failed": "Lauf fehlgeschlagen",
+        "cancelled": "Lauf abgebrochen"
       },
       "playbackAria": "Wiedergabe",
       "resume": "Fortsetzen",
@@ -235,6 +238,37 @@
         "normShape": "[B, {{seq}}, {{dModel}}]",
         "ffnLabel": "Feed-Forward-Netz",
         "ffnShape": "[{{dModel}}] → [{{dFf}}] → [{{dModel}}]"
+      }
+    },
+    "run": {
+      "title": "Lauf",
+      "dataModeAria": "Datenquelle",
+      "mode": {
+        "sim": "Simuliert",
+        "real": "Echte Daten"
+      },
+      "trainer": "Trainer",
+      "loading": "Trainer werden geladen…",
+      "loadError": "Trainer konnten nicht geladen werden: {{msg}}",
+      "noTrainers": "Keine Trainer verfügbar.",
+      "start": "Lauf starten",
+      "starting": "Startet…",
+      "cancel": "Lauf abbrechen",
+      "clear": "Neuer Lauf",
+      "step": "Schritt",
+      "elapsed": "Vergangen",
+      "stepsPerS": "Schritte / s",
+      "idle": "Wähle einen Trainer und starte einen Lauf, um Live-Telemetrie zu sehen.",
+      "errNumber": "Zahl eingeben",
+      "errInteger": "Ganze Zahl eingeben",
+      "range": "Muss zwischen {{min}} und {{max}} liegen",
+      "min": "Muss mindestens {{min}} sein",
+      "max": "Darf höchstens {{max}} sein",
+      "status": {
+        "running": "läuft",
+        "succeeded": "erfolgreich",
+        "failed": "fehlgeschlagen",
+        "cancelled": "abgebrochen"
       }
     }
   },
